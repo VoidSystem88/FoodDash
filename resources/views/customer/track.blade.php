@@ -46,6 +46,29 @@
         </div>
     @endif
 
+    {{-- LIVE MAP --}}
+    @if ($order->rider && in_array($order->status, ['rider_assigned', 'picked_up', 'out_for_delivery']))
+        <div class="bg-white rounded-lg border border-gray-200 p-6 mb-4">
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-xs uppercase tracking-wide text-gray-400">Live Rider Location</p>
+                <p class="text-xs text-gray-500" x-text="lastUpdated"></p>
+            </div>
+            <div id="map" class="w-full h-80 rounded-lg border border-gray-200 z-0"></div>
+
+            {{-- DISTANCE / ETA --}}
+            <div class="mt-3 grid grid-cols-2 gap-3">
+                <div class="bg-gray-50 rounded p-3">
+                    <p class="text-xs text-gray-500">Distance to you</p>
+                    <p class="text-lg font-bold text-gray-900" x-text="distanceText || '—'"></p>
+                </div>
+                <div class="bg-gray-50 rounded p-3">
+                    <p class="text-xs text-gray-500">Estimated arrival</p>
+                    <p class="text-lg font-bold text-gray-900" x-text="etaText || '—'"></p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- DELIVERY --}}
     <div class="bg-white rounded-lg border border-gray-200 p-6 mb-4">
         <p class="text-xs uppercase tracking-wide text-gray-400 mb-2">Delivery address</p>
@@ -55,6 +78,14 @@
             <div class="mt-4 pt-4 border-t border-gray-100">
                 <p class="text-xs uppercase tracking-wide text-gray-400 mb-1">Your rider</p>
                 <p class="text-sm font-medium text-gray-900">{{ $order->rider->user->name }}</p>
+                @if ($order->rider->vehicle_type)
+                    <p class="text-xs text-gray-500 mt-1">
+                        {{ $order->rider->vehicle_type }}
+                        @if ($order->rider->vehicle_plate)
+                            · {{ $order->rider->vehicle_plate }}
+                        @endif
+                    </p>
+                @endif
             </div>
         @endif
     </div>
@@ -88,7 +119,7 @@
         </div>
     </div>
 
-    {{-- RATING FORM (kung delivered pa lang at wala pang rating) --}}
+    {{-- RATING FORM --}}
     @if ($order->status === 'delivered' && !$order->restaurant_rating)
         <div class="bg-white rounded-lg border border-gray-200 p-6">
             <p class="text-xs uppercase tracking-wide text-gray-400 mb-4">Rate your order</p>
@@ -126,11 +157,10 @@
         </div>
     @endif
 
-    {{-- SHOW RATINGS (kung may rating na) --}}
+    {{-- SHOW RATINGS --}}
     @if ($order->status === 'delivered' && $order->restaurant_rating)
         <div class="bg-white rounded-lg border border-gray-200 p-6">
             <p class="text-xs uppercase tracking-wide text-gray-400 mb-4">Your ratings</p>
-
             <div class="space-y-3">
                 <div class="flex justify-between items-center">
                     <span class="text-sm text-gray-700">Restaurant</span>
@@ -155,18 +185,138 @@
 @endsection
 
 @push('scripts')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="//unpkg.com/alpinejs" defer></script>
 <script>
 function orderTracker(orderId) {
     return {
         status: '{{ $order->status }}',
         steps: ['Placed', 'Confirmed', 'Preparing', 'Rider', 'On the way', 'Delivered'],
+        map: null,
+        riderMarker: null,
+        restaurantMarker: null,
+        deliveryMarker: null,
+        routeLine: null,
+        lastUpdated: '',
+        distanceText: '',
+        etaText: '',
 
         init() {
+            // Real-time order status
             window.Echo.private(`order.${orderId}`)
                 .listen('.order.status', (e) => { this.status = e.status; location.reload(); })
                 .listen('.rider.assigned', (e) => { this.status = e.status; location.reload(); })
                 .listen('.no.rider', () => { this.status = 'no_rider'; });
+
+            // Real-time rider location
+            window.Echo.private(`order.${orderId}`)
+                .listen('.rider.location', (e) => {
+                    this.updateRiderLocation(e.latitude, e.longitude);
+                });
+
+            // Initialize map kung may rider
+            @if ($order->rider && in_array($order->status, ['rider_assigned', 'picked_up', 'out_for_delivery']))
+                this.$nextTick(() => { this.initMap(); });
+            @endif
+        },
+
+       initMap() {
+    const restaurantLat = {{ $order->restaurant->latitude }};
+    const restaurantLng = {{ $order->restaurant->longitude }};
+    const deliveryLat = {{ $order->delivery_lat }};
+    const deliveryLng = {{ $order->delivery_lng }};
+    const riderLat = {{ $order->rider->latitude ?? $order->restaurant->latitude }};
+    const riderLng = {{ $order->rider->longitude ?? $order->restaurant->longitude }};
+
+    this.map = L.map('map').setView([riderLat, riderLng], 14);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 19,
+    }).addTo(this.map);
+
+    const restaurantIcon = L.divIcon({
+        html: '<div style="background:#ef4444;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3)">🏪</div>',
+        className: '',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+    });
+
+    const deliveryIcon = L.divIcon({
+        html: '<div style="background:#10b981;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3)">🏠</div>',
+        className: '',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+    });
+
+    const riderIcon = L.divIcon({
+        html: '<div style="background:#f97316;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:3px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3)">🛵</div>',
+        className: '',
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
+    });
+
+    this.restaurantMarker = L.marker([restaurantLat, restaurantLng], { icon: restaurantIcon })
+        .addTo(this.map)
+        .bindPopup('🏪 {{ $order->restaurant->name }}');
+
+    this.deliveryMarker = L.marker([deliveryLat, deliveryLng], { icon: deliveryIcon })
+        .addTo(this.map)
+        .bindPopup('🏠 Your Address');
+
+    @if ($order->rider)
+        this.riderMarker = L.marker([riderLat, riderLng], { icon: riderIcon })
+            .addTo(this.map)
+            .bindPopup('🛵 {{ $order->rider->user->name }}');
+    @endif
+
+    this.routeLine = L.polyline([
+        [restaurantLat, restaurantLng],
+        [deliveryLat, deliveryLng],
+    ], {
+        color: '#f97316',
+        weight: 3,
+        opacity: 0.5,
+        dashArray: '8, 8',
+    }).addTo(this.map);
+
+    const bounds = L.latLngBounds([
+        [restaurantLat, restaurantLng],
+        [deliveryLat, deliveryLng],
+    ]);
+    this.map.fitBounds(bounds, { padding: [50, 50] });
+
+    this.updateDistance(restaurantLat, restaurantLng, deliveryLat, deliveryLng);
+},
+
+        updateRiderLocation(lat, lng) {
+            if (!this.riderMarker) return;
+            this.riderMarker.setLatLng([lat, lng]);
+            this.lastUpdated = 'Updated: ' + new Date().toLocaleTimeString();
+
+            const deliveryLat = {{ $order->delivery_lat }};
+            const deliveryLng = {{ $order->delivery_lng }};
+            this.updateDistance(lat, lng, deliveryLat, deliveryLng);
+        },
+
+        updateDistance(fromLat, fromLng, toLat, toLng) {
+            // Haversine formula
+            const R = 6371;
+            const dLat = (toLat - fromLat) * Math.PI / 180;
+            const dLng = (toLng - fromLng) * Math.PI / 180;
+            const a = Math.sin(dLat/2)**2 +
+                      Math.cos(fromLat * Math.PI/180) * Math.cos(toLat * Math.PI/180) *
+                      Math.sin(dLng/2)**2;
+            const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            this.distanceText = distance < 1
+                ? Math.round(distance * 1000) + ' m'
+                : distance.toFixed(1) + ' km';
+
+            // ETA: assuming 20 km/h average
+            const etaMinutes = Math.round((distance / 20) * 60);
+            this.etaText = etaMinutes < 1 ? 'Arriving' : etaMinutes + ' min';
         },
 
         get statusLabel() {

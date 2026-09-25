@@ -110,20 +110,34 @@ class AvailabilityController extends Controller
     }
 
     public function updateLocation(Request $request)
-    {
-        $data = $request->validate([
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-        ]);
+{
+    $data = $request->validate([
+        'latitude' => 'required|numeric',
+        'longitude' => 'required|numeric',
+    ]);
 
-        $rider = auth()->user()->rider;
+    $rider = auth()->user()->rider;
 
-        $rider->update([
-            'latitude' => $data['latitude'],
-            'longitude' => $data['longitude'],
-            'last_location_at' => now(),
-        ]);
+    $rider->update([
+        'latitude' => $data['latitude'],
+        'longitude' => $data['longitude'],
+        'last_location_at' => now(),
+    ]);
 
-        return response()->json(['ok' => true]);
+    // Broadcast sa customer kung may active order
+    $activeOrder = \App\Models\Order::where('rider_id', $rider->id)
+        ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
+        ->first();
+
+    if ($activeOrder) {
+        broadcast(new \App\Events\RiderLocationUpdated(
+            orderId: $activeOrder->id,
+            latitude: (float) $data['latitude'],
+            longitude: (float) $data['longitude'],
+            riderName: auth()->user()->name,
+        ));
     }
+
+    return response()->json(['ok' => true]);
+}
 }

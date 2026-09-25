@@ -15,8 +15,22 @@ class RiderSearchService
 {
     public function findRider(Order $order): void
     {
+        // I-check kung may rider na
+        if ($order->rider_id) {
+            Log::info("Order #{$order->id} already has a rider, skipping search.");
+            return;
+        }
+
+        // I-check kung finalized na ang status
+        if (in_array($order->status, ['delivered', 'cancelled', 'rejected', 'no_rider'])) {
+            Log::info("Order #{$order->id} is already {$order->status}, skipping search.");
+            return;
+        }
+
         $config = SystemConfig::current();
         $maxRadius = (int) $config->service_radius_km;
+
+        // ITO ANG KULANG KANINA:
         $restLat = (float) $order->restaurant->latitude;
         $restLng = (float) $order->restaurant->longitude;
 
@@ -64,7 +78,6 @@ class RiderSearchService
         $order->update(['status' => 'no_rider']);
         broadcast(new NoRiderAvailable($order));
 
-        // Notify customer via email
         $order->customer->notify(new NoRiderNotification($order->fresh()));
 
         Log::warning("No rider for order #{$order->id}");
@@ -75,7 +88,31 @@ class RiderSearchService
         $timeout = 30;
         $now = now();
 
-        $offerRows = $riders->map(fn($r) => [
+        // I-check kung may existing pending offers
+        $existingOffers = DeliveryOffer::where('order_id', $order->id)
+            ->whereIn('rider_id', $riders->pluck('id'))
+            ->where('status', 'pending')
+            ->where('expires_at', '>', $now)
+            ->exists();
+
+        if ($existingOffers) {
+            Log::info("Existing pending offers found for order #{$order->id}, skipping duplicate insert.");
+            return false;
+        }
+
+        // Filter out riders na may existing record na
+        $existingRiderIds = DeliveryOffer::where('order_id', $order->id)
+            ->pluck('rider_id')
+            ->toArray();
+
+        $newRiders = $riders->filter(fn($r) => !in_array($r->id, $existingRiderIds));
+
+        if ($newRiders->isEmpty()) {
+            Log::info("All riders already have offers for order #{$order->id}");
+            return false;
+        }
+
+        $offerRows = $newRiders->map(fn($r) => [
             'order_id' => $order->id,
             'rider_id' => $r->id,
             'radius_km' => $radiusKm,
@@ -87,7 +124,7 @@ class RiderSearchService
 
         DeliveryOffer::insert($offerRows);
 
-        foreach ($riders as $rider) {
+        foreach ($newRiders as $rider) {
             broadcast(new DeliveryOfferSent($order, $rider, $radiusKm, $timeout));
         }
 

@@ -75,30 +75,40 @@ class OrderController extends Controller
     }
 
     public function ready(Request $request, Order $order)
-    {
-        $restaurant = auth()->user()->restaurant;
-        abort_unless($order->restaurant_id === $restaurant->id, 403);
+{
+    $restaurant = auth()->user()->restaurant;
+    abort_unless($order->restaurant_id === $restaurant->id, 403);
 
-        $order->update(['status' => 'preparing']);
+    $order->update(['status' => 'preparing']);
 
-        // Notify customer
-        $order->customer->notify(new OrderStatusNotification($order->fresh()));
+    // Notify customer
+    $order->customer->notify(new OrderStatusNotification($order->fresh()));
 
-        return back()->with('success', 'Order marked as preparing.');
+    // Trigger rider search kung wala pang rider
+    if (!$order->rider_id) {
+        FindRiderForOrder::dispatch($order);
     }
+
+    return back()->with('success', 'Order marked as preparing. Searching for rider...');
+}
 
     public function markReady(Order $order)
-    {
-        $restaurant = auth()->user()->restaurant;
-        abort_unless($order->restaurant_id === $restaurant->id, 403);
+{
+    $restaurant = auth()->user()->restaurant;
+    abort_unless($order->restaurant_id === $restaurant->id, 403);
 
-        $order->update(['status' => 'preparing']);
+    $order->update(['status' => 'preparing']);
 
-        // Notify customer
-        $order->customer->notify(new OrderStatusNotification($order->fresh()));
+    // Notify customer
+    $order->customer->notify(new OrderStatusNotification($order->fresh()));
 
-        return back()->with('success', 'Order marked as preparing.');
+    // Trigger rider search kung wala pang rider
+    if (!$order->rider_id) {
+        FindRiderForOrder::dispatch($order);
     }
+
+    return back()->with('success', 'Order marked as preparing. Searching for rider...');
+}
 
     public function storeExternal(Request $request)
     {
