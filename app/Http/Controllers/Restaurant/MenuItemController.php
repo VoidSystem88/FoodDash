@@ -102,11 +102,8 @@ class MenuItemController extends Controller
         $restaurant = auth()->user()->restaurant;
         abort_unless($menuItem->restaurant_id === $restaurant->id, 403);
 
-        if ($menuItem->image_path) {
-            $path = storage_path('app/public/' . $menuItem->image_path);
-            if (file_exists($path)) @unlink($path);
-        }
-
+        // Soft delete — hindi na kailangan i-unlink ang image
+        // para kung i-restore, buo pa rin ang picture
         $menuItem->delete();
 
         return back()->with('success', 'Menu item deleted.');

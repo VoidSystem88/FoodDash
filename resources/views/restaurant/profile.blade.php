@@ -4,16 +4,70 @@
 <div class="max-w-3xl mx-auto space-y-5" x-data="imageUploader()">
 
     {{-- HEADER --}}
-    <div class="mb-6 flex justify-between items-center">
+    <div class="mb-6 flex justify-between items-center" x-data="{ showLogout: false }">
         <div>
             <h1 class="text-2xl font-semibold text-gray-900">Restaurant Profile</h1>
             <p class="text-sm text-gray-500 mt-1">Manage your restaurant details and images</p>
         </div>
 
-        <a href="{{ route('restaurant.dashboard') }}"
-           class="text-sm text-gray-500 hover:text-gray-700">
-            ← Back
-        </a>
+        <div class="flex items-center gap-2">
+            
+
+            {{-- LOGOUT BUTTON --}}
+            <button type="button"
+                    @click="showLogout = true"
+                    class="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 hover:bg-red-50 px-4 py-2 rounded-lg font-medium transition">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
+            </button>
+        </div>
+
+        {{-- LOGOUT CONFIRMATION MODAL --}}
+        <div x-show="showLogout"
+             x-cloak
+             x-transition.opacity
+             @keydown.escape.window="showLogout = false"
+             class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4"
+             @click.self="showLogout = false">
+
+            <div x-show="showLogout"
+                 x-transition.scale.origin.center
+                 class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
+
+                <div class="flex justify-center mb-4">
+                    <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
+                        <svg class="w-7 h-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="text-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Logout?</h3>
+                    <p class="text-sm text-gray-500 mt-1">Are you sure you want to logout?</p>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button"
+                            @click="showLogout = false"
+                            class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">
+                        Cancel
+                    </button>
+
+                    <form method="POST" action="{{ route('logout') }}" class="flex-1">
+                        @csrf
+                        <button type="submit"
+                                class="w-full bg-red-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-red-700 shadow-md hover:shadow-lg active:scale-95 transition transform">
+                            Yes, Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- ALERTS --}}

@@ -35,7 +35,7 @@
             </div>
 
             <p class="text-sm text-white/90 max-w-md">
-                I-track ang lahat ng iyong orders sa isang lugar
+                Track all your orders in one place
             </p>
 
             {{-- MINI STATS --}}
@@ -64,13 +64,13 @@
     {{-- ORDERS LIST --}}
     {{-- ============================================ --}}
     @if ($orders->isEmpty())
-        <div class="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-orange-50 mb-4">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-12 text-center transition-colors">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-orange-50 dark:bg-orange-950/40 mb-4">
                 <span class="text-4xl">🍽️</span>
             </div>
-            <h3 class="font-semibold text-gray-900 mb-1">No orders yet</h3>
-            <p class="text-sm text-gray-500 mb-4">
-                Mag-order na at simulan ang iyong food journey
+            <h3 class="font-semibold text-gray-900 dark:text-white mb-1">No orders yet</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                Place an order and start your food journey
             </p>
             <a href="{{ route('customer.restaurants') }}"
                class="inline-block bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-95 transition transform">
@@ -82,18 +82,18 @@
             @foreach ($orders as $order)
                 @php
                     $statusStyles = [
-                        'received' => ['bg' => 'bg-blue-50', 'border' => 'border-blue-200', 'text' => 'text-blue-700', 'icon' => '🔔'],
-                        'confirmed' => ['bg' => 'bg-green-50', 'border' => 'border-green-200', 'text' => 'text-green-700', 'icon' => '✅'],
-                        'preparing' => ['bg' => 'bg-amber-50', 'border' => 'border-amber-200', 'text' => 'text-amber-700', 'icon' => '👨‍🍳'],
-                        'finding_rider' => ['bg' => 'bg-purple-50', 'border' => 'border-purple-200', 'text' => 'text-purple-700', 'icon' => '🔍'],
-                        'rider_assigned' => ['bg' => 'bg-cyan-50', 'border' => 'border-cyan-200', 'text' => 'text-cyan-700', 'icon' => '🛵'],
-                        'picked_up' => ['bg' => 'bg-indigo-50', 'border' => 'border-indigo-200', 'text' => 'text-indigo-700', 'icon' => '📦'],
-                        'out_for_delivery' => ['bg' => 'bg-violet-50', 'border' => 'border-violet-200', 'text' => 'text-violet-700', 'icon' => '🚀'],
-                        'delivered' => ['bg' => 'bg-green-50', 'border' => 'border-green-200', 'text' => 'text-green-700', 'icon' => '🎉'],
-                        'rejected' => ['bg' => 'bg-red-50', 'border' => 'border-red-200', 'text' => 'text-red-700', 'icon' => '⚠️'],
-                        'cancelled' => ['bg' => 'bg-gray-50', 'border' => 'border-gray-200', 'text' => 'text-gray-700', 'icon' => '❌'],
-                        'no_rider' => ['bg' => 'bg-red-50', 'border' => 'border-red-200', 'text' => 'text-red-700', 'icon' => '😔'],
-                    ];
+    'received' => ['bg' => 'bg-blue-50 dark:bg-blue-950/30', 'border' => 'border-blue-200 dark:border-blue-800', 'text' => 'text-blue-700 dark:text-blue-300', 'icon' => '🔔'],
+    'confirmed' => ['bg' => 'bg-green-50 dark:bg-green-950/30', 'border' => 'border-green-200 dark:border-green-800', 'text' => 'text-green-700 dark:text-green-300', 'icon' => '✅'],
+    'preparing' => ['bg' => 'bg-amber-50 dark:bg-amber-950/30', 'border' => 'border-amber-200 dark:border-amber-800', 'text' => 'text-amber-700 dark:text-amber-300', 'icon' => '👨🍳'],
+    'finding_rider' => ['bg' => 'bg-purple-50 dark:bg-purple-950/30', 'border' => 'border-purple-200 dark:border-purple-800', 'text' => 'text-purple-700 dark:text-purple-300', 'icon' => '🔍'],
+    'rider_assigned' => ['bg' => 'bg-cyan-50 dark:bg-cyan-950/30', 'border' => 'border-cyan-200 dark:border-cyan-800', 'text' => 'text-cyan-700 dark:text-cyan-300', 'icon' => '🛵'],
+    'picked_up' => ['bg' => 'bg-indigo-50 dark:bg-indigo-950/30', 'border' => 'border-indigo-200 dark:border-indigo-800', 'text' => 'text-indigo-700 dark:text-indigo-300', 'icon' => '📦'],
+    'out_for_delivery' => ['bg' => 'bg-violet-50 dark:bg-violet-950/30', 'border' => 'border-violet-200 dark:border-violet-800', 'text' => 'text-violet-700 dark:text-violet-300', 'icon' => '🚀'],
+    'delivered' => ['bg' => 'bg-green-50 dark:bg-green-950/30', 'border' => 'border-green-200 dark:border-green-800', 'text' => 'text-green-700 dark:text-green-300', 'icon' => '🎉'],
+    'rejected' => ['bg' => 'bg-red-50 dark:bg-red-950/30', 'border' => 'border-red-200 dark:border-red-800', 'text' => 'text-red-700 dark:text-red-300', 'icon' => '⚠️'],
+    'cancelled' => ['bg' => 'bg-gray-50 dark:bg-gray-800', 'border' => 'border-gray-200 dark:border-gray-700', 'text' => 'text-gray-700 dark:text-gray-300', 'icon' => '❌'],
+    'no_rider' => ['bg' => 'bg-red-50 dark:bg-red-950/30', 'border' => 'border-red-200 dark:border-red-800', 'text' => 'text-red-700 dark:text-red-300', 'icon' => '😔'],
+];
 
                     $labels = [
                         'received' => 'Pending',
@@ -109,21 +109,21 @@
                         'no_rider' => 'No Rider',
                     ];
 
-                    $sc = $statusStyles[$order->status] ?? ['bg' => 'bg-gray-50', 'border' => 'border-gray-200', 'text' => 'text-gray-700', 'icon' => '📋'];
+                    $sc = $statusStyles[$order->status] ?? ['bg' => 'bg-gray-50 dark:bg-gray-800', 'border' => 'border-gray-200 dark:border-gray-700', 'text' => 'text-gray-700 dark:text-gray-300', 'icon' => '📋'];
                     $label = $labels[$order->status] ?? ucfirst(str_replace('_', ' ', $order->status));
 
                     $isActive = !in_array($order->status, ['delivered', 'cancelled', 'rejected', 'no_rider']);
                 @endphp
 
                 <a href="{{ route('customer.orders.show', $order) }}"
-                   class="block bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all duration-200 group">
+                   class="block bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 overflow-hidden hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-200 group">
 
                     {{-- HEADER --}}
                     <div class="px-5 py-3 {{ $sc['bg'] }} {{ $sc['border'] }} border-b flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <span class="text-xl">{{ $sc['icon'] }}</span>
                             <div>
-                                <p class="font-bold text-gray-900 text-sm">{{ $order->restaurant->name }}</p>
+                                <p class="font-bold text-gray-900 dark:text-white text-sm">{{ $order->restaurant->name }}</p>
                                 <p class="text-xs {{ $sc['text'] }} font-semibold uppercase tracking-wide">
                                     {{ $label }}
                                 </p>
@@ -131,9 +131,9 @@
                         </div>
 
                         @if ($isActive)
-                            <span class="flex items-center gap-1.5 bg-white/70 backdrop-blur rounded-full px-2.5 py-1">
+                            <span class="flex items-center gap-1.5 bg-white/70 dark:bg-gray-900/70 backdrop-blur rounded-full px-2.5 py-1">
                                 <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
-                                <span class="text-[10px] font-bold text-orange-700 uppercase tracking-wider">
+                                <span class="text-[10px] font-bold text-orange-700 dark:text-orange-300 uppercase tracking-wider">
                                     Active
                                 </span>
                             </span>
@@ -148,28 +148,28 @@
                             <div class="flex-1 min-w-0">
                                 {{-- ORDER # + TIME --}}
                                 <div class="flex items-center gap-3 mb-2">
-                                    <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full font-semibold">
+                                    <span class="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full font-semibold">
                                         #{{ $order->id }}
                                     </span>
-                                    <span class="text-xs text-gray-400">{{ $order->created_at->diffForHumans() }}</span>
+                                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ $order->created_at->diffForHumans() }}</span>
                                 </div>
 
                                 {{-- ITEMS SUMMARY --}}
-                                <p class="text-sm text-gray-600 mb-2">
-                                    <span class="font-bold text-gray-900">{{ $order->items->count() }}</span>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                    <span class="font-bold text-gray-900 dark:text-white">{{ $order->items->count() }}</span>
                                     {{ Str::plural('item', $order->items->count()) }}
                                     @if ($order->items->count() > 0)
                                         · 
-                                        <span class="text-gray-500">{{ $order->items->first()->name }}</span>
+                                        <span class="text-gray-500 dark:text-gray-400">{{ $order->items->first()->name }}</span>
                                         @if ($order->items->count() > 1)
-                                            <span class="text-gray-400">+{{ $order->items->count() - 1 }} more</span>
+                                            <span class="text-gray-400 dark:text-gray-500">+{{ $order->items->count() - 1 }} more</span>
                                         @endif
                                     @endif
                                 </p>
 
                                 {{-- DELIVERY ADDRESS --}}
-                                <div class="flex items-start gap-1.5 text-xs text-gray-500">
-                                    <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div class="flex items-start gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                                    <svg class="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -181,23 +181,23 @@
                                 {{-- RIDER INFO --}}
                                 @if ($order->rider && $isActive)
                                     <div class="flex items-center gap-2 mt-2 text-xs">
-                                        <div class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                                            <svg class="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <div class="w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
                                         </div>
-                                        <span class="text-green-700 font-medium">Rider: {{ $order->rider->user->name }}</span>
+                                        <span class="text-green-700 dark:text-green-400 font-medium">Rider: {{ $order->rider->user->name }}</span>
                                     </div>
                                 @endif
                             </div>
 
                             {{-- RIGHT: TOTAL --}}
                             <div class="text-right flex-shrink-0">
-                                <p class="text-xs text-gray-500 mb-0.5">Total</p>
-                                <p class="text-lg font-bold text-orange-600">₱{{ number_format($order->total_amount, 2) }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Total</p>
+                                <p class="text-lg font-bold text-orange-600 dark:text-orange-400">₱{{ number_format($order->total_amount, 2) }}</p>
 
-                                <span class="text-xs text-gray-500 group-hover:text-orange-600 transition inline-flex items-center gap-1 mt-2">
+                                <span class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition inline-flex items-center gap-1 mt-2">
                                     View
                                     <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

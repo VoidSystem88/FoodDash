@@ -111,6 +111,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::patch('/users/{user}/disable', [AccountController::class, 'disable'])->name('admin.users.disable');
     Route::delete('/users/{user}', [AccountController::class, 'destroy'])->name('admin.users.destroy');
     Route::post('/config', [ConfigController::class, 'update'])->name('admin.config.update');
+    Route::post('/config/logo', [ConfigController::class, 'uploadLogo'])->name('admin.config.logo.upload');
+    Route::delete('/config/logo', [ConfigController::class, 'removeLogo'])->name('admin.config.logo.remove');
+    Route::post('/config/logo/size', [ConfigController::class, 'updateLogoSize'])->name('admin.config.logo.size');
 });
 
 // ============================================
@@ -122,6 +125,15 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::get('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.mark-read');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+    // ============================================
+    // PUSH SUBSCRIPTIONS
+    // ============================================
+    Route::get('/push/vapid-public-key', [\App\Http\Controllers\PushSubscriptionController::class, 'vapidPublicKey'])->name('push.vapid');
+    Route::post('/push/subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('push.subscribe');
+    Route::delete('/push/unsubscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+    Route::get('/push/status', [\App\Http\Controllers\PushSubscriptionController::class, 'status'])->name('push.status');
+    Route::post('/push/test', [\App\Http\Controllers\PushSubscriptionController::class, 'test'])->name('push.test');
 });
 
 // ============================================
