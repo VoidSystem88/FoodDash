@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Events\NotificationSent;
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -15,7 +16,7 @@ class NewOrderForRestaurantNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -31,5 +32,29 @@ class NewOrderForRestaurantNotification extends Notification
             ->line($this->order->delivery_address)
             ->action('View Order', url("/restaurant/dashboard"))
             ->line('Please confirm or reject this order as soon as possible.');
+    }
+
+    public function toArray(object $notifiable): array
+    {
+        $title = "New Order #{$this->order->id}";
+        $body = "From {$this->order->customer->name} — ₱" . number_format($this->order->total_amount, 2);
+
+        broadcast(new NotificationSent(
+            userId: $notifiable->id,
+            id: (string) \Illuminate\Support\Str::uuid(),
+            title: $title,
+            body: $body,
+            url: route('restaurant.dashboard'),
+            icon: '🛒',
+            createdAt: now()->toIso8601String(),
+        ));
+
+        return [
+            'title' => $title,
+            'body' => $body,
+            'url' => route('restaurant.dashboard'),
+            'icon' => '🛒',
+            'order_id' => $this->order->id,
+        ];
     }
 }

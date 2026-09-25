@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Events\NotificationSent;
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -15,7 +16,7 @@ class OrderPlacedNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -33,5 +34,29 @@ class OrderPlacedNotification extends Notification
             ->line($this->order->delivery_address)
             ->action('Track Order', url("/orders/{$this->order->id}"))
             ->line('We will notify you once the restaurant confirms your order.');
+    }
+
+    public function toArray(object $notifiable): array
+    {
+        $title = 'Order Placed';
+        $body = "Your order #{$this->order->id} from {$this->order->restaurant->name} is placed.";
+
+        broadcast(new NotificationSent(
+            userId: $notifiable->id,
+            id: (string) \Illuminate\Support\Str::uuid(),
+            title: $title,
+            body: $body,
+            url: route('customer.orders.show', $this->order),
+            icon: '🛒',
+            createdAt: now()->toIso8601String(),
+        ));
+
+        return [
+            'title' => $title,
+            'body' => $body,
+            'url' => route('customer.orders.show', $this->order),
+            'icon' => '🛒',
+            'order_id' => $this->order->id,
+        ];
     }
 }

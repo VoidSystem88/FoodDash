@@ -31,3 +31,25 @@ Broadcast::channel('order.{orderId}', function ($user, $orderId) {
 
     return false;
 });
+
+Broadcast::channel('order.{orderId}.chat', function ($user, $orderId) {
+    $order = Order::find($orderId);
+    if (!$order) {
+        return false;
+    }
+
+    if ($user->id === $order->customer_id) {
+        return true;
+    }
+
+    if ($user->rider && $user->rider->id === $order->rider_id) {
+        return true;
+    }
+
+    return false;
+});
+
+// User notification channel
+Broadcast::channel('user.{userId}', function ($user, $userId) {
+    return (int) $user->id === (int) $userId;
+});

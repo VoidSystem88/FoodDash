@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Events\OrderStatusUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\MenuItem;
 use App\Models\Order;
+use App\Models\Restaurant;
 use App\Models\SystemConfig;
 use App\Notifications\NewOrderForRestaurantNotification;
 use App\Notifications\OrderPlacedNotification;
+use App\Notifications\OrderStatusNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -42,6 +45,17 @@ class OrderController extends Controller
             'delivery_lat' => 'required|numeric',
             'delivery_lng' => 'required|numeric',
         ]);
+
+        // ============================================
+        // CHECK KUNG BUKAS ANG RESTAURANT
+        // ============================================
+        $restaurant = Restaurant::findOrFail($data['restaurant_id']);
+
+        if (!$restaurant->isOpenNow()) {
+            return back()->with('error',
+                'This restaurant is currently closed. ' . $restaurant->status_label
+            );
+        }
 
         $menuItems = MenuItem::whereIn('id', collect($data['items'])->pluck('menu_item_id'))
             ->where('restaurant_id', $data['restaurant_id'])
@@ -121,5 +135,59 @@ class OrderController extends Controller
         session()->flash('reorder_items', $items);
 
         return redirect()->route('customer.restaurants.show', $order->restaurant);
+    }
+
+    /**
+     * Cancel an order (customer side).
+     */
+    public function cancel(Request $request, Order $order)
+    {
+        // 1. Ownership check
+        abort_unless($order->customer_id === auth()->id(), 403);
+
+        // 2. Status check — dapat cancellable pa
+        if (!$order->canBeCancelledByCustomer()) {
+            return back()->with('error',
+                'Cannot cancel this order. It is already ' .
+                str_replace('_', ' ', $order->status) . '.'
+            );
+        }
+
+        // 3. Validate reason
+        $data = $request->validate([
+            'cancellation_reason' => 'required|string|max:500',
+        ]);
+
+        // 4. Update order
+        $order->update([
+            'status' => 'cancelled',
+            'cancellation_reason' => $data['cancellation_reason'],
+            'cancelled_at' => now(),
+        ]);
+
+        $order->refresh();
+
+        // 5. Notify restaurant owner
+        if ($order->restaurant && $order->restaurant->user) {
+            $order->restaurant->user->notify(
+                new OrderStatusNotification($order)
+            );
+        }
+
+        // 6. Notify rider kung meron na, at i-free siya
+        if ($order->rider && $order->rider->user) {
+            $order->rider->user->notify(
+                new OrderStatusNotification($order)
+            );
+
+            $order->rider->update(['is_available' => true]);
+        }
+
+        // 7. Broadcast real-time update sa lahat ng naka-subscribe
+        broadcast(new OrderStatusUpdated($order));
+
+        return redirect()
+            ->route('customer.orders.show', $order)
+            ->with('success', 'Order cancelled successfully.');
     }
 }

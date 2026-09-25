@@ -1,73 +1,215 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex justify-between items-center mb-8">
-    <div>
-        <h1 class="text-2xl font-semibold text-gray-900">My Orders</h1>
-        <p class="text-sm text-gray-500 mt-1">Track and view your orders</p>
-    </div>
-    <a href="{{ route('customer.restaurants') }}"
-       class="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-orange-700">
-        New Order
-    </a>
-</div>
+<div class="max-w-4xl mx-auto space-y-5">
 
-@if ($orders->isEmpty())
-    <div class="bg-white rounded-lg border border-gray-200 p-16 text-center">
-        <p class="text-gray-500 mb-4">You have no orders yet.</p>
-        <a href="{{ route('customer.restaurants') }}"
-           class="inline-block text-sm text-orange-600 hover:underline">
-            Browse restaurants
-        </a>
-    </div>
-@else
-    <div class="space-y-2">
-        @foreach ($orders as $order)
-            @php
-                $statusLabels = [
-                    'received' => 'Pending',
-                    'confirmed' => 'Confirmed',
-                    'preparing' => 'Preparing',
-                    'finding_rider' => 'Finding rider',
-                    'rider_assigned' => 'Rider assigned',
-                    'picked_up' => 'Picked up',
-                    'out_for_delivery' => 'On the way',
-                    'delivered' => 'Delivered',
-                    'no_rider' => 'No rider',
-                    'cancelled' => 'Cancelled',
-                    'rejected' => 'Rejected',
-                ];
-                $statusColors = [
-                    'delivered' => 'bg-green-50 text-green-700',
-                    'cancelled' => 'bg-red-50 text-red-700',
-                    'rejected' => 'bg-red-50 text-red-700',
-                    'no_rider' => 'bg-red-50 text-red-700',
-                    'received' => 'bg-gray-100 text-gray-600',
-                ];
-                $label = $statusLabels[$order->status] ?? ucfirst(str_replace('_', ' ', $order->status));
-                $color = $statusColors[$order->status] ?? 'bg-amber-50 text-amber-700';
-            @endphp
+    {{-- ============================================ --}}
+    {{-- HERO HEADER --}}
+    {{-- ============================================ --}}
+    <div class="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-500 to-orange-600 rounded-2xl shadow-xl text-white">
 
-            <a href="{{ route('customer.orders.show', $order) }}"
-               class="block bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition p-5">
-                <div class="flex justify-between items-start">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-3 mb-1">
-                            <h3 class="font-semibold text-gray-900 truncate">{{ $order->restaurant->name }}</h3>
-                            <span class="text-xs text-gray-400">#{{ $order->id }}</span>
-                        </div>
-                        <p class="text-sm text-gray-500">
-                            {{ $order->items->count() }} {{ Str::plural('item', $order->items->count()) }} ·
-                            <span class="font-medium text-gray-700">₱{{ number_format($order->total_amount, 2) }}</span>
-                        </p>
-                        <p class="text-xs text-gray-400 mt-1">{{ $order->created_at->diffForHumans() }}</p>
+        {{-- Decorative --}}
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl opacity-10 -mr-20 -mt-20"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-yellow-300 rounded-full blur-3xl opacity-20 -ml-16 -mb-16"></div>
+
+        <div class="relative p-6">
+            {{-- TITLE --}}
+            <div class="flex justify-between items-start mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center border-2 border-white/30">
+                        <span class="text-2xl">📋</span>
                     </div>
-                    <span class="text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap ml-4 {{ $color }}">
-                        {{ $label }}
-                    </span>
+                    <div>
+                        <p class="text-xs text-white/70 uppercase tracking-wider font-medium">Activity</p>
+                        <h1 class="text-xl font-bold leading-tight">My Orders</h1>
+                    </div>
                 </div>
-            </a>
-        @endforeach
+
+                <a href="{{ route('customer.restaurants') }}"
+                   class="bg-white/20 hover:bg-white/30 backdrop-blur rounded-full px-4 py-2 text-sm font-semibold transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    New
+                </a>
+            </div>
+
+            <p class="text-sm text-white/90 max-w-md">
+                I-track ang lahat ng iyong orders sa isang lugar
+            </p>
+
+            {{-- MINI STATS --}}
+            @if ($orders->count() > 0)
+                <div class="grid grid-cols-3 gap-3 pt-5 mt-5 border-t border-white/20">
+                    <div>
+                        <p class="text-[10px] text-white/70 uppercase tracking-wider font-medium">Total Orders</p>
+                        <p class="text-xl font-bold mt-1">{{ $orders->count() }}</p>
+                    </div>
+                    <div class="border-l border-white/20 pl-3">
+                        <p class="text-[10px] text-white/70 uppercase tracking-wider font-medium">Delivered</p>
+                        <p class="text-xl font-bold mt-1">{{ $orders->where('status', 'delivered')->count() }}</p>
+                    </div>
+                    <div class="border-l border-white/20 pl-3">
+                        <p class="text-[10px] text-white/70 uppercase tracking-wider font-medium">Active</p>
+                        <p class="text-xl font-bold mt-1">
+                            {{ $orders->whereNotIn('status', ['delivered', 'cancelled', 'rejected', 'no_rider'])->count() }}
+                        </p>
+                    </div>
+                </div>
+            @endif
+        </div>
     </div>
-@endif
+
+    {{-- ============================================ --}}
+    {{-- ORDERS LIST --}}
+    {{-- ============================================ --}}
+    @if ($orders->isEmpty())
+        <div class="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-orange-50 mb-4">
+                <span class="text-4xl">🍽️</span>
+            </div>
+            <h3 class="font-semibold text-gray-900 mb-1">No orders yet</h3>
+            <p class="text-sm text-gray-500 mb-4">
+                Mag-order na at simulan ang iyong food journey
+            </p>
+            <a href="{{ route('customer.restaurants') }}"
+               class="inline-block bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-95 transition transform">
+                Browse Restaurants
+            </a>
+        </div>
+    @else
+        <div class="space-y-3">
+            @foreach ($orders as $order)
+                @php
+                    $statusStyles = [
+                        'received' => ['bg' => 'bg-blue-50', 'border' => 'border-blue-200', 'text' => 'text-blue-700', 'icon' => '🔔'],
+                        'confirmed' => ['bg' => 'bg-green-50', 'border' => 'border-green-200', 'text' => 'text-green-700', 'icon' => '✅'],
+                        'preparing' => ['bg' => 'bg-amber-50', 'border' => 'border-amber-200', 'text' => 'text-amber-700', 'icon' => '👨‍🍳'],
+                        'finding_rider' => ['bg' => 'bg-purple-50', 'border' => 'border-purple-200', 'text' => 'text-purple-700', 'icon' => '🔍'],
+                        'rider_assigned' => ['bg' => 'bg-cyan-50', 'border' => 'border-cyan-200', 'text' => 'text-cyan-700', 'icon' => '🛵'],
+                        'picked_up' => ['bg' => 'bg-indigo-50', 'border' => 'border-indigo-200', 'text' => 'text-indigo-700', 'icon' => '📦'],
+                        'out_for_delivery' => ['bg' => 'bg-violet-50', 'border' => 'border-violet-200', 'text' => 'text-violet-700', 'icon' => '🚀'],
+                        'delivered' => ['bg' => 'bg-green-50', 'border' => 'border-green-200', 'text' => 'text-green-700', 'icon' => '🎉'],
+                        'rejected' => ['bg' => 'bg-red-50', 'border' => 'border-red-200', 'text' => 'text-red-700', 'icon' => '⚠️'],
+                        'cancelled' => ['bg' => 'bg-gray-50', 'border' => 'border-gray-200', 'text' => 'text-gray-700', 'icon' => '❌'],
+                        'no_rider' => ['bg' => 'bg-red-50', 'border' => 'border-red-200', 'text' => 'text-red-700', 'icon' => '😔'],
+                    ];
+
+                    $labels = [
+                        'received' => 'Pending',
+                        'confirmed' => 'Confirmed',
+                        'preparing' => 'Preparing',
+                        'finding_rider' => 'Finding Rider',
+                        'rider_assigned' => 'Rider Assigned',
+                        'picked_up' => 'Picked Up',
+                        'out_for_delivery' => 'On the Way',
+                        'delivered' => 'Delivered',
+                        'rejected' => 'Rejected',
+                        'cancelled' => 'Cancelled',
+                        'no_rider' => 'No Rider',
+                    ];
+
+                    $sc = $statusStyles[$order->status] ?? ['bg' => 'bg-gray-50', 'border' => 'border-gray-200', 'text' => 'text-gray-700', 'icon' => '📋'];
+                    $label = $labels[$order->status] ?? ucfirst(str_replace('_', ' ', $order->status));
+
+                    $isActive = !in_array($order->status, ['delivered', 'cancelled', 'rejected', 'no_rider']);
+                @endphp
+
+                <a href="{{ route('customer.orders.show', $order) }}"
+                   class="block bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all duration-200 group">
+
+                    {{-- HEADER --}}
+                    <div class="px-5 py-3 {{ $sc['bg'] }} {{ $sc['border'] }} border-b flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">{{ $sc['icon'] }}</span>
+                            <div>
+                                <p class="font-bold text-gray-900 text-sm">{{ $order->restaurant->name }}</p>
+                                <p class="text-xs {{ $sc['text'] }} font-semibold uppercase tracking-wide">
+                                    {{ $label }}
+                                </p>
+                            </div>
+                        </div>
+
+                        @if ($isActive)
+                            <span class="flex items-center gap-1.5 bg-white/70 backdrop-blur rounded-full px-2.5 py-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                                <span class="text-[10px] font-bold text-orange-700 uppercase tracking-wider">
+                                    Active
+                                </span>
+                            </span>
+                        @endif
+                    </div>
+
+                    {{-- BODY --}}
+                    <div class="p-5">
+                        <div class="flex items-center justify-between gap-4">
+
+                            {{-- LEFT: ORDER INFO --}}
+                            <div class="flex-1 min-w-0">
+                                {{-- ORDER # + TIME --}}
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full font-semibold">
+                                        #{{ $order->id }}
+                                    </span>
+                                    <span class="text-xs text-gray-400">{{ $order->created_at->diffForHumans() }}</span>
+                                </div>
+
+                                {{-- ITEMS SUMMARY --}}
+                                <p class="text-sm text-gray-600 mb-2">
+                                    <span class="font-bold text-gray-900">{{ $order->items->count() }}</span>
+                                    {{ Str::plural('item', $order->items->count()) }}
+                                    @if ($order->items->count() > 0)
+                                        · 
+                                        <span class="text-gray-500">{{ $order->items->first()->name }}</span>
+                                        @if ($order->items->count() > 1)
+                                            <span class="text-gray-400">+{{ $order->items->count() - 1 }} more</span>
+                                        @endif
+                                    @endif
+                                </p>
+
+                                {{-- DELIVERY ADDRESS --}}
+                                <div class="flex items-start gap-1.5 text-xs text-gray-500">
+                                    <svg class="w-3.5 h-3.5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span class="line-clamp-1">{{ $order->delivery_address }}</span>
+                                </div>
+
+                                {{-- RIDER INFO --}}
+                                @if ($order->rider && $isActive)
+                                    <div class="flex items-center gap-2 mt-2 text-xs">
+                                        <div class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-3 h-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                        </div>
+                                        <span class="text-green-700 font-medium">Rider: {{ $order->rider->user->name }}</span>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- RIGHT: TOTAL --}}
+                            <div class="text-right flex-shrink-0">
+                                <p class="text-xs text-gray-500 mb-0.5">Total</p>
+                                <p class="text-lg font-bold text-orange-600">₱{{ number_format($order->total_amount, 2) }}</p>
+
+                                <span class="text-xs text-gray-500 group-hover:text-orange-600 transition inline-flex items-center gap-1 mt-2">
+                                    View
+                                    <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            @endforeach
+        </div>
+    @endif
+
+</div>
 @endsection

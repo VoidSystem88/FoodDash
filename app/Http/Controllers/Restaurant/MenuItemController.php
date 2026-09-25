@@ -25,14 +25,24 @@ class MenuItemController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('menu-items', 'public');
+            $file = $request->file('image');
+            $filename = 'menu-items/' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+            $dir = storage_path('app/public/menu-items');
+            if (!file_exists($dir)) {
+                mkdir($dir, 0755, true);
+            }
+
+            $file->move($dir, basename($filename));
+            $data['image_path'] = $filename;
         }
 
         unset($data['image']);
+
         $restaurant->menuItems()->create($data);
 
         return back()->with('success', 'Menu item added.');
@@ -47,14 +57,26 @@ class MenuItemController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
+            // Delete old
             if ($menuItem->image_path) {
-                Storage::disk('public')->delete($menuItem->image_path);
+                $old = storage_path('app/public/' . $menuItem->image_path);
+                if (file_exists($old)) @unlink($old);
             }
-            $data['image_path'] = $request->file('image')->store('menu-items', 'public');
+
+            $file = $request->file('image');
+            $filename = 'menu-items/' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+            $dir = storage_path('app/public/menu-items');
+            if (!file_exists($dir)) {
+                mkdir($dir, 0755, true);
+            }
+
+            $file->move($dir, basename($filename));
+            $data['image_path'] = $filename;
         }
 
         unset($data['image']);
@@ -81,7 +103,8 @@ class MenuItemController extends Controller
         abort_unless($menuItem->restaurant_id === $restaurant->id, 403);
 
         if ($menuItem->image_path) {
-            Storage::disk('public')->delete($menuItem->image_path);
+            $path = storage_path('app/public/' . $menuItem->image_path);
+            if (file_exists($path)) @unlink($path);
         }
 
         $menuItem->delete();

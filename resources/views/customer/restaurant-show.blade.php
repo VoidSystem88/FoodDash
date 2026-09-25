@@ -2,121 +2,388 @@
 
 @section('content')
 <div x-data="orderForm({{ $restaurant->id }}, {{ $restaurant->menuItems->toJson() }})">
-    <div class="mb-8">
-        <a href="{{ route('customer.restaurants') }}" class="text-sm text-gray-500 hover:text-gray-700">← Back</a>
-        <h1 class="text-2xl font-semibold text-gray-900 mt-2">{{ $restaurant->name }}</h1>
-        <p class="text-sm text-gray-500 mt-1">{{ $restaurant->address }}</p>
+
+    {{-- ============================================ --}}
+{{-- HERO HEADER --}}
+{{-- ============================================ --}}
+<div class="relative mb-6 bg-white rounded-2xl border border-gray-200 overflow-hidden">
+
+    {{-- Decorative banner / Cover image --}}
+    <div class="h-40 relative overflow-hidden">
+        @if ($restaurant->cover_image_url)
+            <img src="{{ $restaurant->cover_image_url }}"
+                 alt="{{ $restaurant->name }}"
+                 class="absolute inset-0 w-full h-full object-cover">
+        @else
+            <div class="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400"></div>
+            <div class="absolute inset-0 opacity-20"
+                 style="background-image: radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 80%, white 1px, transparent 1px); background-size: 40px 40px;"></div>
+        @endif
     </div>
 
+    {{-- Back button --}}
+    <a href="{{ route('customer.restaurants') }}"
+       class="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur flex items-center justify-center shadow-md hover:bg-white transition z-10">
+        <svg class="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+    </a>
+
+    {{-- Restaurant info --}}
+    <div class="relative px-6 -mt-12">
+        <div class="flex items-end gap-4">
+            {{-- Profile image --}}
+            <div class="w-24 h-24 rounded-2xl bg-white border-4 border-white shadow-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                @if ($restaurant->profile_image_url)
+                    <img src="{{ $restaurant->profile_image_url }}"
+                         alt="{{ $restaurant->name }}"
+                         class="w-full h-full object-cover">
+                @else
+                    <span class="text-4xl">🍽️</span>
+                @endif
+            </div>
+
+            <div class="flex-1 pb-1">
+                <h1 class="text-2xl font-bold text-gray-900 leading-tight">{{ $restaurant->name }}</h1>
+                @if ($restaurant->cuisine)
+                    <span class="inline-block mt-1 text-xs px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 font-semibold">
+                        {{ $restaurant->cuisine }}
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        {{-- Address --}}
+        <div class="mt-4 flex items-center gap-2 text-sm text-gray-500">
+            <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span class="line-clamp-1">{{ $restaurant->address }}</span>
+        </div>
+
+        {{-- Meta info --}}
+        <div class="mt-4 pb-6 flex items-center gap-5 text-sm border-t border-gray-100 pt-4">
+            <div class="flex items-center gap-1.5">
+                <span class="text-yellow-500 text-lg">★</span>
+                <span class="font-semibold text-gray-900">4.8</span>
+                <span class="text-gray-400 text-xs">(120+)</span>
+            </div>
+            <div class="w-px h-4 bg-gray-200"></div>
+            <div class="flex items-center gap-1.5 text-gray-600">
+                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-medium">{{ $restaurant->prep_time_minutes ?? 20 }} min</span>
+            </div>
+            <div class="w-px h-4 bg-gray-200"></div>
+            <div class="flex items-center gap-1.5 text-gray-600">
+                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                <span class="font-medium">{{ $restaurant->menuItems->count() }} items</span>
+            </div>
+        </div>
+    </div>
+</div>
+
     @if (session('error'))
-        <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">{{ session('error') }}</div>
+        <div class="mb-4 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl text-sm flex items-center gap-3">
+            <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            {{ session('error') }}
+        </div>
     @endif
 
     <form method="POST" action="{{ route('customer.orders.store') }}" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         @csrf
         <input type="hidden" name="restaurant_id" value="{{ $restaurant->id }}">
 
+        {{-- ============================================ --}}
         {{-- MENU --}}
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-lg border border-gray-200">
-                <div class="px-5 py-4 border-b border-gray-100">
-                    <h2 class="font-semibold text-gray-900">Menu</h2>
+        {{-- ============================================ --}}
+        <div class="lg:col-span-2 space-y-4">
+            <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+
+                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="font-bold text-gray-900">Menu</h2>
+                                <p class="text-xs text-gray-500">Choose your items</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 @forelse ($restaurant->menuItems as $item)
-                    <div class="px-5 py-4 border-b border-gray-100 last:border-0 flex justify-between items-center gap-4">
-                        <div class="flex-1 min-w-0">
-                            <p class="font-medium text-gray-900">{{ $item->name }}</p>
-                            @if ($item->description)
-                                <p class="text-sm text-gray-500 mt-0.5">{{ $item->description }}</p>
-                            @endif
-                            <p class="text-sm font-medium text-gray-900 mt-1">₱{{ number_format($item->price, 2) }}</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <button type="button" @click="dec({{ $item->id }})"
-                                    class="w-8 h-8 rounded-full border border-gray-300 hover:bg-gray-50 text-gray-700">−</button>
-                            <span class="w-6 text-center font-medium text-gray-900" x-text="qty({{ $item->id }})"></span>
-                            <button type="button" @click="inc({{ $item->id }})"
-                                    class="w-8 h-8 rounded-full bg-orange-600 hover:bg-orange-700 text-white">+</button>
+                    <div class="px-6 py-5 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition group">
+                        <div class="flex justify-between items-start gap-4">
+                            {{-- ITEM INFO --}}
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start gap-3">
+                                    {{-- Placeholder image --}}
+                                    @if ($item->image_path)
+                                        <img src="{{ Storage::disk('public')->url($item->image_path) }}"
+                                             alt="{{ $item->name }}"
+                                             class="w-16 h-16 rounded-xl object-cover flex-shrink-0">
+                                    @else
+                                        <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center flex-shrink-0">
+                                            <span class="text-2xl">🍴</span>
+                                        </div>
+                                    @endif
+
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-semibold text-gray-900 group-hover:text-orange-600 transition">
+                                            {{ $item->name }}
+                                        </p>
+                                        @if ($item->description)
+                                            <p class="text-sm text-gray-500 mt-0.5 line-clamp-2">{{ $item->description }}</p>
+                                        @endif
+                                        <p class="text-base font-bold text-orange-600 mt-1.5">
+                                            ₱{{ number_format($item->price, 2) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- QUANTITY CONTROLS --}}
+                            <div class="flex-shrink-0">
+                                <template x-if="qty({{ $item->id }}) === 0">
+                                    <button type="button"
+                                            @click="inc({{ $item->id }})"
+                                            class="flex items-center gap-1.5 bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-md hover:shadow-lg active:scale-95 transition transform">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Add
+                                    </button>
+                                </template>
+
+                                <template x-if="qty({{ $item->id }}) > 0">
+                                    <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-1">
+                                        <button type="button"
+                                                @click="dec({{ $item->id }})"
+                                                class="w-8 h-8 rounded-lg bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 flex items-center justify-center shadow-sm active:scale-90 transition">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                            </svg>
+                                        </button>
+                                        <span class="w-8 text-center font-bold text-gray-900 text-base"
+                                              x-text="qty({{ $item->id }})"></span>
+                                        <button type="button"
+                                                @click="inc({{ $item->id }})"
+                                                class="w-8 h-8 rounded-lg bg-orange-600 hover:bg-orange-700 text-white flex items-center justify-center shadow-sm active:scale-90 transition">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </div>
                 @empty
-                    <div class="p-8 text-center text-gray-500 text-sm">No items available.</div>
+                    <div class="p-12 text-center">
+                        <div class="text-5xl mb-3">🍽️</div>
+                        <p class="text-gray-500">No items available right now.</p>
+                    </div>
                 @endforelse
             </div>
         </div>
 
+        {{-- ============================================ --}}
         {{-- CART --}}
+        {{-- ============================================ --}}
         <div class="lg:sticky lg:top-24 h-fit">
-            <div class="bg-white rounded-lg border border-gray-200">
-                <div class="px-5 py-4 border-b border-gray-100">
-                    <h2 class="font-semibold text-gray-900">Your order</h2>
+            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+
+                {{-- CART HEADER --}}
+                <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md">
+                                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="font-bold text-gray-900">Your Order</h2>
+                                <p class="text-xs text-gray-500" x-text="cartSize === 0 ? 'Empty cart' : cartSize + ' item' + (cartSize > 1 ? 's' : '')"></p>
+                            </div>
+                        </div>
+
+                        {{-- Item count badge --}}
+                        <template x-if="cartSize > 0">
+                            <span class="bg-orange-100 text-orange-700 text-xs font-bold px-2.5 py-1 rounded-full"
+                                  x-text="cartSize"></span>
+                        </template>
+                    </div>
                 </div>
 
-                <div class="p-5">
+                {{-- CART ITEMS --}}
+                <div class="p-5 max-h-64 overflow-y-auto">
                     <template x-if="cartSize === 0">
-                        <p class="text-sm text-gray-500">No items selected.</p>
-                    </template>
-
-                    <template x-for="line in cartLines" :key="line.id">
-                        <div class="flex justify-between text-sm py-1">
-                            <span class="text-gray-700"><span x-text="line.quantity"></span>× <span x-text="line.name"></span></span>
-                            <span class="text-gray-900">₱<span x-text="line.subtotal.toFixed(2)"></span></span>
+                        <div class="py-8 text-center">
+                            <div class="text-4xl mb-2 opacity-50">🛒</div>
+                            <p class="text-sm text-gray-400">Walang laman ang cart</p>
+                            <p class="text-xs text-gray-400 mt-1">Mag-add ng items para magsimula</p>
                         </div>
                     </template>
 
-                    <template x-if="cartSize > 0">
-                        <div class="mt-4 pt-4 border-t border-gray-100 space-y-1.5 text-sm">
-                            <div class="flex justify-between text-gray-500">
-                                <span>Food cost</span>
-                                <span>₱<span x-text="foodCost.toFixed(2)"></span></span>
+                    <div class="space-y-3">
+                        <template x-for="line in cartLines" :key="line.id">
+                            <div class="flex justify-between items-start gap-3 text-sm">
+                                <div class="flex items-start gap-2 flex-1 min-w-0">
+                                    <span class="w-6 h-6 rounded-md bg-orange-100 text-orange-700 text-xs font-bold flex items-center justify-center flex-shrink-0"
+                                          x-text="line.quantity"></span>
+                                    <span class="text-gray-700 line-clamp-2" x-text="line.name"></span>
+                                </div>
+                                <span class="text-gray-900 font-semibold flex-shrink-0">
+                                    ₱<span x-text="line.subtotal.toFixed(2)"></span>
+                                </span>
                             </div>
-                            <div class="flex justify-between text-gray-500">
-                                <span>Delivery fee</span>
-                                <span>₱{{ number_format(\App\Models\SystemConfig::current()->default_delivery_fee, 2) }}</span>
-                            </div>
-                            <div class="flex justify-between font-semibold text-gray-900 pt-2 border-t border-gray-100">
-                                <span>Total</span>
-                                <span>₱<span x-text="total.toFixed(2)"></span></span>
-                            </div>
-                        </div>
-                    </template>
+                        </template>
+                    </div>
                 </div>
 
-                <div class="px-5 pb-5 space-y-4">
-                    {{-- ADDRESS --}}
-                    <div>
-                        <label class="block text-sm text-gray-700 mb-1.5">Delivery address</label>
-                        <textarea x-model="address" 
-                                  @input.debounce.800ms="geocodeAddress()"
-                                  required rows="2"
-                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                  placeholder="Street, barangay, city"></textarea>
+                {{-- TOTALS --}}
+                <template x-if="cartSize > 0">
+                    <div class="px-5 py-4 border-t border-gray-100 space-y-2 text-sm bg-gray-50">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Food cost</span>
+                            <span class="font-medium text-gray-900">₱<span x-text="foodCost.toFixed(2)"></span></span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>Delivery fee</span>
+                            <span class="font-medium text-gray-900">₱{{ number_format(\App\Models\SystemConfig::current()->default_delivery_fee, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between font-bold text-gray-900 pt-3 border-t border-gray-200 text-base">
+                            <span>Total</span>
+                            <span class="text-orange-600">₱<span x-text="total.toFixed(2)"></span></span>
+                        </div>
+                    </div>
+                </template>
+
+                {{-- DELIVERY FORM --}}
+                <div class="px-5 pb-5 pt-4 space-y-4 border-t border-gray-100">
+                    {{-- ADDRESS LABEL --}}
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <label class="text-sm font-semibold text-gray-900">Delivery Address</label>
                     </div>
 
-                    {{-- HIDDEN LAT/LNG --}}
+                    {{-- ADDRESS INPUT --}}
+                    <div class="relative">
+                        <div class="relative">
+                            <input type="text"
+                                   x-model="address"
+                                   @input.debounce.500ms="searchAddress()"
+                                   @focus="showSuggestions = address.length >= 3 && suggestions.length > 0"
+                                   @keydown.escape="showSuggestions = false"
+                                   @keydown.arrow-down.prevent="highlightNext()"
+                                   @keydown.arrow-up.prevent="highlightPrev()"
+                                   @keydown.enter.prevent="selectHighlighted()"
+                                   placeholder="Start typing your address..."
+                                   autocomplete="off"
+                                   required
+                                   class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition pr-10">
+
+                            {{-- Loading spinner --}}
+                            <div x-show="searching" x-cloak
+                                 class="absolute right-3 top-1/2 -translate-y-1/2">
+                                <svg class="animate-spin h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+
+                            {{-- Check icon kung may lat/lng --}}
+                            <div x-show="!searching && lat && lng" x-cloak
+                                 class="absolute right-3 top-1/2 -translate-y-1/2">
+                                <svg class="w-5 h-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        {{-- SUGGESTIONS --}}
+                        <div x-show="showSuggestions && suggestions.length > 0"
+                             x-cloak
+                             @click.outside="showSuggestions = false"
+                             class="absolute z-30 left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-72 overflow-y-auto">
+
+                            <template x-for="(s, index) in suggestions" :key="index">
+                                <button type="button"
+                                        @click="selectSuggestion(index)"
+                                        @mouseenter="highlightedIndex = index"
+                                        :class="highlightedIndex === index ? 'bg-orange-50' : ''"
+                                        class="w-full text-left px-4 py-3 text-sm hover:bg-orange-50 border-b border-gray-100 last:border-0 transition flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-gray-900 font-semibold line-clamp-1" x-text="s.display_name.split(',')[0]"></p>
+                                        <p class="text-xs text-gray-500 line-clamp-2 mt-0.5" x-text="s.display_name"></p>
+                                    </div>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    {{-- HIDDEN --}}
                     <input type="hidden" name="delivery_address" :value="address">
                     <input type="hidden" name="delivery_lat" :value="lat">
                     <input type="hidden" name="delivery_lng" :value="lng">
 
-                    {{-- LOCATION BUTTON --}}
-                    <button type="button" @click="useCurrentLocation()"
+                    {{-- CURRENT LOCATION BUTTON --}}
+                    <button type="button"
+                            @click="useCurrentLocation()"
                             :disabled="locating"
-                            class="w-full text-xs text-gray-600 hover:text-orange-600 border border-gray-300 rounded-lg py-2 disabled:opacity-50">
-                        <span x-show="!locating">Use my current location</span>
-                        <span x-show="locating">Getting location...</span>
+                            class="w-full flex items-center justify-center gap-2 text-sm text-orange-600 hover:text-orange-700 border-2 border-dashed border-orange-300 hover:border-orange-500 rounded-xl py-2.5 transition disabled:opacity-50 bg-orange-50 hover:bg-orange-100">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span x-show="!locating" class="font-medium">Use my current location</span>
+                        <span x-show="locating" class="font-medium">Getting location...</span>
                     </button>
 
-                    {{-- STATUS MESSAGE --}}
-                    <p class="text-xs" x-show="geocoding">
-                        <span class="text-gray-500">Looking up address...</span>
-                    </p>
-                    <p class="text-xs" x-show="!geocoding && lat && lng && !locating" x-cloak>
-                        <span class="text-green-600">Location set</span>
-                    </p>
-                    <p class="text-xs" x-show="!geocoding && (!lat || !lng) && !locating" x-cloak>
-                        <span class="text-red-600">Please enter an address or use your location</span>
-                    </p>
+                    {{-- STATUS --}}
+                    <template x-if="!searching && lat && lng">
+                        <div class="flex items-center gap-2 text-xs text-green-600 font-medium">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Location confirmed
+                        </div>
+                    </template>
 
                     {{-- HIDDEN ITEMS --}}
                     <template x-for="line in cartLines" :key="'input-' + line.id">
@@ -126,12 +393,25 @@
                         </div>
                     </template>
 
+                    {{-- SUBMIT --}}
                     <button type="submit"
                             :disabled="cartSize === 0 || !lat || !lng"
-                            :class="(cartSize === 0 || !lat || !lng) ? 'opacity-40 cursor-not-allowed' : 'hover:bg-orange-700'"
-                            class="w-full bg-orange-600 text-white py-2.5 rounded-lg text-sm font-medium">
-                        Place order
+                            :class="(cartSize === 0 || !lat || !lng)
+                                    ? 'opacity-40 cursor-not-allowed'
+                                    : 'hover:from-orange-600 hover:to-orange-700 hover:shadow-xl active:scale-98'"
+                            class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3.5 rounded-xl text-sm font-bold shadow-lg transition transform flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Place Order
                     </button>
+
+                    <p class="text-center text-xs text-gray-400">
+                        <span x-show="cartSize === 0">Add items to continue</span>
+                        <span x-show="cartSize > 0 && (!lat || !lng)" x-cloak>Set delivery address to continue</span>
+                        <span x-show="cartSize > 0 && lat && lng" x-cloak>Ready to place order</span>
+                    </p>
                 </div>
             </div>
         </div>
@@ -141,17 +421,29 @@
 
 @push('scripts')
 <script src="//unpkg.com/alpinejs" defer></script>
+<style>
+    .active\:scale-95:active { transform: scale(0.95); }
+    .active\:scale-90:active { transform: scale(0.90); }
+    .active\:scale-98:active { transform: scale(0.98); }
+</style>
 <script>
 function orderForm(restaurantId, menuItems) {
     return {
         menu: menuItems,
         cart: {},
         deliveryFee: {{ \App\Models\SystemConfig::current()->default_delivery_fee }},
+
         locating: false,
         geocoding: false,
         address: '',
         lat: '',
         lng: '',
+
+        suggestions: [],
+        showSuggestions: false,
+        highlightedIndex: -1,
+        searching: false,
+        searchTimeout: null,
 
         init() {
             this.menu.forEach(m => { this.cart[m.id] = 0; });
@@ -191,6 +483,74 @@ function orderForm(restaurantId, menuItems) {
             return this.foodCost + (this.cartSize > 0 ? this.deliveryFee : 0);
         },
 
+        async searchAddress() {
+            if (!this.address || this.address.length < 3) {
+                this.suggestions = [];
+                this.showSuggestions = false;
+                this.lat = '';
+                this.lng = '';
+                return;
+            }
+
+            if (this.locating) return;
+
+            const town = '{{ \App\Models\SystemConfig::current()->town_address ?? "Cagayan de Oro" }}';
+            const query = `${this.address}, ${town}, Philippines`;
+
+            this.searching = true;
+
+            try {
+                const res = await fetch(
+                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1&countrycodes=ph`,
+                    { headers: { 'Accept-Language': 'en', 'User-Agent': 'FoodDash/1.0' } }
+                );
+
+                const data = await res.json();
+                this.suggestions = data || [];
+                this.highlightedIndex = -1;
+                this.showSuggestions = this.suggestions.length > 0;
+
+                if (this.suggestions.length === 0) {
+                    this.lat = '';
+                    this.lng = '';
+                }
+            } catch (err) {
+                console.warn('Address search failed:', err);
+                this.suggestions = [];
+                this.showSuggestions = false;
+            }
+
+            this.searching = false;
+        },
+
+        selectSuggestion(index) {
+            const s = this.suggestions[index];
+            if (!s) return;
+            this.address = s.display_name;
+            this.lat = s.lat;
+            this.lng = s.lon;
+            this.showSuggestions = false;
+            this.suggestions = [];
+        },
+
+        highlightNext() {
+            if (this.suggestions.length === 0) return;
+            this.highlightedIndex = (this.highlightedIndex + 1) % this.suggestions.length;
+        },
+
+        highlightPrev() {
+            if (this.suggestions.length === 0) return;
+            this.highlightedIndex = this.highlightedIndex <= 0
+                ? this.suggestions.length - 1
+                : this.highlightedIndex - 1;
+        },
+
+        selectHighlighted() {
+            if (this.highlightedIndex >= 0 && this.suggestions[this.highlightedIndex]) {
+                this.selectSuggestion(this.highlightedIndex);
+            }
+        },
+
         async useCurrentLocation() {
             if (!navigator.geolocation) {
                 alert('Geolocation not supported.');
@@ -199,61 +559,33 @@ function orderForm(restaurantId, menuItems) {
 
             this.locating = true;
 
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                this.lat = pos.coords.latitude;
-                this.lng = pos.coords.longitude;
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    this.lat = pos.coords.latitude;
+                    this.lng = pos.coords.longitude;
 
-                try {
-                    const res = await fetch(
-                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${this.lat}&lon=${this.lng}&zoom=18&addressdetails=1`,
-                        { headers: { 'Accept-Language': 'en' } }
-                    );
-                    const data = await res.json();
-                    if (data && data.display_name) {
-                        this.address = data.display_name;
+                    try {
+                        const res = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${this.lat}&lon=${this.lng}&zoom=18&addressdetails=1`,
+                            { headers: { 'Accept-Language': 'en', 'User-Agent': 'FoodDash/1.0' } }
+                        );
+                        const data = await res.json();
+                        if (data && data.display_name) {
+                            this.address = data.display_name;
+                        }
+                    } catch (err) {
+                        console.warn('Reverse geocoding failed:', err);
                     }
-                } catch (err) {
-                    console.warn('Reverse geocoding failed:', err);
+
+                    this.locating = false;
+                    this.suggestions = [];
+                    this.showSuggestions = false;
+                },
+                () => {
+                    alert('Could not get your location. Please type your address instead.');
+                    this.locating = false;
                 }
-
-                this.locating = false;
-            }, () => {
-                alert('Could not get your location.');
-                this.locating = false;
-            });
-        },
-
-        async geocodeAddress() {
-            if (!this.address || this.address.length < 5) {
-                this.lat = '';
-                this.lng = '';
-                return;
-            }
-            if (this.locating) return;
-
-            this.geocoding = true;
-
-            try {
-                const res = await fetch(
-                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.address)}&limit=1`,
-                    { headers: { 'Accept-Language': 'en' } }
-                );
-                const data = await res.json();
-
-                if (data && data.length > 0) {
-                    this.lat = data[0].lat;
-                    this.lng = data[0].lon;
-                } else {
-                    this.lat = '';
-                    this.lng = '';
-                }
-            } catch (err) {
-                console.warn('Geocoding failed:', err);
-                this.lat = '';
-                this.lng = '';
-            }
-
-            this.geocoding = false;
+            );
         }
     }
 }

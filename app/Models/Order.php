@@ -14,7 +14,9 @@ class Order extends Model
         'restaurant_id',
         'rider_id',
         'status',
-   	'rejection_reason',
+        'rejection_reason',
+        'cancellation_reason',
+        'cancelled_at',
         'food_cost',
         'delivery_fee',
         'total_amount',
@@ -33,6 +35,7 @@ class Order extends Model
         'delivery_lat' => 'float',
         'delivery_lng' => 'float',
         'is_external_order' => 'boolean',
+        'cancelled_at' => 'datetime',
     ];
 
     public function customer()
@@ -63,5 +66,38 @@ class Order extends Model
     public function payment()
     {
         return $this->hasOne(Payment::class);
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class)->orderBy('created_at');
+    }
+
+    public function unreadMessagesFor(User $user)
+    {
+        return $this->messages()
+            ->where('sender_id', '!=', $user->id)
+            ->whereNull('read_at')
+            ->count();
+    }
+
+    public function canChat(): bool
+    {
+        return $this->rider_id
+            && in_array($this->status, [
+                'rider_assigned',
+                'picked_up',
+                'out_for_delivery',
+            ]);
+    }
+
+    public function canBeCancelledByCustomer(): bool
+    {
+        return in_array($this->status, [
+            'received',
+            'confirmed',
+            'preparing',
+            'finding_rider',
+        ]);
     }
 }

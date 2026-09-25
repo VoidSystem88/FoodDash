@@ -17,9 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         ]);
 
-        // Idagdag ang EnsureUserIsApproved sa web group
         $middleware->web(append: [
             \App\Http\Middleware\EnsureUserIsApproved::class,
+            \App\Http\Middleware\UpdateLastSeen::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

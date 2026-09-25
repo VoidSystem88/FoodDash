@@ -62,6 +62,83 @@ class AvailabilityController extends Controller
         return view('rider.history', compact('orders', 'stats'));
     }
 
+    /**
+     * Rider earnings dashboard.
+     */
+    public function earnings(Request $request)
+    {
+        $rider = auth()->user()->rider;
+
+        // Period: 7 days, 30 days, or this month
+        $period = $request->query('period', '7days');
+
+        $from = match ($period) {
+            '30days' => now()->subDays(30)->startOfDay(),
+            'month' => now()->startOfMonth(),
+            default => now()->subDays(7)->startOfDay(),
+        };
+
+        $to = now();
+
+        // Base query
+        $query = Order::where('rider_id', $rider->id)
+            ->where('status', 'delivered')
+            ->whereBetween('updated_at', [$from, $to]);
+
+        // Summary stats
+        $totalEarnings = (clone $query)->sum('delivery_fee');
+        $totalDeliveries = (clone $query)->count();
+        $avgPerDelivery = $totalDeliveries > 0 ? $totalEarnings / $totalDeliveries : 0;
+
+        // Daily breakdown
+        $dailyEarnings = (clone $query)
+            ->selectRaw('DATE(updated_at) as date')
+            ->selectRaw('COUNT(*) as count')
+            ->selectRaw('SUM(delivery_fee) as total')
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // Best day
+        $bestDay = $dailyEarnings->sortByDesc('total')->first();
+
+        // Kunin lahat ng araw sa range (may zero-fill sa chart)
+        $allDays = [];
+        $current = $from->copy()->startOfDay();
+        $endOfDay = $to->copy()->endOfDay();
+
+        while ($current <= $endOfDay) {
+            $dateStr = $current->format('Y-m-d');
+            $existing = $dailyEarnings->firstWhere('date', $dateStr);
+
+            $allDays[] = [
+                'date' => $dateStr,
+                'label' => $current->format('M d'),
+                'count' => $existing->count ?? 0,
+                'total' => (float) ($existing->total ?? 0),
+            ];
+
+            $current->addDay();
+        }
+
+        $chartLabels = collect($allDays)->pluck('label')->values();
+        $chartData = collect($allDays)->pluck('total')->values();
+
+        return view('rider.earnings', compact(
+            'period',
+            'from',
+            'to',
+            'totalEarnings',
+            'totalDeliveries',
+            'avgPerDelivery',
+            'dailyEarnings',
+            'bestDay',
+            'chartLabels',
+            'chartData',
+            'allDays',
+        ));
+    }
+
     public function profile()
     {
         $rider = auth()->user()->rider;
@@ -110,34 +187,34 @@ class AvailabilityController extends Controller
     }
 
     public function updateLocation(Request $request)
-{
-    $data = $request->validate([
-        'latitude' => 'required|numeric',
-        'longitude' => 'required|numeric',
-    ]);
+    {
+        $data = $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
 
-    $rider = auth()->user()->rider;
+        $rider = auth()->user()->rider;
 
-    $rider->update([
-        'latitude' => $data['latitude'],
-        'longitude' => $data['longitude'],
-        'last_location_at' => now(),
-    ]);
+        $rider->update([
+            'latitude' => $data['latitude'],
+            'longitude' => $data['longitude'],
+            'last_location_at' => now(),
+        ]);
 
-    // Broadcast sa customer kung may active order
-    $activeOrder = \App\Models\Order::where('rider_id', $rider->id)
-        ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
-        ->first();
+        // Broadcast sa customer kung may active order
+        $activeOrder = Order::where('rider_id', $rider->id)
+            ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
+            ->first();
 
-    if ($activeOrder) {
-        broadcast(new \App\Events\RiderLocationUpdated(
-            orderId: $activeOrder->id,
-            latitude: (float) $data['latitude'],
-            longitude: (float) $data['longitude'],
-            riderName: auth()->user()->name,
-        ));
+        if ($activeOrder) {
+            broadcast(new \App\Events\RiderLocationUpdated(
+                orderId: $activeOrder->id,
+                latitude: (float) $data['latitude'],
+                longitude: (float) $data['longitude'],
+                riderName: auth()->user()->name,
+            ));
+        }
+
+        return response()->json(['ok' => true]);
     }
-
-    return response()->json(['ok' => true]);
-}
 }

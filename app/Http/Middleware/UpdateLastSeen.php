@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class UpdateLastSeen
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        if ($request->user()) {
+            // Update without triggering updated_at
+            $request->user()->timestamps = false;
+            $request->user()->update(['last_seen_at' => now()]);
+        }
+
+        return $next($request);
+    }
+}

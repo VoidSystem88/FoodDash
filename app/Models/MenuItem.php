@@ -27,4 +27,13 @@ class MenuItem extends Model
     {
         return $this->belongsTo(Restaurant::class);
     }
+
+    public function getImageUrlAttribute(): string
+    {
+        if ($this->image_path && \Storage::disk('public')->exists($this->image_path)) {
+            return \Storage::disk('public')->url($this->image_path);
+        }
+
+        return '';
+    }
 }

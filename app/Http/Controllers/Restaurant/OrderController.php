@@ -161,13 +161,174 @@ class OrderController extends Controller
             'longitude' => 'required|numeric',
             'prep_time_minutes' => 'nullable|integer|min:1|max:120',
         ]);
-
+        
         $restaurant = auth()->user()->restaurant;
         $restaurant->update($data);
 
         return back()->with('success', 'Restaurant profile updated.');
     }
+    /**
+ * Upload cover image.
+ */
+public function uploadCover(Request $request)
+{
+    $request->validate([
+        'cover' => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
+    ]);
 
+    $restaurant = auth()->user()->restaurant;
+
+    // Delete old
+    if ($restaurant->cover_image) {
+        $old = storage_path('app/public/' . $restaurant->cover_image);
+        if (file_exists($old)) @unlink($old);
+    }
+
+    // Ensure directory
+    $dir = storage_path('app/public/restaurants');
+    if (!file_exists($dir)) mkdir($dir, 0755, true);
+
+    // Save new
+    $file = $request->file('cover');
+    $filename = 'restaurants/cover_' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+    $file->move($dir, basename($filename));
+
+    $restaurant->cover_image = $filename;
+    $restaurant->save();
+
+    return back()->with('success', 'Cover image updated!');
+}
+
+/**
+ * Upload profile image.
+ */
+public function uploadProfileImage(Request $request)
+{
+    $request->validate([
+        'profile_image' => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
+    ]);
+
+    $restaurant = auth()->user()->restaurant;
+
+    // Delete old
+    if ($restaurant->profile_image) {
+        $old = storage_path('app/public/' . $restaurant->profile_image);
+        if (file_exists($old)) @unlink($old);
+    }
+
+    // Ensure directory
+    $dir = storage_path('app/public/restaurants');
+    if (!file_exists($dir)) mkdir($dir, 0755, true);
+
+    // Save new
+    $file = $request->file('profile_image');
+    $filename = 'restaurants/profile_' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+    $file->move($dir, basename($filename));
+
+    $restaurant->profile_image = $filename;
+    $restaurant->save();
+
+    return back()->with('success', 'Profile image updated!');
+}
+
+/**
+ * Remove cover image.
+ */
+public function removeCover()
+{
+    $restaurant = auth()->user()->restaurant;
+
+    if ($restaurant->cover_image) {
+        $path = storage_path('app/public/' . $restaurant->cover_image);
+        if (file_exists($path)) @unlink($path);
+    }
+
+    $restaurant->cover_image = null;
+    $restaurant->save();
+
+    return back()->with('success', 'Cover image removed.');
+}
+
+/**
+ * Remove profile image.
+ */
+public function removeProfileImage()
+{
+    $restaurant = auth()->user()->restaurant;
+
+    if ($restaurant->profile_image) {
+        $path = storage_path('app/public/' . $restaurant->profile_image);
+        if (file_exists($path)) @unlink($path);
+    }
+
+    $restaurant->profile_image = null;
+    $restaurant->save();
+
+    return back()->with('success', 'Profile image removed.');
+}
+/**
+ * Show operating hours editor.
+ */
+public function hours()
+{
+    $restaurant = auth()->user()->restaurant;
+
+    // Kunin ang existing hours
+    $existing = $restaurant->hours->keyBy('day_of_week');
+
+    // Kunin ang 7 days (0=Sunday to 6=Saturday)
+    $days = [];
+    $dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    for ($i = 0; $i < 7; $i++) {
+        $days[$i] = [
+            'day_of_week' => $i,
+            'day_name' => $dayNames[$i],
+            'is_open' => $existing->has($i) ? $existing[$i]->is_open : false,
+            'open_time' => $existing->has($i) ? $existing[$i]->open_time : '09:00',
+            'close_time' => $existing->has($i) ? $existing[$i]->close_time : '21:00',
+        ];
+    }
+
+    return view('restaurant.hours', compact('restaurant', 'days'));
+}
+
+/**
+ * Update operating hours.
+ */
+public function updateHours(Request $request)
+{
+    $restaurant = auth()->user()->restaurant;
+
+    $data = $request->validate([
+        'days' => 'required|array|size:7',
+        'days.*.day_of_week' => 'required|integer|between:0,6',
+        'days.*.is_open' => 'nullable|boolean',
+        'days.*.open_time' => 'nullable|date_format:H:i',
+        'days.*.close_time' => 'nullable|date_format:H:i|after:days.*.open_time',
+    ]);
+
+    foreach ($data['days'] as $day) {
+        $isOpen = !empty($day['is_open']);
+
+        \App\Models\RestaurantHour::updateOrCreate(
+            [
+                'restaurant_id' => $restaurant->id,
+                'day_of_week' => $day['day_of_week'],
+            ],
+            [
+                'is_open' => $isOpen,
+                'open_time' => $isOpen ? ($day['open_time'] ?? '09:00') : null,
+                'close_time' => $isOpen ? ($day['close_time'] ?? '21:00') : null,
+            ]
+        );
+    }
+
+    // Auto-toggle agad para maging sync
+    \Artisan::call('restaurants:auto-toggle');
+
+    return back()->with('success', 'Operating hours updated successfully.');
+}
     public function orders(Request $request)
     {
         $restaurant = auth()->user()->restaurant;
