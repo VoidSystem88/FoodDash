@@ -85,7 +85,7 @@ class RiderSearchService
 
     protected function offerToRiders(Order $order, $riders, int $radiusKm): bool
     {
-        $timeout = 30;
+        $timeout = 60;
         $now = now();
 
         // I-check kung may existing pending offers
@@ -151,7 +151,7 @@ class RiderSearchService
         return false;
     }
 
-    protected function waitForAcceptance(int $orderId, int $timeoutSec): ?int
+        protected function waitForAcceptance(int $orderId, int $timeoutSec): ?int
     {
         $key = "order:{$orderId}:accepted_rider";
         $deadline = microtime(true) + $timeoutSec;
@@ -162,7 +162,7 @@ class RiderSearchService
                 cache()->forget($key);
                 return (int) $riderId;
             }
-            usleep(300_000);
+            usleep(300_000);   // check every 0.3s
         }
 
         return null;

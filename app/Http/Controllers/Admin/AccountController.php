@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class AccountController extends Controller
 {
-    public function dashboard()
+        public function dashboard()
     {
         $pendingRestaurants = User::where('role', 'restaurant')
             ->where('status', 'pending')
@@ -32,6 +32,7 @@ class AccountController extends Controller
             'total_orders' => Order::count(),
             'delivered_orders' => Order::where('status', 'delivered')->count(),
             'total_sales' => Order::where('status', 'delivered')->sum('food_cost'),
+            'total_commission' => Order::where('status', 'delivered')->sum('commission_amount'),
             'active_restaurants' => Restaurant::where('is_open', true)->count(),
             'online_riders' => Rider::where('is_online', true)->count(),
         ];
@@ -172,10 +173,11 @@ class AccountController extends Controller
             ->whereDate('created_at', '>=', $from)
             ->whereDate('created_at', '<=', $to);
 
-        $salesStats = [
+                $salesStats = [
             'total_orders' => (clone $salesQuery)->count(),
             'total_food_cost' => (clone $salesQuery)->sum('food_cost'),
             'total_delivery_fees' => (clone $salesQuery)->sum('delivery_fee'),
+            'total_commission' => (clone $salesQuery)->sum('commission_amount'),
             'total_revenue' => (clone $salesQuery)->sum('total_amount'),
         ];
 

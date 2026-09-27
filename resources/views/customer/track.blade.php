@@ -4,59 +4,59 @@
 <div x-data="orderTracker({{ $order->id }})" x-init="init()">
     <div class="flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-2xl font-semibold text-gray-900">Order #{{ $order->id }}</h1>
-            <p class="text-sm text-gray-500 mt-1">{{ $order->restaurant->name }}</p>
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-neutral-100">Order #{{ $order->id }}</h1>
+            <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">{{ $order->restaurant->name }}</p>
         </div>
-        <a href="{{ route('customer.orders') }}" class="text-sm text-gray-500 hover:text-gray-700">
+        <a href="{{ route('customer.orders') }}" class="text-sm text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-neutral-200">
             Back
         </a>
     </div>
 
     {{-- STATUS --}}
-    <div class="bg-white rounded-lg border border-gray-200 p-6 mb-4">
-        <p class="text-xs uppercase tracking-wide text-gray-400 mb-1">Current status</p>
-        <p class="text-lg font-semibold text-gray-900" x-text="statusLabel"></p>
+    <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4">
+        <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-1">Current status</p>
+        <p class="text-lg font-semibold text-gray-900 dark:text-neutral-100" x-text="statusLabel"></p>
 
         {{-- PROGRESS --}}
         <div class="mt-6 flex items-center">
             <template x-for="(step, i) in steps" :key="i">
                 <div class="flex items-center flex-1">
                     <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0"
-                         :class="stepIndex >= i ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-500'">
+                         :class="stepIndex >= i ? 'bg-orange-600 text-white' : 'bg-gray-200 dark:bg-dark-700 text-gray-500 dark:text-neutral-400'">
                         <span x-text="i + 1"></span>
                     </div>
                     <div class="flex-1 h-0.5 mx-1"
-                         :class="stepIndex > i ? 'bg-orange-600' : 'bg-gray-200'"
+                         :class="stepIndex > i ? 'bg-orange-600' : 'bg-gray-200 dark:bg-dark-700'"
                          x-show="i < steps.length - 1"></div>
                 </div>
             </template>
         </div>
         <div class="flex justify-between mt-2">
             <template x-for="(step, i) in steps" :key="'lbl' + i">
-                <span class="text-xs" :class="stepIndex >= i ? 'text-gray-700 font-medium' : 'text-gray-400'" x-text="step"></span>
+                <span class="text-xs" :class="stepIndex >= i ? 'text-gray-700 dark:text-neutral-300 font-medium' : 'text-gray-400 dark:text-neutral-500'" x-text="step"></span>
             </template>
         </div>
     </div>
 
     {{-- REJECTION REASON --}}
     @if ($order->status === 'rejected' && $order->rejection_reason)
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-            <p class="text-xs uppercase tracking-wide text-red-700 font-medium mb-1">Order rejected</p>
-            <p class="text-sm text-red-800">Reason: {{ $order->rejection_reason }}</p>
+        <div class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+            <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-medium mb-1">Order rejected</p>
+            <p class="text-sm text-red-800 dark:text-red-200">Reason: {{ $order->rejection_reason }}</p>
         </div>
     @endif
 
     {{-- CANCELLATION REASON --}}
     @if ($order->status === 'cancelled' && $order->cancellation_reason)
-        <div class="bg-gray-50 border border-gray-300 rounded-lg p-4 mb-4">
-            <p class="text-xs uppercase tracking-wide text-gray-700 font-medium mb-1">
+        <div class="bg-gray-50 dark:bg-dark-850 border border-gray-300 dark:border-dark-600 rounded-lg p-4 mb-4">
+            <p class="text-xs uppercase tracking-wide text-gray-700 dark:text-neutral-300 font-medium mb-1">
                 Order cancelled
             </p>
-            <p class="text-sm text-gray-800">
+            <p class="text-sm text-gray-800 dark:text-neutral-200">
                 Reason: {{ $order->cancellation_reason }}
             </p>
             @if ($order->cancelled_at)
-                <p class="text-xs text-gray-500 mt-2">
+                <p class="text-xs text-gray-500 dark:text-neutral-400 mt-2">
                     Cancelled {{ $order->cancelled_at->diffForHumans() }}
                 </p>
             @endif
@@ -65,18 +65,18 @@
 
     {{-- CANCEL ORDER FORM --}}
     @if ($order->canBeCancelledByCustomer())
-        <div class="bg-white rounded-lg border border-red-200 p-6 mb-4"
+        <div class="bg-white dark:bg-dark-800 rounded-lg border border-red-200 dark:border-red-800 p-6 mb-4"
              x-data="{ showCancel: false }">
             <div class="flex justify-between items-center">
                 <div>
-                    <p class="text-sm font-medium text-gray-900">Need to cancel?</p>
-                    <p class="text-xs text-gray-500 mt-1">
+                    <p class="text-sm font-medium text-gray-900 dark:text-neutral-100">Need to cancel?</p>
+                    <p class="text-xs text-gray-500 dark:text-neutral-400 mt-1">
                         You can cancel this order while it's still being processed.
                     </p>
                 </div>
                 <button type="button"
                         @click="showCancel = !showCancel"
-                        class="text-red-600 border border-red-300 hover:bg-red-50 px-4 py-2 rounded text-sm font-medium">
+                        class="text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/30 px-4 py-2 rounded text-sm font-medium">
                     Cancel Order
                 </button>
             </div>
@@ -84,7 +84,7 @@
             <div x-show="showCancel"
                  x-cloak
                  x-transition
-                 class="mt-4 pt-4 border-t border-red-100">
+                 class="mt-4 pt-4 border-t border-red-100 dark:border-red-900">
                 <form method="POST"
                       action="{{ route('customer.orders.cancel', $order) }}"
                       class="space-y-3"
@@ -92,12 +92,12 @@
                     @csrf
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-800 mb-1">
+                        <label class="block text-sm font-medium text-gray-800 dark:text-neutral-200 mb-1">
                             Reason for cancellation
                         </label>
                         <select name="cancellation_reason"
                                 required
-                                class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent">
                             <option value="">Select a reason...</option>
                             <option value="Changed my mind">Changed my mind</option>
                             <option value="Ordered by mistake">Ordered by mistake</option>
@@ -115,7 +115,7 @@
                         </button>
                         <button type="button"
                                 @click="showCancel = false"
-                                class="border border-gray-300 px-4 py-2 rounded text-sm hover:bg-gray-50">
+                                class="border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-neutral-300 px-4 py-2 rounded text-sm hover:bg-gray-50 dark:hover:bg-dark-850">
                             Keep Order
                         </button>
                     </div>
@@ -130,7 +130,7 @@
     @if ($order->canChat())
         <div x-data="chatBox({{ $order->id }})"
              x-init="init()"
-             class="bg-white rounded-lg border border-gray-200 mb-4 overflow-hidden">
+             class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 mb-4 overflow-hidden">
 
             {{-- HEADER --}}
             <div class="bg-orange-600 text-white px-5 py-3 flex justify-between items-center cursor-pointer"
@@ -158,26 +158,44 @@
             <div x-show="isOpen" x-cloak x-transition>
                 <div x-ref="messagesContainer"
                      @scroll="onScroll()"
-                     class="h-96 overflow-y-auto p-4 space-y-2 bg-gray-50 scroll-smooth">
+                     class="h-96 overflow-y-auto p-4 space-y-2 bg-gray-50 dark:bg-dark-850 scroll-smooth">
 
                     <template x-if="loading">
-                        <p class="text-center text-sm text-gray-500">Loading messages...</p>
+                        <p class="text-center text-sm text-gray-500 dark:text-neutral-400">Loading messages...</p>
                     </template>
 
                     <template x-if="!loading && messages.length === 0">
                         <div class="text-center py-12">
                             <p class="text-4xl mb-2">💬</p>
-                            <p class="text-sm text-gray-500">No messages yet.</p>
-                            <p class="text-xs text-gray-400 mt-1">Say hi to your rider!</p>
+                            <p class="text-sm text-gray-500 dark:text-neutral-400">No messages yet.</p>
+                            <p class="text-xs text-gray-400 dark:text-neutral-500 mt-1">Say hi to your rider!</p>
                         </div>
                     </template>
 
                     <template x-for="msg in messages" :key="msg.id">
                         <div :class="msg.sender_id === currentUserId ? 'flex justify-end' : 'flex justify-start'"
-                             class="chat-message">
+                             class="chat-message gap-2 items-end">
+
+                            {{-- AVATAR — left side para sa kausap --}}
+                            <template x-if="msg.sender_id !== currentUserId">
+                                <div class="flex-shrink-0">
+                                    <template x-if="msg.sender_avatar_url">
+                                        <img :src="msg.sender_avatar_url"
+                                             :alt="msg.sender_name"
+                                             class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
+                                    </template>
+                                    <template x-if="!msg.sender_avatar_url">
+                                        <div :class="msg.sender_avatar_color || 'bg-gray-500'"
+                                             class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
+                                             x-text="msg.sender_initials || '?'"></div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            {{-- MESSAGE BUBBLE --}}
                             <div :class="msg.sender_id === currentUserId
                                     ? 'bg-orange-600 text-white rounded-br-none'
-                                    : 'bg-white text-gray-900 border border-gray-200 rounded-bl-none'"
+                                    : 'bg-white dark:bg-dark-800 text-gray-900 dark:text-neutral-100 border border-gray-200 dark:border-dark-700 rounded-bl-none'"
                                  class="max-w-[75%] px-3 py-2 rounded-2xl shadow-sm transition-all duration-200">
                                 <p class="text-xs font-medium mb-0.5 opacity-75"
                                    x-text="msg.sender_name"></p>
@@ -197,14 +215,31 @@
                                     </template>
                                 </div>
                             </div>
+
+                            {{-- AVATAR — right side para sa sarili --}}
+                            <template x-if="msg.sender_id === currentUserId">
+                                <div class="flex-shrink-0">
+                                    <template x-if="msg.sender_avatar_url">
+                                        <img :src="msg.sender_avatar_url"
+                                             :alt="msg.sender_name"
+                                             class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
+                                    </template>
+                                    <template x-if="!msg.sender_avatar_url">
+                                        <div :class="msg.sender_avatar_color || 'bg-orange-500'"
+                                             class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
+                                             x-text="msg.sender_initials || '?'"></div>
+                                    </template>
+                                </div>
+                            </template>
                         </div>
                     </template>
 
                     {{-- TYPING INDICATOR --}}
                     <template x-if="typingName">
-                        <div class="flex justify-start chat-message">
-                            <div class="bg-white border border-gray-200 px-3 py-2 rounded-2xl rounded-bl-none shadow-sm">
-                                <p class="text-xs text-gray-500 mb-1" x-text="typingName + ' is typing'"></p>
+                        <div class="flex justify-start chat-message gap-2 items-end">
+                            <div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-dark-700 flex-shrink-0"></div>
+                            <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 px-3 py-2 rounded-2xl rounded-bl-none shadow-sm">
+                                <p class="text-xs text-gray-500 dark:text-neutral-400 mb-1" x-text="typingName + ' is typing'"></p>
                                 <div class="flex gap-1">
                                     <span class="typing-dot"></span>
                                     <span class="typing-dot" style="animation-delay: 0.15s"></span>
@@ -216,7 +251,7 @@
                 </div>
 
                 {{-- INPUT --}}
-                <div class="border-t border-gray-200 p-3 bg-white">
+                <div class="border-t border-gray-200 dark:border-dark-700 p-3 bg-white dark:bg-dark-800">
                     <form @submit.prevent="sendMessage()" class="flex gap-2">
                         <input type="text"
                                x-model="newMessage"
@@ -225,7 +260,7 @@
                                @blur="stopTyping()"
                                placeholder="Type a message..."
                                maxlength="1000"
-                               class="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
+                               class="flex-1 border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
                         <button type="submit"
                                 :disabled="!newMessage.trim() || sending"
                                 :class="(!newMessage.trim() || sending) ? 'opacity-40 cursor-not-allowed' : 'hover:bg-orange-700'"
@@ -241,37 +276,37 @@
 
     {{-- LIVE MAP --}}
     @if ($order->rider && in_array($order->status, ['rider_assigned', 'picked_up', 'out_for_delivery']))
-        <div class="bg-white rounded-lg border border-gray-200 p-6 mb-4">
+        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4">
             <div class="flex justify-between items-center mb-3">
-                <p class="text-xs uppercase tracking-wide text-gray-400">Live Rider Location</p>
-                <p class="text-xs text-gray-500" x-text="lastUpdated"></p>
+                <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500">Live Rider Location</p>
+                <p class="text-xs text-gray-500 dark:text-neutral-400" x-text="lastUpdated"></p>
             </div>
-            <div id="map" class="w-full h-80 rounded-lg border border-gray-200 z-0"></div>
+            <div id="map" class="w-full h-80 rounded-lg border border-gray-200 dark:border-dark-700 z-0"></div>
 
             <div class="mt-3 grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded p-3">
-                    <p class="text-xs text-gray-500">Distance to you</p>
-                    <p class="text-lg font-bold text-gray-900" x-text="distanceText || '—'"></p>
+                <div class="bg-gray-50 dark:bg-dark-850 rounded p-3">
+                    <p class="text-xs text-gray-500 dark:text-neutral-400">Distance to you</p>
+                    <p class="text-lg font-bold text-gray-900 dark:text-neutral-100" x-text="distanceText || '—'"></p>
                 </div>
-                <div class="bg-gray-50 rounded p-3">
-                    <p class="text-xs text-gray-500">Estimated arrival</p>
-                    <p class="text-lg font-bold text-gray-900" x-text="etaText || '—'"></p>
+                <div class="bg-gray-50 dark:bg-dark-850 rounded p-3">
+                    <p class="text-xs text-gray-500 dark:text-neutral-400">Estimated arrival</p>
+                    <p class="text-lg font-bold text-gray-900 dark:text-neutral-100" x-text="etaText || '—'"></p>
                 </div>
             </div>
         </div>
     @endif
 
     {{-- DELIVERY --}}
-    <div class="bg-white rounded-lg border border-gray-200 p-6 mb-4">
-        <p class="text-xs uppercase tracking-wide text-gray-400 mb-2">Delivery address</p>
-        <p class="text-sm text-gray-700">{{ $order->delivery_address }}</p>
+    <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4">
+        <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-2">Delivery address</p>
+        <p class="text-sm text-gray-700 dark:text-neutral-300">{{ $order->delivery_address }}</p>
 
         @if ($order->rider)
-            <div class="mt-4 pt-4 border-t border-gray-100">
-                <p class="text-xs uppercase tracking-wide text-gray-400 mb-1">Your rider</p>
-                <p class="text-sm font-medium text-gray-900">{{ $order->rider->user->name }}</p>
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-dark-700">
+                <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-1">Your rider</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-neutral-100">{{ $order->rider->user->name }}</p>
                 @if ($order->rider->vehicle_type)
-                    <p class="text-xs text-gray-500 mt-1">
+                    <p class="text-xs text-gray-500 dark:text-neutral-400 mt-1">
                         {{ $order->rider->vehicle_type }}
                         @if ($order->rider->vehicle_plate)
                             · {{ $order->rider->vehicle_plate }}
@@ -283,28 +318,28 @@
     </div>
 
     {{-- ITEMS --}}
-    <div class="bg-white rounded-lg border border-gray-200 p-6 mb-4">
-        <p class="text-xs uppercase tracking-wide text-gray-400 mb-4">Order summary</p>
+    <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4">
+        <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-4">Order summary</p>
 
         <div class="space-y-2">
             @foreach ($order->items as $item)
                 <div class="flex justify-between text-sm">
-                    <span class="text-gray-700">{{ $item->quantity }}× {{ $item->name }}</span>
-                    <span class="text-gray-900">₱{{ number_format($item->price * $item->quantity, 2) }}</span>
+                    <span class="text-gray-700 dark:text-neutral-300">{{ $item->quantity }}× {{ $item->name }}</span>
+                    <span class="text-gray-900 dark:text-neutral-100">₱{{ number_format($item->price * $item->quantity, 2) }}</span>
                 </div>
             @endforeach
         </div>
 
-        <div class="mt-4 pt-4 border-t border-gray-100 space-y-1.5 text-sm">
-            <div class="flex justify-between text-gray-500">
+        <div class="mt-4 pt-4 border-t border-gray-100 dark:border-dark-700 space-y-1.5 text-sm">
+            <div class="flex justify-between text-gray-500 dark:text-neutral-400">
                 <span>Food cost</span>
                 <span>₱{{ number_format($order->food_cost, 2) }}</span>
             </div>
-            <div class="flex justify-between text-gray-500">
+            <div class="flex justify-between text-gray-500 dark:text-neutral-400">
                 <span>Delivery fee</span>
                 <span>₱{{ number_format($order->delivery_fee, 2) }}</span>
             </div>
-            <div class="flex justify-between font-semibold text-gray-900 pt-2 border-t border-gray-100">
+            <div class="flex justify-between font-semibold text-gray-900 dark:text-neutral-100 pt-2 border-t border-gray-100 dark:border-dark-700">
                 <span>Total</span>
                 <span>₱{{ number_format($order->total_amount, 2) }}</span>
             </div>
@@ -313,30 +348,30 @@
 
     {{-- RATING FORM --}}
     @if ($order->status === 'delivered' && !$order->restaurant_rating)
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <p class="text-xs uppercase tracking-wide text-gray-400 mb-4">Rate your order</p>
+        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6">
+            <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-4">Rate your order</p>
             <form method="POST" action="{{ route('customer.orders.rate', $order) }}" class="space-y-5">
                 @csrf
 
                 <div>
-                    <label class="block text-sm text-gray-700 mb-2">Restaurant</label>
+                    <label class="block text-sm text-gray-700 dark:text-neutral-300 mb-2">Restaurant</label>
                     <div class="flex gap-1">
                         @for ($i = 1; $i <= 5; $i++)
                             <label class="cursor-pointer">
                                 <input type="radio" name="restaurant_rating" value="{{ $i }}" class="peer sr-only" required>
-                                <span class="block text-3xl text-gray-300 peer-checked:text-orange-500 hover:text-orange-400 transition">★</span>
+                                <span class="block text-3xl text-gray-300 dark:text-neutral-600 peer-checked:text-orange-500 hover:text-orange-400 transition">★</span>
                             </label>
                         @endfor
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm text-gray-700 mb-2">Rider</label>
+                    <label class="block text-sm text-gray-700 dark:text-neutral-300 mb-2">Rider</label>
                     <div class="flex gap-1">
                         @for ($i = 1; $i <= 5; $i++)
                             <label class="cursor-pointer">
                                 <input type="radio" name="rider_rating" value="{{ $i }}" class="peer sr-only" required>
-                                <span class="block text-3xl text-gray-300 peer-checked:text-orange-500 hover:text-orange-400 transition">★</span>
+                                <span class="block text-3xl text-gray-300 dark:text-neutral-600 peer-checked:text-orange-500 hover:text-orange-400 transition">★</span>
                             </label>
                         @endfor
                     </div>
@@ -351,22 +386,22 @@
 
     {{-- SHOW RATINGS --}}
     @if ($order->status === 'delivered' && $order->restaurant_rating)
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-            <p class="text-xs uppercase tracking-wide text-gray-400 mb-4">Your ratings</p>
+        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6">
+            <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-4">Your ratings</p>
             <div class="space-y-3">
                 <div class="flex justify-between items-center">
-                    <span class="text-sm text-gray-700">Restaurant</span>
+                    <span class="text-sm text-gray-700 dark:text-neutral-300">Restaurant</span>
                     <div class="flex gap-0.5">
                         @for ($i = 1; $i <= 5; $i++)
-                            <span class="text-xl {{ $i <= $order->restaurant_rating ? 'text-orange-500' : 'text-gray-300' }}">★</span>
+                            <span class="text-xl {{ $i <= $order->restaurant_rating ? 'text-orange-500' : 'text-gray-300 dark:text-neutral-600' }}">★</span>
                         @endfor
                     </div>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span class="text-sm text-gray-700">Rider</span>
+                    <span class="text-sm text-gray-700 dark:text-neutral-300">Rider</span>
                     <div class="flex gap-0.5">
                         @for ($i = 1; $i <= 5; $i++)
-                            <span class="text-xl {{ $i <= $order->rider_rating ? 'text-orange-500' : 'text-gray-300' }}">★</span>
+                            <span class="text-xl {{ $i <= $order->rider_rating ? 'text-orange-500' : 'text-gray-300 dark:text-neutral-600' }}">★</span>
                         @endfor
                     </div>
                 </div>
@@ -379,7 +414,6 @@
 @push('scripts')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="//unpkg.com/alpinejs" defer></script>
 <style>
     .chat-message {
         animation: slideIn 0.25s ease-out;
@@ -415,6 +449,8 @@ function orderTracker(orderId) {
         lastUpdated: '',
         distanceText: '',
         etaText: '',
+        mapInitialized: false,
+        routeDebounce: null,
 
         init() {
             window.Echo.private(`order.${orderId}`)
@@ -433,6 +469,15 @@ function orderTracker(orderId) {
         },
 
         initMap() {
+            if (this.mapInitialized) return;
+
+            const mapContainer = document.getElementById('map');
+            if (!mapContainer) return;
+
+            if (mapContainer._leaflet_id) {
+                mapContainer._leaflet_id = null;
+            }
+
             const restaurantLat = {{ $order->restaurant->latitude }};
             const restaurantLng = {{ $order->restaurant->longitude }};
             const deliveryLat = {{ $order->delivery_lat }};
@@ -447,25 +492,105 @@ function orderTracker(orderId) {
                 maxZoom: 19,
             }).addTo(this.map);
 
+                        // ⭐ RESTAURANT MARKER — actual profile image
+            @php
+                $restaurantProfileUrl = $order->restaurant->profile_image_url;
+                $restaurantInitial = strtoupper(substr($order->restaurant->name, 0, 1));
+            @endphp
+
+            const restaurantProfileUrl = '{{ $restaurantProfileUrl }}';
+            const restaurantInitial = '{{ $restaurantInitial }}';
+
             const restaurantIcon = L.divIcon({
-                html: '<div style="background:#ef4444;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3)">🏪</div>',
+                html: restaurantProfileUrl ? `
+                    <div style="position:relative;width:56px;height:56px;">
+                        <div style="
+                            width:56px;
+                            height:56px;
+                            border-radius:50%;
+                            overflow:hidden;
+                            border:4px solid #ef4444;
+                            box-shadow:0 4px 10px rgba(239,68,68,0.5), 0 2px 6px rgba(0,0,0,0.3);
+                            background:white;
+                        ">
+                            <img src="${restaurantProfileUrl}"
+                                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;width:100%;height:100%;background:#ef4444;color:white;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;&quot;>${restaurantInitial}</div>';"
+                                 style="width:100%;height:100%;object-fit:cover;"
+                                 alt="Restaurant">
+                        </div>
+                        <div style="
+                            position:absolute;
+                            bottom:-2px;
+                            right:-2px;
+                            background:#ef4444;
+                            color:white;
+                            width:20px;
+                            height:20px;
+                            border-radius:50%;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            font-size:12px;
+                            border:2px solid white;
+                            box-shadow:0 2px 4px rgba(0,0,0,0.3);
+                        ">🏪</div>
+                    </div>
+                ` : `
+                    <div style="position:relative;width:56px;height:56px;">
+                        <div style="
+                            background:#ef4444;
+                            color:white;
+                            width:56px;
+                            height:56px;
+                            border-radius:50%;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            font-size:24px;
+                            font-weight:bold;
+                            border:4px solid white;
+                            box-shadow:0 4px 10px rgba(0,0,0,0.4);
+                        ">${restaurantInitial}</div>
+                    </div>
+                `,
                 className: '',
-                iconSize: [36, 36],
-                iconAnchor: [18, 18],
+                iconSize: [56, 56],
+                iconAnchor: [28, 28],
+                popupAnchor: [0, -28],
             });
 
+            // ⭐ CUSTOMER MARKER — custom image (cusicon.png)
             const deliveryIcon = L.divIcon({
-                html: '<div style="background:#10b981;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3)">🏠</div>',
+                html: `
+                    <div style="position:relative;width:48px;height:48px;">
+                        <img src="/images/cusicon.png"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                             style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4));"
+                             alt="Customer">
+                        <div style="display:none;background:#10b981;color:white;width:44px;height:44px;border-radius:50%;align-items:center;justify-content:center;font-size:22px;border:3px solid white;box-shadow:0 3px 6px rgba(0,0,0,0.4);position:absolute;top:2px;left:2px;">🏠</div>
+                    </div>
+                `,
                 className: '',
-                iconSize: [36, 36],
-                iconAnchor: [18, 18],
+                iconSize: [48, 48],
+                iconAnchor: [24, 24],
+                popupAnchor: [0, -24],
             });
 
+            // ⭐ RIDER MARKER — custom image (ridicon.png)
             const riderIcon = L.divIcon({
-                html: '<div style="background:#f97316;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:3px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3)">🛵</div>',
+                html: `
+                    <div style="position:relative;width:56px;height:56px;">
+                        <img src="/images/ridicon.png"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                             style="width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5));"
+                             alt="Rider">
+                        <div style="display:none;background:#f97316;color:white;width:52px;height:52px;border-radius:50%;align-items:center;justify-content:center;font-size:26px;border:3px solid white;box-shadow:0 3px 6px rgba(0,0,0,0.4);position:absolute;top:2px;left:2px;">🛵</div>
+                    </div>
+                `,
                 className: '',
-                iconSize: [44, 44],
-                iconAnchor: [22, 22],
+                iconSize: [56, 56],
+                iconAnchor: [28, 28],
+                popupAnchor: [0, -28],
             });
 
             this.restaurantMarker = L.marker([restaurantLat, restaurantLng], { icon: restaurantIcon })
@@ -482,23 +607,71 @@ function orderTracker(orderId) {
                     .bindPopup('🛵 {{ $order->rider->user->name }}');
             @endif
 
+            // ⭐ Draw road-snapped route
+            this.drawRoute(restaurantLat, restaurantLng, deliveryLat, deliveryLng);
+
+            this.mapInitialized = true;
+            console.log('✅ Map initialized');
+        },
+
+        async drawRoute(fromLat, fromLng, toLat, toLng) {
+            console.log('🛣️ Fetching road route...');
+
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.routes || data.routes.length === 0) {
+                    console.warn('⚠️ No route, falling back');
+                    this.drawStraightLine(fromLat, fromLng, toLat, toLng);
+                    return;
+                }
+
+                const route = data.routes[0];
+                const coordinates = route.geometry.coordinates;
+                const latlngs = coordinates.map(coord => [coord[1], coord[0]]);
+
+                this.routeLine = L.polyline(latlngs, {
+                    color: '#f97316',
+                    weight: 4,
+                    opacity: 0.7,
+                    lineJoin: 'round',
+                    lineCap: 'round',
+                }).addTo(this.map);
+
+                console.log('✅ Road route drawn:', latlngs.length, 'points');
+
+                const distanceKm = route.distance / 1000;
+                const durationMin = Math.round(route.duration / 60);
+
+                this.distanceText = distanceKm < 1
+                    ? Math.round(distanceKm * 1000) + ' m'
+                    : distanceKm.toFixed(1) + ' km';
+
+                this.etaText = durationMin < 1 ? 'Arriving' : durationMin + ' min';
+
+                if (this.routeLine) {
+                    const bounds = this.routeLine.getBounds();
+                    this.map.fitBounds(bounds, { padding: [50, 50] });
+                }
+            } catch (err) {
+                console.error('❌ Route fetch failed:', err);
+                this.drawStraightLine(fromLat, fromLng, toLat, toLng);
+            }
+        },
+
+        drawStraightLine(fromLat, fromLng, toLat, toLng) {
+            console.log('📏 Drawing straight fallback');
             this.routeLine = L.polyline([
-                [restaurantLat, restaurantLng],
-                [deliveryLat, deliveryLng],
+                [fromLat, fromLng],
+                [toLat, toLng],
             ], {
                 color: '#f97316',
                 weight: 3,
                 opacity: 0.5,
                 dashArray: '8, 8',
             }).addTo(this.map);
-
-            const bounds = L.latLngBounds([
-                [restaurantLat, restaurantLng],
-                [deliveryLat, deliveryLng],
-            ]);
-            this.map.fitBounds(bounds, { padding: [50, 50] });
-
-            this.updateDistance(restaurantLat, restaurantLng, deliveryLat, deliveryLng);
         },
 
         updateRiderLocation(lat, lng) {
@@ -508,24 +681,49 @@ function orderTracker(orderId) {
 
             const deliveryLat = {{ $order->delivery_lat }};
             const deliveryLng = {{ $order->delivery_lng }};
-            this.updateDistance(lat, lng, deliveryLat, deliveryLng);
+
+            clearTimeout(this.routeDebounce);
+            this.routeDebounce = setTimeout(() => {
+                this.redrawRouteFromRider(lat, lng, deliveryLat, deliveryLng);
+            }, 1000);
         },
 
-        updateDistance(fromLat, fromLng, toLat, toLng) {
-            const R = 6371;
-            const dLat = (toLat - fromLat) * Math.PI / 180;
-            const dLng = (toLng - fromLng) * Math.PI / 180;
-            const a = Math.sin(dLat/2)**2 +
-                      Math.cos(fromLat * Math.PI/180) * Math.cos(toLat * Math.PI/180) *
-                      Math.sin(dLng/2)**2;
-            const distance = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        async redrawRouteFromRider(fromLat, fromLng, toLat, toLng) {
+            if (this.routeLine) {
+                this.map.removeLayer(this.routeLine);
+                this.routeLine = null;
+            }
 
-            this.distanceText = distance < 1
-                ? Math.round(distance * 1000) + ' m'
-                : distance.toFixed(1) + ' km';
+            try {
+                const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+                const res = await fetch(url);
+                const data = await res.json();
 
-            const etaMinutes = Math.round((distance / 20) * 60);
-            this.etaText = etaMinutes < 1 ? 'Arriving' : etaMinutes + ' min';
+                if (!data.routes || data.routes.length === 0) return;
+
+                const route = data.routes[0];
+                const coordinates = route.geometry.coordinates;
+                const latlngs = coordinates.map(coord => [coord[1], coord[0]]);
+
+                this.routeLine = L.polyline(latlngs, {
+                    color: '#f97316',
+                    weight: 4,
+                    opacity: 0.7,
+                    lineJoin: 'round',
+                    lineCap: 'round',
+                }).addTo(this.map);
+
+                const distanceKm = route.distance / 1000;
+                const durationMin = Math.round(route.duration / 60);
+
+                this.distanceText = distanceKm < 1
+                    ? Math.round(distanceKm * 1000) + ' m'
+                    : distanceKm.toFixed(1) + ' km';
+
+                this.etaText = durationMin < 1 ? 'Arriving' : durationMin + ' min';
+            } catch (err) {
+                console.warn('Route redraw failed:', err);
+            }
         },
 
         get statusLabel() {
@@ -566,46 +764,93 @@ function chatBox(orderId) {
         newMessage: '',
         unread: 0,
         currentUserId: {{ auth()->id() }},
+        currentUserName: '{{ auth()->user()->name }}',
+        currentUserAvatar: '{{ auth()->user()->avatar_url }}',
+        currentUserInitials: '{{ auth()->user()->initials }}',
+        currentUserAvatarColor: '{{ auth()->user()->avatar_color }}',
         channel: null,
         typingName: '',
         typingTimeout: null,
         isTypingSent: false,
         isAtBottom: true,
+        listenerAttached: false,
 
         init() {
+            console.log('💬 chatBox.init() for order:', orderId);
+
+            if (window.Echo) {
+                window.Echo.leave(`order.${orderId}.chat`);
+                console.log('🚪 Left old channel');
+            }
+
             this.loadMessages();
 
-            this.channel = window.Echo.private(`order.${orderId}.chat`)
-                .listen('.message.sent', (e) => {
-                    if (e.sender_id === this.currentUserId) return;
+            setTimeout(() => {
+                this.subscribeToChat(orderId);
+            }, 300);
+        },
 
-                    e.status = 'received';
-                    this.messages.push(e);
+        subscribeToChat(orderId) {
+            if (this.listenerAttached) return;
 
-                    if (!this.isOpen || !this.isAtBottom) {
-                        this.unread++;
-                    } else {
-                        this.markAsRead();
+            if (typeof window.Echo === 'undefined') {
+                console.error('❌ Echo not available');
+                return;
+            }
+
+            console.log('🔌 Subscribing to order.' + orderId + '.chat');
+
+            const chatChannel = window.Echo.private(`order.${orderId}.chat`);
+
+            chatChannel.subscribed(() => {
+                console.log('✅ SUBSCRIBED to order.' + orderId + '.chat');
+            });
+
+            chatChannel.error((err) => {
+                console.error('❌ Subscription error:', err);
+            });
+
+            chatChannel.listen('.message.sent', (e) => {
+                console.log('🔥 MESSAGE RECEIVED:', e);
+
+                if (e.sender_id === this.currentUserId) {
+                    console.log('⏭️ Skipping own message');
+                    return;
+                }
+
+                e.status = 'received';
+                this.messages.push(e);
+                console.log('✅ Pushed. Total:', this.messages.length);
+
+                if (!this.isOpen || !this.isAtBottom) {
+                    this.unread++;
+                } else {
+                    this.markAsRead();
+                }
+
+                if (this.isAtBottom) {
+                    this.$nextTick(() => this.scrollToBottom());
+                }
+            });
+
+            chatChannel.listen('.user.typing', (e) => {
+                if (e.user_id === this.currentUserId) return;
+                this.typingName = e.is_typing ? e.user_name : '';
+            });
+
+            chatChannel.listen('.messages.read', (e) => {
+                if (e.reader_id === this.currentUserId) return;
+                this.messages.forEach(m => {
+                    if (e.message_ids.includes(m.id) && m.sender_id === this.currentUserId) {
+                        m.status = 'seen';
+                        m.read_at = e.read_at;
                     }
-
-                    if (this.isAtBottom) {
-                        this.scrollToBottom();
-                    }
-                })
-                .listen('.user.typing', (e) => {
-                    if (e.user_id === this.currentUserId) return;
-                    this.typingName = e.is_typing ? e.user_name : '';
-                })
-                .listen('.messages.read', (e) => {
-                    if (e.reader_id === this.currentUserId) return;
-
-                    this.messages.forEach(m => {
-                        if (e.message_ids.includes(m.id) && m.sender_id === this.currentUserId) {
-                            m.status = 'seen';
-                            m.read_at = e.read_at;
-                        }
-                    });
                 });
+            });
+
+            this.channel = chatChannel;
+            this.listenerAttached = true;
+            console.log('🎯 Listener attached');
         },
 
         statusLabel(msg) {
@@ -652,7 +897,10 @@ function chatBox(orderId) {
             const optimisticMsg = {
                 id: optimisticId,
                 sender_id: this.currentUserId,
-                sender_name: '{{ auth()->user()->name }}',
+                sender_name: this.currentUserName,
+                sender_avatar_url: this.currentUserAvatar,
+                sender_initials: this.currentUserInitials,
+                sender_avatar_color: this.currentUserAvatarColor,
                 body: body,
                 created_at: new Date().toISOString(),
                 created_at_human: 'just now',

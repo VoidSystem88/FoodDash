@@ -171,16 +171,34 @@ class AvailabilityController extends Controller
         return back()->with('success', 'Profile updated.');
     }
 
-    public function toggleOnline(Request $request)
+        public function toggleOnline(Request $request)
     {
         $rider = auth()->user()->rider;
 
+        // ⭐ CHECK kung may active order
+        if ($rider->is_online) {
+            $hasActiveOrder = \App\Models\Order::where('rider_id', $rider->id)
+                ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
+                ->exists();
+
+            if ($hasActiveOrder) {
+                return response()->json([
+                    'ok' => false,
+                    'is_online' => true,   // Force online
+                    'is_available' => $rider->is_available,
+                    'message' => 'Cannot go offline — you have an active delivery. Complete it first.',
+                ], 422);
+            }
+        }
+
+        // ⭐ Toggle online status
         $rider->update([
             'is_online' => !$rider->is_online,
-            'is_available' => !$rider->is_online,
+            'is_available' => !$rider->is_online,   // Toggle din availability
         ]);
 
         return response()->json([
+            'ok' => true,
             'is_online' => $rider->is_online,
             'is_available' => $rider->is_available,
         ]);

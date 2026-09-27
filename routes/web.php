@@ -14,17 +14,29 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Customer\FavoriteController;
 
+// ============================================
+// ROOT REDIRECT
+// ============================================
 Route::get('/', function () {
-    return redirect()->route('login');
+    // Kung naka-login, punta sa dashboard
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+
+    // Kung guest, punta sa restaurants browse
+    return redirect()->route('customer.restaurants');
 });
 
 // ============================================
-// CUSTOMER ROUTES
+// PUBLIC ROUTES (Guest Access - Browse Only)
+// ============================================
+Route::get('/restaurants', [\App\Http\Controllers\Customer\RestaurantController::class, 'index'])->name('customer.restaurants');
+Route::get('/restaurants/{restaurant}', [\App\Http\Controllers\Customer\RestaurantController::class, 'show'])->name('customer.restaurants.show');
+
+// ============================================
+// CUSTOMER ROUTES (Auth Required)
 // ============================================
 Route::middleware(['auth', 'role:customer'])->group(function () {
-    Route::get('/restaurants', [\App\Http\Controllers\Customer\RestaurantController::class, 'index'])->name('customer.restaurants');
-    Route::get('/restaurants/{restaurant}', [\App\Http\Controllers\Customer\RestaurantController::class, 'show'])->name('customer.restaurants.show');
-
     // Favorites
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('customer.favorites');
     Route::post('/favorites/{restaurant}/toggle', [FavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
@@ -69,6 +81,7 @@ Route::middleware(['auth', 'role:restaurant'])->prefix('restaurant')->group(func
 
     Route::resource('menu-items', MenuItemController::class);
     Route::patch('/menu-items/{menuItem}/toggle', [MenuItemController::class, 'toggleAvailability'])->name('menu-items.toggle');
+
     // Image uploads
     Route::post('/profile/cover', [RestaurantOrderController::class, 'uploadCover'])->name('restaurant.profile.cover');
     Route::delete('/profile/cover', [RestaurantOrderController::class, 'removeCover'])->name('restaurant.profile.cover.remove');
@@ -90,11 +103,16 @@ Route::middleware(['auth', 'role:rider'])->prefix('rider')->group(function () {
     Route::patch('/orders/{order}/status', [RiderOrderController::class, 'updateStatus'])->name('rider.orders.status');
     Route::post('/orders/{order}/payment', [RiderOrderController::class, 'recordPayment'])->name('rider.orders.payment');
 
+    // ⭐ NEW: Get offer details (para sa global popup)
+    Route::get('/offers/{order}/details', [RiderOrderController::class, 'showOffer'])->name('rider.offers.details');
+
     Route::get('/orders/{order}/chat', [ChatController::class, 'index'])->name('rider.chat.index');
     Route::post('/orders/{order}/chat', [ChatController::class, 'store'])->name('rider.chat.store');
     Route::get('/orders/{order}/chat/unread', [ChatController::class, 'unread'])->name('rider.chat.unread');
     Route::post('/orders/{order}/chat/typing', [ChatController::class, 'typing'])->name('rider.chat.typing');
     Route::post('/orders/{order}/chat/mark-read', [ChatController::class, 'markRead'])->name('rider.chat.mark-read');
+    Route::get('/offers/active', [RiderOrderController::class, 'activeOffers'])->name('rider.offers.active');
+    Route::get('/offers/{order}/details', [RiderOrderController::class, 'showOffer'])->name('rider.offers.details');
 });
 
 // ============================================
@@ -110,6 +128,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::patch('/users/{user}/approve', [AccountController::class, 'approve'])->name('admin.users.approve');
     Route::patch('/users/{user}/disable', [AccountController::class, 'disable'])->name('admin.users.disable');
     Route::delete('/users/{user}', [AccountController::class, 'destroy'])->name('admin.users.destroy');
+
+    // ============================================
+    // ADMIN SETTINGS (Branding + System Config)
+    // ============================================
+    Route::get('/settings', function () {
+        return view('admin.settings');
+    })->name('admin.settings');
+
     Route::post('/config', [ConfigController::class, 'update'])->name('admin.config.update');
     Route::post('/config/logo', [ConfigController::class, 'uploadLogo'])->name('admin.config.logo.upload');
     Route::delete('/config/logo', [ConfigController::class, 'removeLogo'])->name('admin.config.logo.remove');

@@ -19,7 +19,6 @@
                         </div>
                     @endif
 
-                    {{-- Status Dot --}}
                     <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white"
                           :class="online ? 'bg-green-400' : 'bg-gray-400'"></span>
                 </div>
@@ -30,17 +29,31 @@
                 </div>
             </div>
 
-            {{-- Online Toggle --}}
-            <button @click="toggleOnline()"
-                    :disabled="toggling"
-                    :class="online ? 'bg-white text-orange-600' : 'bg-white/20 text-white'"
-                    class="px-5 py-2.5 rounded-full font-semibold text-sm shadow-md hover:scale-105 active:scale-95 transition transform disabled:opacity-50 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full" :class="online ? 'bg-green-500 animate-pulse' : 'bg-gray-400'"></span>
-                <span x-text="online ? 'Online' : 'Offline'"></span>
-            </button>
+                        @if ($currentOrder)
+                {{-- May active order — disabled toggle --}}
+                <button type="button"
+                        disabled
+                        title="Complete your active delivery first"
+                        class="px-5 py-2.5 rounded-full font-semibold text-sm shadow-md opacity-70 cursor-not-allowed bg-white text-orange-600 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span>Online</span>
+                    <svg class="w-3.5 h-3.5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </button>
+            @else
+                {{-- Walang active order — normal toggle --}}
+                <button @click="toggleOnline()"
+                        :disabled="toggling"
+                        :class="online ? 'bg-white text-orange-600' : 'bg-white/20 text-white'"
+                        class="px-5 py-2.5 rounded-full font-semibold text-sm shadow-md hover:scale-105 active:scale-95 transition transform disabled:opacity-50 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full" :class="online ? 'bg-green-500 animate-pulse' : 'bg-gray-400'"></span>
+                    <span x-text="online ? 'Online' : 'Offline'"></span>
+                </button>
+            @endif
         </div>
 
-        {{-- Mini Stats Row --}}
         <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/20">
             <div>
                 <p class="text-xs text-white/80">Today's Deliveries</p>
@@ -57,123 +70,194 @@
     {{-- STAT CARDS --}}
     {{-- ============================================ --}}
     <div class="grid grid-cols-3 gap-3 mb-6">
-        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:shadow-md transition">
+        <div class="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 hover:shadow-md transition">
             <div class="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-950/40 flex items-center justify-center mb-2">
                 <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Completed</p>
-            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ $completedToday }}</p>
+            <p class="text-xs text-gray-500 dark:text-neutral-400">Completed</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-neutral-100">{{ $completedToday }}</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:shadow-md transition">
+        <div class="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 hover:shadow-md transition">
             <div class="w-9 h-9 rounded-lg bg-green-100 dark:bg-green-950/40 flex items-center justify-center mb-2">
                 <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Earnings</p>
+            <p class="text-xs text-gray-500 dark:text-neutral-400">Earnings</p>
             <p class="text-xl font-bold text-green-600 dark:text-green-400">₱{{ number_format($earningsToday, 0) }}</p>
         </div>
 
-        <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:shadow-md transition">
+        <div class="bg-white dark:bg-dark-800 rounded-xl border border-gray-200 dark:border-dark-700 p-4 hover:shadow-md transition">
             <div class="w-9 h-9 rounded-lg flex items-center justify-center mb-2"
-                 :class="online ? 'bg-green-100 dark:bg-green-950/40' : 'bg-gray-100 dark:bg-gray-800'">
-                <svg class="w-5 h-5" :class="online ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 :class="online ? 'bg-green-100 dark:bg-green-950/40' : 'bg-gray-100 dark:bg-dark-850'">
+                <svg class="w-5 h-5" :class="online ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-neutral-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
             </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Status</p>
-            <p class="text-sm font-bold mt-1" :class="online ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+            <p class="text-xs text-gray-500 dark:text-neutral-400">Status</p>
+            <p class="text-sm font-bold mt-1" :class="online ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-neutral-400'"
                x-text="online ? 'Ready' : 'Offline'"></p>
         </div>
     </div>
 
     {{-- ============================================ --}}
-    {{-- INCOMING OFFER (Animated) --}}
+    {{-- NEW: AVAILABLE OFFERS (Stacked, hindi popup) --}}
     {{-- ============================================ --}}
-    <template x-if="currentOffer">
-        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 mb-6 border-2 border-orange-500 animate-pulse-slow relative overflow-hidden">
-            {{-- Blinking indicator --}}
-            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-orange-500 animate-pulse"></div>
-
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center animate-bounce">
-                    <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="font-bold text-lg text-gray-900 dark:text-white">New Delivery Offer</h2>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Accept within <span class="font-bold text-red-600 dark:text-red-400" x-text="secondsLeft"></span>s</p>
-                </div>
+    <template x-if="offers.length > 0">
+        <div class="mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="font-bold text-gray-900 dark:text-neutral-100 flex items-center gap-2">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                    </span>
+                    Available Offers
+                    <span class="text-xs bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded-full font-bold"
+                          x-text="offers.length"></span>
+                </h2>
+                <p class="text-xs text-gray-500 dark:text-neutral-400">Pumili ng order</p>
             </div>
 
-            {{-- Progress bar --}}
-            <div class="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5 mb-4 overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all duration-1000"
-                     :style="`width: ${(secondsLeft / currentOffer.expires_in) * 100}%`"></div>
+            <div class="space-y-3">
+                <template x-for="(offer, index) in offers" :key="offer.order_id">
+                    <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-md border-2 border-orange-300 dark:border-orange-800 overflow-hidden transition-all hover:shadow-lg">
+
+                        {{-- PROGRESS BAR --}}
+                        <div class="h-1.5 bg-gray-100 dark:bg-dark-850 overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-1000"
+                                 :style="`width: ${(offer.secondsLeft / offer.expires_in) * 100}%`"></div>
+                        </div>
+
+                        {{-- HEADER --}}
+                        <div class="px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center">
+                                        <span class="text-base">🚴</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm" x-text="offer.restaurant"></p>
+                                        <p class="text-[10px] text-white/80">Delivery Offer</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-white/80">Expires in</p>
+                                    <p class="text-base font-bold" x-text="offer.secondsLeft + 's'"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- BODY --}}
+                        <div class="p-4">
+                                            {{-- PICKUP --}}
+                <div class="flex gap-4 mb-5 pb-5 border-b border-gray-100 dark:border-dark-700">
+                    <div class="flex-shrink-0">
+                        @if ($currentOrder->restaurant->profile_image_url)
+                            <img src="{{ $currentOrder->restaurant->profile_image_url }}"
+                                 alt="{{ $currentOrder->restaurant->name }}"
+                                 class="w-14 h-14 rounded-xl object-cover border-2 border-red-300 dark:border-red-800 shadow-sm">
+                        @else
+                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white text-xl font-bold shadow-sm">
+                                {{ strtoupper(substr($currentOrder->restaurant->name, 0, 1)) }}
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-gray-500 dark:text-neutral-400 uppercase tracking-wide font-medium mb-1">Pickup From</p>
+                        <p class="font-bold text-gray-900 dark:text-neutral-100">{{ $currentOrder->restaurant->name }}</p>
+                        <p class="text-sm text-gray-600 dark:text-neutral-400 mt-0.5">{{ $currentOrder->restaurant->address }}</p>
+
+                        <div class="flex items-center gap-2 mt-3 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
+                            <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span class="text-xs font-medium text-gray-700 dark:text-neutral-300">Pay restaurant:</span>
+                            <span class="text-sm font-bold text-red-600 dark:text-red-400">₱{{ number_format($currentOrder->restaurant_earnings ?? $currentOrder->food_cost, 2) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                            {{-- DROPOFF --}}
+                            <div class="flex items-start gap-2 mb-3">
+                                <div class="w-7 h-7 rounded-lg bg-green-50 dark:bg-green-950/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <span class="text-xs">📍</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-[10px] text-gray-500 dark:text-neutral-400 uppercase tracking-wide font-medium">Deliver to</p>
+                                    <p class="text-sm text-gray-700 dark:text-neutral-300 line-clamp-2" x-text="offer.delivery_address"></p>
+                                </div>
+                            </div>
+
+                            {{-- STATS --}}
+                            <div class="grid grid-cols-3 gap-2 bg-gray-50 dark:bg-dark-850 rounded-xl p-3 mb-3 text-center">
+                                <div>
+                                    <p class="text-[10px] text-gray-500 dark:text-neutral-400">Food Cost</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-neutral-100" x-text="'₱' + offer.food_cost"></p>
+                                </div>
+                                <div class="border-x border-gray-200 dark:border-dark-600">
+                                    <p class="text-[10px] text-gray-500 dark:text-neutral-400">Delivery Fee</p>
+                                    <p class="text-sm font-bold text-green-600 dark:text-green-400" x-text="'₱' + offer.delivery_fee"></p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-gray-500 dark:text-neutral-400">Items</p>
+                                    <p class="text-sm font-bold text-orange-600 dark:text-orange-400" x-text="offer.items_count"></p>
+                                </div>
+                            </div>
+
+                            {{-- ERROR --}}
+                            <template x-if="error">
+                                <div class="mb-3 p-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300 rounded-lg text-xs"
+                                     x-text="error"></div>
+                            </template>
+
+                            {{-- ACTIONS --}}
+                            <div class="flex gap-2">
+                                <button @click="declineOffer(offer.order_id)"
+                                        type="button"
+                                        :disabled="processing"
+                                        class="flex-1 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-neutral-300 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-dark-850 transition disabled:opacity-50">
+                                    Decline
+                                </button>
+                                <button @click="acceptOffer(offer.order_id)"
+                                        type="button"
+                                        :disabled="processing"
+                                        :class="processing
+                                                ? 'opacity-50 cursor-not-allowed'
+                                                : 'hover:from-orange-600 hover:to-orange-700 active:scale-98'"
+                                        class="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2.5 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition transform flex items-center justify-center gap-2">
+                                    <template x-if="!processing">
+                                        <span class="flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            Accept
+                                        </span>
+                                    </template>
+                                    <template x-if="processing">
+                                        <span>Processing...</span>
+                                    </template>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
             </div>
-
-            <div class="space-y-3 text-sm mb-4">
-                <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/40 flex items-center justify-center flex-shrink-0">
-                        <span class="text-base">🏪</span>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Pickup</p>
-                        <p class="font-semibold text-gray-900 dark:text-white" x-text="currentOffer.restaurant"></p>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-950/40 flex items-center justify-center flex-shrink-0">
-                        <span class="text-base">📍</span>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Drop-off</p>
-                        <p class="font-semibold text-gray-900 dark:text-white text-sm" x-text="currentOffer.delivery_address"></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-4 grid grid-cols-3 gap-2 text-center">
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Food</p>
-                    <p class="text-sm font-bold text-gray-900 dark:text-white">₱<span x-text="currentOffer.food_cost"></span></p>
-                </div>
-                <div class="border-x border-gray-200 dark:border-gray-700">
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Delivery Fee</p>
-                    <p class="text-sm font-bold text-green-600 dark:text-green-400">₱<span x-text="currentOffer.delivery_fee"></span></p>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Collect</p>
-                    <p class="text-sm font-bold text-orange-600 dark:text-orange-400">₱<span x-text="currentOffer.total_amount"></span></p>
-                </div>
-            </div>
-
-            <button @click="acceptOffer()"
-                    class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3.5 rounded-xl hover:from-orange-600 hover:to-orange-700 font-bold shadow-lg hover:shadow-xl active:scale-98 transition transform flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                Accept Delivery
-            </button>
         </div>
     </template>
 
     {{-- ============================================ --}}
-    {{-- CURRENT ORDER --}}
+    {{-- CURRENT ACTIVE ORDER --}}
     {{-- ============================================ --}}
     @if ($currentOrder)
-        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-lg mb-6 overflow-hidden transition-colors">
-
-            {{-- ORDER HEADER --}}
+        <div class="bg-white dark:bg-dark-800 rounded-2xl shadow-lg mb-6 overflow-hidden transition-colors">
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 text-white">
                 <div class="flex justify-between items-center">
                     <div>
@@ -185,7 +269,6 @@
                     </span>
                 </div>
 
-                {{-- Status Timeline --}}
                 <div class="flex items-center gap-1 mt-3">
                     @php
                         $stages = ['rider_assigned', 'picked_up', 'out_for_delivery'];
@@ -203,45 +286,76 @@
                 </div>
             </div>
 
-            {{-- BODY --}}
             <div class="p-6">
-
-                {{-- PICKUP --}}
-                <div class="flex gap-4 mb-5 pb-5 border-b border-gray-100 dark:border-gray-800">
-                    <div class="w-11 h-11 rounded-xl bg-red-50 dark:bg-red-950/40 flex items-center justify-center flex-shrink-0">
-                        <span class="text-xl">🏪</span>
+                                {{-- PICKUP --}}
+                <div class="flex gap-4 mb-5 pb-5 border-b border-gray-100 dark:border-dark-700">
+                    <div class="relative flex-shrink-0">
+                        @if ($currentOrder->restaurant->profile_image_url)
+                            <img src="{{ $currentOrder->restaurant->profile_image_url }}"
+                                 alt="{{ $currentOrder->restaurant->name }}"
+                                 class="w-12 h-12 rounded-xl object-cover border-2 border-red-300 dark:border-red-800 shadow-sm">
+                        @else
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white text-lg font-bold shadow-sm">
+                                {{ strtoupper(substr($currentOrder->restaurant->name, 0, 1)) }}
+                            </div>
+                        @endif
+                        {{-- Badge --}}
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-xs border-2 border-white dark:border-dark-800 shadow-sm">
+                            🏪
+                        </div>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mb-0.5">Pickup From</p>
-                        <p class="font-bold text-gray-900 dark:text-white">{{ $currentOrder->restaurant->name }}</p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">{{ $currentOrder->restaurant->address }}</p>
+                        <p class="text-xs text-gray-500 dark:text-neutral-400 uppercase tracking-wide font-medium mb-0.5">Pickup From</p>
+                        <p class="font-bold text-gray-900 dark:text-neutral-100">{{ $currentOrder->restaurant->name }}</p>
+                        <p class="text-sm text-gray-600 dark:text-neutral-400 mt-0.5">{{ $currentOrder->restaurant->address }}</p>
 
                         <div class="flex items-center gap-2 mt-3 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
                             <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
-                            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Pay restaurant:</span>
-                            <span class="text-sm font-bold text-red-600 dark:text-red-400">₱{{ number_format($currentOrder->food_cost, 2) }}</span>
+                            <span class="text-xs font-medium text-gray-700 dark:text-neutral-300">Pay restaurant:</span>
+                            <span class="text-sm font-bold text-red-600 dark:text-red-400">₱{{ number_format($currentOrder->restaurant_earnings ?? $currentOrder->food_cost, 2) }}</span>
                         </div>
                     </div>
                 </div>
 
-                {{-- DROP-OFF --}}
-                <div class="flex gap-4 mb-5 pb-5 border-b border-gray-100 dark:border-gray-800">
-                    <div class="w-11 h-11 rounded-xl bg-green-50 dark:bg-green-950/40 flex items-center justify-center flex-shrink-0">
-                        <span class="text-xl">📍</span>
+                                {{-- DROP-OFF --}}
+                <div class="flex gap-4 mb-5 pb-5 border-b border-gray-100 dark:border-dark-700">
+                    <div class="flex-shrink-0">
+                        @php
+                            $customer = $currentOrder->customer;
+                        @endphp
+
+                        @if ($customer && $customer->avatar_url)
+                            <img src="{{ $customer->avatar_url }}"
+                                 alt="{{ $customer->name }}"
+                                 class="w-14 h-14 rounded-xl object-cover border-2 border-green-300 dark:border-green-800 shadow-sm">
+                        @else
+                            <div class="w-14 h-14 rounded-xl {{ $customer?->avatar_color ?? 'bg-green-500' }} flex items-center justify-center text-white text-xl font-bold shadow-sm">
+                                {{ $customer?->initials ?? '?' }}
+                            </div>
+                        @endif
                     </div>
+
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mb-0.5">Deliver To</p>
-                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ $currentOrder->delivery_address }}</p>
+                        <p class="text-xs text-gray-500 dark:text-neutral-400 uppercase tracking-wide font-medium mb-1">Deliver To</p>
+
+                        @if ($customer)
+                            <p class="font-bold text-gray-900 dark:text-neutral-100">{{ $customer->name }}</p>
+                            @if ($customer->phone)
+                                <p class="text-xs text-gray-500 dark:text-neutral-400">📞 {{ $customer->phone }}</p>
+                            @endif
+                        @endif
+
+                        <p class="text-sm text-gray-600 dark:text-neutral-400 mt-0.5">{{ $currentOrder->delivery_address }}</p>
 
                         <div class="flex items-center gap-2 mt-3 bg-green-50 dark:bg-green-950/30 rounded-lg px-3 py-2">
                             <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
-                            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">Collect from customer:</span>
+                            <span class="text-xs font-medium text-gray-700 dark:text-neutral-300">Collect from customer:</span>
                             <span class="text-sm font-bold text-green-600 dark:text-green-400">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
                         </div>
                     </div>
@@ -249,12 +363,12 @@
 
                 {{-- ORDER ITEMS --}}
                 <div class="mb-5">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mb-2">Order Items</p>
-                    <div class="space-y-1.5 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+                    <p class="text-xs text-gray-500 dark:text-neutral-400 uppercase tracking-wide font-medium mb-2">Order Items</p>
+                    <div class="space-y-1.5 bg-gray-50 dark:bg-dark-850 rounded-xl p-3">
                         @foreach ($currentOrder->items as $item)
                             <div class="flex justify-between items-center text-sm">
-                                <span class="text-gray-700 dark:text-gray-300">
-                                    <span class="font-semibold text-gray-900 dark:text-white">{{ $item->quantity }}x</span>
+                                <span class="text-gray-700 dark:text-neutral-300">
+                                    <span class="font-semibold text-gray-900 dark:text-neutral-100">{{ $item->quantity }}x</span>
                                     {{ $item->name }}
                                 </span>
                             </div>
@@ -307,11 +421,10 @@
                 {{-- CHAT WITH CUSTOMER --}}
                 @if ($currentOrder->canChat())
                     <div x-data="chatBox({{ $currentOrder->id }})"
-                         x-init="init()"
-                         class="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+     x-init="init()"   ← IMPORTANT
+     class="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
 
-                        {{-- HEADER --}}
-                        <div class="bg-gray-50 dark:bg-gray-800 px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                        <div class="bg-gray-50 dark:bg-dark-850 px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-700 transition"
                              @click="isOpen = !isOpen">
                             <div class="flex items-center gap-3">
                                 <div class="w-9 h-9 rounded-full bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center">
@@ -321,8 +434,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="font-semibold text-sm text-gray-900 dark:text-white">Chat with Customer</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">Customer • Order #{{ $currentOrder->id }}</p>
+                                    <p class="font-semibold text-sm text-gray-900 dark:text-neutral-100">Chat with Customer</p>
+                                    <p class="text-xs text-gray-500 dark:text-neutral-400">Order #{{ $currentOrder->id }}</p>
                                 </div>
                                 <template x-if="unread > 0">
                                     <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
@@ -337,55 +450,79 @@
                             </svg>
                         </div>
 
-                        {{-- CHAT BODY --}}
                         <div x-show="isOpen" x-cloak x-transition>
                             <div x-ref="messagesContainer"
                                  @scroll="onScroll()"
-                                 class="h-80 overflow-y-auto p-4 space-y-2 bg-gray-50 dark:bg-gray-800 scroll-smooth">
+                                 class="h-80 overflow-y-auto p-4 space-y-2 bg-gray-50 dark:bg-dark-850">
                                 <template x-if="loading">
-                                    <p class="text-center text-sm text-gray-500 dark:text-gray-400 py-4">Loading messages...</p>
+                                    <p class="text-center text-sm text-gray-500 dark:text-neutral-400 py-4">Loading messages...</p>
                                 </template>
 
                                 <template x-if="!loading && messages.length === 0">
                                     <div class="text-center py-8">
                                         <div class="text-4xl mb-2">💬</div>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">No messages yet</p>
-                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Say hi to your customer!</p>
+                                        <p class="text-sm text-gray-500 dark:text-neutral-400">No messages yet</p>
+                                        <p class="text-xs text-gray-400 dark:text-neutral-500 mt-1">Say hi to your customer!</p>
                                     </div>
                                 </template>
 
                                 <template x-for="msg in messages" :key="msg.id">
-                                    <div :class="msg.sender_id === currentUserId ? 'flex justify-end' : 'flex justify-start'"
-                                         class="chat-message">
-                                        <div :class="msg.sender_id === currentUserId
-                                                ? 'bg-orange-600 text-white rounded-br-none'
-                                                : 'bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-bl-none'"
-                                             class="max-w-[75%] px-3 py-2 rounded-2xl shadow-sm transition-all duration-200">
-                                            <p class="text-xs font-medium mb-0.5 opacity-75"
-                                               x-text="msg.sender_name"></p>
-                                            <p class="text-sm break-words whitespace-pre-wrap"
-                                               x-text="msg.body"></p>
-                                            <div class="flex items-center justify-end gap-1 mt-1">
-                                                <span class="text-[10px] opacity-60"
-                                                      x-text="msg.created_at_human"></span>
-                                                <template x-if="msg.sender_id === currentUserId">
-                                                    <span class="text-[11px] leading-none"
-                                                          :title="statusLabel(msg)"
-                                                          :class="msg.status === 'seen' ? 'text-blue-200 font-bold' : 'opacity-70'">
-                                                        <span x-show="msg.status === 'sent'">🕐</span>
-                                                        <span x-show="msg.status === 'delivered'">✓</span>
-                                                        <span x-show="msg.status === 'seen'">✓✓</span>
-                                                    </span>
-                                                </template>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
+    <div :class="msg.sender_id === currentUserId ? 'flex justify-end' : 'flex justify-start'"
+         class="chat-message gap-2 items-end">
+
+        {{-- ⭐ AVATAR — left side para sa kausap --}}
+        <template x-if="msg.sender_id !== currentUserId">
+            <div class="flex-shrink-0">
+                <template x-if="msg.sender_avatar_url">
+                    <img :src="msg.sender_avatar_url"
+                         :alt="msg.sender_name"
+                         class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
+                </template>
+                <template x-if="!msg.sender_avatar_url">
+                    <div :class="msg.sender_avatar_color || 'bg-gray-500'"
+                         class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
+                         x-text="msg.sender_initials || '?'"></div>
+                </template>
+            </div>
+        </template>
+
+        {{-- MESSAGE BUBBLE --}}
+        <div :class="msg.sender_id === currentUserId
+                ? 'bg-orange-600 text-white rounded-br-none'
+                : 'bg-white dark:bg-dark-850 text-gray-900 dark:text-neutral-100 border border-gray-200 dark:border-dark-700 rounded-bl-none'"
+             class="max-w-[75%] px-3 py-2 rounded-2xl shadow-sm transition-all duration-200">
+            <p class="text-xs font-medium mb-0.5 opacity-75"
+               x-text="msg.sender_name"></p>
+            <p class="text-sm break-words whitespace-pre-wrap"
+               x-text="msg.body"></p>
+            <div class="flex items-center justify-end gap-1 mt-1">
+                <span class="text-[10px] opacity-60"
+                      x-text="msg.created_at_human"></span>
+            </div>
+        </div>
+
+        {{-- ⭐ AVATAR — right side para sa sarili --}}
+        <template x-if="msg.sender_id === currentUserId">
+            <div class="flex-shrink-0">
+                <template x-if="msg.sender_avatar_url">
+                    <img :src="msg.sender_avatar_url"
+                         :alt="msg.sender_name"
+                         class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
+                </template>
+                <template x-if="!msg.sender_avatar_url">
+                    <div :class="msg.sender_avatar_color || 'bg-orange-500'"
+                         class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
+                         x-text="msg.sender_initials || '?'"></div>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>
 
                                 <template x-if="typingName">
-                                    <div class="flex justify-start chat-message">
-                                        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 px-3 py-2 rounded-2xl rounded-bl-none shadow-sm">
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1" x-text="typingName + ' is typing'"></p>
+                                    <div class="flex justify-start">
+                                        <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 px-3 py-2 rounded-2xl rounded-bl-none shadow-sm">
+                                            <p class="text-xs text-gray-500 dark:text-neutral-400 mb-1" x-text="typingName + ' is typing'"></p>
                                             <div class="flex gap-1">
                                                 <span class="typing-dot"></span>
                                                 <span class="typing-dot" style="animation-delay: 0.15s"></span>
@@ -396,16 +533,15 @@
                                 </template>
                             </div>
 
-                            <div class="border-t border-gray-200 dark:border-gray-700 p-3 bg-white dark:bg-gray-900">
+                            <div class="border-t border-gray-200 dark:border-dark-600 p-3 bg-white dark:bg-dark-800">
                                 <form @submit.prevent="sendMessage()" class="flex gap-2">
                                     <input type="text"
                                            x-model="newMessage"
                                            @input="onTypingInput()"
                                            @keydown.enter.prevent="sendMessage()"
-                                           @blur="stopTyping()"
                                            placeholder="Type a message..."
                                            maxlength="1000"
-                                           class="flex-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
+                                           class="flex-1 border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
                                     <button type="submit"
                                             :disabled="!newMessage.trim() || sending"
                                             :class="(!newMessage.trim() || sending) ? 'opacity-40 cursor-not-allowed' : 'hover:bg-orange-700'"
@@ -431,14 +567,29 @@
                                 <p class="text-xs text-green-700 dark:text-green-400">Complete this to finish the order</p>
                             </div>
                         </div>
-                        <div class="bg-white/60 dark:bg-gray-900/60 rounded-lg p-3 mb-3 text-xs space-y-1">
+
+                        @if ($currentOrder->commission_amount > 0)
+                            <div class="mb-3 p-2.5 bg-orange-100 dark:bg-orange-950/30 rounded-lg flex items-start gap-2">
+                                <svg class="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <p class="text-[11px] text-orange-800 dark:text-orange-300 leading-relaxed">
+                                    <strong>Platform fee:</strong> ₱{{ number_format($currentOrder->commission_amount, 2) }}
+                                    ({{ $currentOrder->commission_rate }}%) is deducted.
+                                    Bayaran mo sa restaurant ay <strong>₱{{ number_format($currentOrder->restaurant_earnings, 2) }}</strong> lamang.
+                                </p>
+                            </div>
+                        @endif
+
+                        <div class="bg-white/60 dark:bg-dark-800/60 rounded-lg p-3 mb-3 text-xs space-y-1">
                             <div class="flex justify-between">
-                                <span class="text-gray-600 dark:text-gray-400">Paid to restaurant</span>
-                                <span class="font-semibold text-red-600 dark:text-red-400">₱{{ number_format($currentOrder->food_cost, 2) }}</span>
+                                <span class="text-gray-600 dark:text-neutral-400">Paid to restaurant</span>
+                                <span class="font-semibold text-red-600 dark:text-red-400">₱{{ number_format($currentOrder->restaurant_earnings ?? $currentOrder->food_cost, 2) }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-600 dark:text-gray-400">Collected from customer</span>
-                                <span class="font-semibold text-gray-900 dark:text-white">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
+                                <span class="text-gray-600 dark:text-neutral-400">Collected from customer</span>
+                                <span class="font-semibold text-gray-900 dark:text-neutral-100">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
                             </div>
                             <div class="flex justify-between pt-2 border-t border-green-200 dark:border-green-800">
                                 <span class="font-semibold text-green-900 dark:text-green-300">Your earnings</span>
@@ -460,22 +611,24 @@
     {{-- ============================================ --}}
     {{-- WAITING / OFFLINE STATE --}}
     {{-- ============================================ --}}
+ 
+
     @if (!$currentOrder && $rider->is_online)
-        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-10 text-center transition-colors">
+        <div x-show="offers.length === 0" class="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-10 text-center transition-colors">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-950/40 mb-4">
                 <span class="w-3 h-3 rounded-full bg-green-500 animate-ping"></span>
             </div>
-            <h3 class="font-bold text-gray-900 dark:text-white mb-1">You're Online</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Waiting for delivery offers...</p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-4">Stay on this page to receive orders</p>
+            <h3 class="font-bold text-gray-900 dark:text-neutral-100 mb-1">You're Online</h3>
+            <p class="text-sm text-gray-500 dark:text-neutral-400">Waiting for delivery offers...</p>
+            <p class="text-xs text-gray-400 dark:text-neutral-500 mt-4">Offers will appear on this page automatically</p>
         </div>
     @elseif (!$rider->is_online)
-        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-10 text-center transition-colors">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
+        <div class="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-10 text-center transition-colors">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-dark-850 mb-4">
                 <span class="text-2xl">⚪</span>
             </div>
-            <h3 class="font-bold text-gray-900 dark:text-white mb-1">You're Offline</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Toggle online to start receiving delivery offers</p>
+            <h3 class="font-bold text-gray-900 dark:text-neutral-100 mb-1">You're Offline</h3>
+            <p class="text-sm text-gray-500 dark:text-neutral-400">Toggle online to start receiving delivery offers</p>
             <button @click="toggleOnline()"
                     class="mt-4 bg-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-orange-700 active:scale-98 transition transform">
                 Go Online
@@ -488,13 +641,6 @@
 
 @push('scripts')
 <style>
-    .chat-message {
-        animation: slideIn 0.25s ease-out;
-    }
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
     .typing-dot {
         display: inline-block;
         width: 6px;
@@ -507,14 +653,6 @@
         0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
         40% { transform: scale(1); opacity: 1; }
     }
-    .scroll-smooth { scroll-behavior: smooth; }
-    .animate-pulse-slow {
-        animation: pulseSlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    @keyframes pulseSlow {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.85; }
-    }
     .active\:scale-98:active {
         transform: scale(0.98);
     }
@@ -524,33 +662,107 @@ function riderDash(riderId) {
     return {
         online: {{ $rider->is_online ? 'true' : 'false' }},
         toggling: false,
-        currentOffer: null,
-        secondsLeft: 0,
+        offers: [],
+        processing: false,
+        error: '',
         timer: null,
 
         init() {
-            window.Echo.private(`rider.${riderId}`)
-                .listen('.delivery.offer', (e) => {
-                    this.currentOffer = e;
-                    this.secondsLeft = e.expires_in;
-                    this.startCountdown();
-                    this.playBeep();
-                });
+            if (typeof window.Echo !== 'undefined') {
+                window.Echo.private(`rider.${riderId}`)
+                    .listen('.delivery.offer', (e) => {
+                        this.loadOffer(parseInt(e.order_id));
+                    });
+            }
+
+            // Countdown ticker
+            this.timer = setInterval(() => {
+                this.tickCountdowns();
+            }, 1000);
+
+            // Load existing offers on page load
+            this.loadExistingOffers();
 
             if (this.online) {
                 this.startLocationSharing();
             }
         },
 
-        startCountdown() {
-            clearInterval(this.timer);
-            this.timer = setInterval(() => {
-                this.secondsLeft--;
-                if (this.secondsLeft <= 0) {
-                    clearInterval(this.timer);
-                    this.currentOffer = null;
+        async loadExistingOffers() {
+            // Refresh offers list on load (para sa mga nauna nang nag-offer)
+            try {
+                const res = await fetch('/rider/offers/active', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    }
+                });
+
+                if (!res.ok) return;
+
+                const data = await res.json();
+                if (data.offers) {
+                    this.offers = data.offers.map(o => ({
+                        ...o,
+                        food_cost: parseFloat(o.food_cost || 0).toFixed(2),
+                        delivery_fee: parseFloat(o.delivery_fee || 0).toFixed(2),
+                        total_amount: parseFloat(o.total_amount || 0).toFixed(2),
+                        secondsLeft: Math.floor(parseInt(o.secondsLeft) || 0),
+                        expires_in: Math.floor(parseInt(o.expires_in) || 120),
+                    }));
                 }
-            }, 1000);
+            } catch (err) {
+                // silent — baka walang route
+            }
+        },
+
+        async loadOffer(orderId) {
+            // Skip kung nasa list na
+            if (this.offers.find(o => o.order_id === orderId)) return;
+
+            try {
+                const res = await fetch(`/rider/offers/${orderId}/details`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    }
+                });
+
+                if (!res.ok) return;
+
+                const data = await res.json();
+                if (!data.ok) return;
+
+                const expiresIn = Math.floor(parseInt(data.offer.expires_in) || 120);
+
+                this.offers.push({
+                    order_id: parseInt(data.offer.order_id),
+                    radius_km: Math.floor(parseFloat(data.offer.radius_km) || 0),
+                    expires_in: expiresIn,
+                    secondsLeft: expiresIn,
+                    restaurant: data.offer.restaurant || '',
+                    restaurant_address: data.offer.restaurant_address || '',
+                    delivery_address: data.offer.delivery_address || '',
+                    food_cost: parseFloat(data.offer.food_cost || 0).toFixed(2),
+                    delivery_fee: parseFloat(data.offer.delivery_fee || 0).toFixed(2),
+                    total_amount: parseFloat(data.offer.total_amount || 0).toFixed(2),
+                    items_count: parseInt(data.offer.items_count) || 0,
+                    distance_km: data.offer.distance_km ? parseFloat(data.offer.distance_km).toFixed(2) : null,
+                });
+
+                this.playBeep();
+            } catch (err) {
+                console.error('Failed to load offer:', err);
+            }
+        },
+
+        tickCountdowns() {
+            if (this.offers.length === 0) return;
+
+            this.offers = this.offers.map(offer => {
+                offer.secondsLeft = Math.max(0, Math.floor(offer.secondsLeft) - 1);
+                return offer;
+            }).filter(offer => offer.secondsLeft > 0);
         },
 
         playBeep() {
@@ -567,8 +779,18 @@ function riderDash(riderId) {
             } catch (e) { /* silent */ }
         },
 
-        async toggleOnline() {
+                async toggleOnline() {
             if (this.toggling) return;
+
+            // ⭐ CHECK kung may active order
+            @if ($currentOrder)
+                // May active order — huwag payagan mag-offline
+                if (this.online) {
+                    alert('⚠️ Cannot go offline — you have an active delivery (Order #{{ $currentOrder->id }}). Complete it first.');
+                    return;
+                }
+            @endif
+
             this.toggling = true;
 
             try {
@@ -579,7 +801,17 @@ function riderDash(riderId) {
                         'Content-Type': 'application/json'
                     }
                 });
+
                 const data = await res.json();
+
+                if (!data.ok) {
+                    // Server rejected — may active order pala
+                    alert('⚠️ ' + (data.message || 'Cannot toggle status'));
+                    this.online = data.is_online;
+                    this.toggling = false;
+                    return;
+                }
+
                 this.online = data.is_online;
                 if (this.online) this.startLocationSharing();
             } catch (err) {
@@ -611,69 +843,146 @@ function riderDash(riderId) {
             setInterval(send, 10000);
         },
 
-        async acceptOffer() {
-            const res = await fetch(`/rider/orders/${this.currentOffer.order_id}/accept`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json'
-                }
-            });
+        async acceptOffer(orderId) {
+            if (this.processing) return;
+            this.processing = true;
+            this.error = '';
 
-            if (res.ok || res.redirected) {
-                alert('Order accepted! Proceed to the restaurant.');
-                location.href = '{{ route('rider.dashboard') }}';
-            } else {
-                alert('Offer expired or another rider accepted first.');
-                this.currentOffer = null;
+            try {
+                const res = await fetch(`/rider/orders/${orderId}/accept`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    }
+                });
+
+                const data = await res.json();
+
+                if (data.ok) {
+                    clearInterval(this.timer);
+                    window.location.href = '{{ route('rider.dashboard') }}';
+                } else {
+                    this.error = data.message || 'Could not accept offer.';
+                    this.processing = false;
+                    this.removeOffer(orderId);
+                }
+            } catch (err) {
+                console.error(err);
+                this.error = 'Network error. Please try again.';
+                this.processing = false;
             }
+        },
+
+        declineOffer(orderId) {
+            this.removeOffer(orderId);
+        },
+
+        removeOffer(orderId) {
+            this.offers = this.offers.filter(o => o.order_id !== orderId);
         }
     }
 }
 
 function chatBox(orderId) {
     return {
-        isOpen: true,
+        isOpen: false,
         loading: true,
         sending: false,
         messages: [],
         newMessage: '',
         unread: 0,
         currentUserId: {{ auth()->id() }},
+        currentUserName: '{{ auth()->user()->name }}',
+        currentUserAvatar: '{{ auth()->user()->avatar_url }}',
+        currentUserInitials: '{{ auth()->user()->initials }}',
+        currentUserAvatarColor: '{{ auth()->user()->avatar_color }}',
         channel: null,
         typingName: '',
         typingTimeout: null,
         isTypingSent: false,
         isAtBottom: true,
+        listenerAttached: false,
 
         init() {
+            console.log('💬 Rider chatBox.init() for order:', orderId);
+
+            // ⭐ LEAVE muna para walang lumang listener
+            if (window.Echo) {
+                window.Echo.leave(`order.${orderId}.chat`);
+                console.log('🚪 Left old channel');
+            }
+
             this.loadMessages();
 
-            this.channel = window.Echo.private(`order.${orderId}.chat`)
-                .listen('.message.sent', (e) => {
-                    if (e.sender_id === this.currentUserId) return;
-                    e.status = 'received';
-                    this.messages.push(e);
-                    if (!this.isOpen || !this.isAtBottom) {
-                        this.unread++;
-                    } else {
-                        this.markAsRead();
+            // ⭐ DELAY subscribe para siguradong cleared
+            setTimeout(() => {
+                this.subscribeToChat(orderId);
+            }, 300);
+        },
+
+        subscribeToChat(orderId) {
+            if (this.listenerAttached) return;
+
+            if (typeof window.Echo === 'undefined') {
+                console.error('❌ Echo not available');
+                return;
+            }
+
+            console.log('🔌 Subscribing to order.' + orderId + '.chat');
+
+            const chatChannel = window.Echo.private(`order.${orderId}.chat`);
+
+            chatChannel.subscribed(() => {
+                console.log('✅ SUBSCRIBED to order.' + orderId + '.chat');
+            });
+
+            chatChannel.error((err) => {
+                console.error('❌ Subscription error:', err);
+            });
+
+            chatChannel.listen('.message.sent', (e) => {
+                console.log('🔥 MESSAGE RECEIVED:', e);
+
+                if (e.sender_id === this.currentUserId) {
+                    console.log('⏭️ Skipping own message');
+                    return;
+                }
+
+                e.status = 'received';
+                this.messages.push(e);
+                console.log('✅ Pushed. Total:', this.messages.length);
+
+                if (!this.isOpen || !this.isAtBottom) {
+                    this.unread++;
+                } else {
+                    this.markAsRead();
+                }
+
+                if (this.isAtBottom) {
+                    this.$nextTick(() => this.scrollToBottom());
+                }
+            });
+
+            chatChannel.listen('.user.typing', (e) => {
+                if (e.user_id === this.currentUserId) return;
+                this.typingName = e.is_typing ? e.user_name : '';
+            });
+
+            chatChannel.listen('.messages.read', (e) => {
+                if (e.reader_id === this.currentUserId) return;
+                this.messages.forEach(m => {
+                    if (e.message_ids.includes(m.id) && m.sender_id === this.currentUserId) {
+                        m.status = 'seen';
+                        m.read_at = e.read_at;
                     }
-                    if (this.isAtBottom) this.scrollToBottom();
-                })
-                .listen('.user.typing', (e) => {
-                    if (e.user_id === this.currentUserId) return;
-                    this.typingName = e.is_typing ? e.user_name : '';
-                })
-                .listen('.messages.read', (e) => {
-                    if (e.reader_id === this.currentUserId) return;
-                    this.messages.forEach(m => {
-                        if (e.message_ids.includes(m.id) && m.sender_id === this.currentUserId) {
-                            m.status = 'seen';
-                            m.read_at = e.read_at;
-                        }
-                    });
                 });
+            });
+
+            this.channel = chatChannel;
+            this.listenerAttached = true;
+            console.log('🎯 Listener attached');
         },
 
         statusLabel(msg) {
@@ -684,7 +993,7 @@ function chatBox(orderId) {
 
         async loadMessages() {
             try {
-                const res = await fetch('{{ $currentOrder ? route('rider.chat.index', $currentOrder) : '' }}', {
+                const res = await fetch('{{ route('rider.chat.index', $currentOrder ?? 0) }}', {
                     headers: {
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -708,6 +1017,7 @@ function chatBox(orderId) {
 
         async sendMessage() {
             if (!this.newMessage.trim() || this.sending) return;
+
             this.sending = true;
             const body = this.newMessage.trim();
             this.newMessage = '';
@@ -717,7 +1027,10 @@ function chatBox(orderId) {
             const optimisticMsg = {
                 id: optimisticId,
                 sender_id: this.currentUserId,
-                sender_name: '{{ auth()->user()->name }}',
+                sender_name: this.currentUserName,
+                sender_avatar_url: this.currentUserAvatar,
+                sender_initials: this.currentUserInitials,
+                sender_avatar_color: this.currentUserAvatarColor,
                 body: body,
                 created_at: new Date().toISOString(),
                 created_at_human: 'just now',
@@ -727,7 +1040,7 @@ function chatBox(orderId) {
             this.scrollToBottom();
 
             try {
-                const res = await fetch('{{ $currentOrder ? route('rider.chat.store', $currentOrder) : '' }}', {
+                const res = await fetch('{{ route('rider.chat.store', $currentOrder ?? 0) }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -771,7 +1084,7 @@ function chatBox(orderId) {
 
         async sendTyping(isTyping) {
             try {
-                await fetch('{{ $currentOrder ? route('rider.chat.typing', $currentOrder) : '' }}', {
+                await fetch('{{ route('rider.chat.typing', $currentOrder ?? 0) }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -785,7 +1098,7 @@ function chatBox(orderId) {
 
         async markAsRead() {
             try {
-                await fetch('{{ $currentOrder ? route('rider.chat.mark-read', $currentOrder) : '' }}', {
+                await fetch('{{ route('rider.chat.mark-read', $currentOrder ?? 0) }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -817,3 +1130,4 @@ function chatBox(orderId) {
 }
 </script>
 @endpush
+

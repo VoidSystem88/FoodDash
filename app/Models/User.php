@@ -20,6 +20,8 @@ class User extends Authenticatable
         'role',
         'status',
         'phone',
+        'avatar',           
+        'last_seen_at',
         'otp_code',
         'otp_expires_at',
         'otp_verified_at',

@@ -39,71 +39,104 @@ class ChatController extends Controller
             broadcast(new MessagesRead($order->id, $request->user()->id, $readIds));
         }
 
-        $messages = $order->messages()->with('sender:id,name,role')->get();
+        $messages = $order->messages()->with('sender:id,name,role,avatar')->get();
 
-        return response()->json([
-            'messages' => $messages->map(fn($m) => [
-                'id' => $m->id,
-                'sender_id' => $m->sender_id,
-                'sender_name' => $m->sender->name,
-                'sender_role' => $m->sender->role,
-                'body' => $m->body,
-                'created_at' => $m->created_at->toIso8601String(),
-                'created_at_human' => $m->created_at->diffForHumans(),
-                'delivered_at' => $m->delivered_at?->toIso8601String(),
-                'read_at' => $m->read_at?->toIso8601String(),
-            ]),
-        ]);
+return response()->json([
+    'messages' => $messages->map(fn($m) => [
+        'id' => $m->id,
+        'sender_id' => $m->sender_id,
+        'sender_name' => $m->sender->name,
+        'sender_role' => $m->sender->role,
+        'sender_avatar_url' => $m->sender->avatar_url,      // ← DAPAT
+        'sender_initials' => $m->sender->initials,          // ← DAPAT
+        'sender_avatar_color' => $m->sender->avatar_color,  // ← DAPAT
+        'body' => $m->body,
+        'created_at' => $m->created_at->toIso8601String(),
+        'created_at_human' => $m->created_at->diffForHumans(),
+        'delivered_at' => $m->delivered_at?->toIso8601String(),
+        'read_at' => $m->read_at?->toIso8601String(),
+    ]),
+]);
     }
 
     /**
      * Send a new message.
      */
     public function store(Request $request, Order $order)
-    {
-        $this->authorizeChat($request, $order);
+{
+    $this->authorizeChat($request, $order);
 
-        $data = $request->validate([
-            'body' => 'required|string|max:1000',
-        ]);
+    $data = $request->validate([
+        'body' => 'required|string|max:1000',
+    ]);
 
-        $message = Message::create([
-            'order_id' => $order->id,
-            'sender_id' => $request->user()->id,
-            'body' => $data['body'],
-            'delivered_at' => now(), // auto-delivered sa real-time
-        ]);
+    $message = Message::create([
+        'order_id' => $order->id,
+        'sender_id' => $request->user()->id,
+        'body' => $data['body'],
+        'delivered_at' => now(),
+    ]);
 
-        broadcast(new MessageSent($message->load('sender')))->toOthers();
-// Notify receiver (database notification)
-$order->load('customer', 'rider.user');
-$receiver = null;
+    // ⭐ IMPORTANT: Load sender BEFORE broadcasting
+    $message->load('sender');
 
-if ($request->user()->id === $order->customer_id) {
-    // Nag-send si customer → i-notify ang rider
-    $receiver = $order->rider?->user;
-} else {
-    // Nag-send si rider → i-notify ang customer
-    $receiver = $order->customer;
-}
+    // ⭐ DEBUG LOGS
+    \Log::info('🚀 ChatController@store', [
+        'message_id' => $message->id,
+        'order_id' => $order->id,
+        'sender_id' => $message->sender_id,
+        'sender_name' => $message->sender?->name,
+        'channel' => "order.{$order->id}.chat",
+    ]);
 
-if ($receiver && $receiver->id !== $request->user()->id) {
-    $receiver->notify(new \App\Notifications\NewChatMessageNotification($message));
-}
-        return response()->json([
-            'message' => [
-                'id' => $message->id,
-                'sender_id' => $message->sender_id,
-                'sender_name' => $message->sender->name,
-                'sender_role' => $message->sender->role,
-                'body' => $message->body,
-                'created_at' => $message->created_at->toIso8601String(),
-                'created_at_human' => $message->created_at->diffForHumans(),
-                'delivered_at' => $message->delivered_at?->toIso8601String(),
-                'read_at' => $message->read_at?->toIso8601String(),
-            ],
+    // ⭐ TRY/CATCH BROADCAST
+    try {
+        broadcast(new MessageSent($message));
+        \Log::info('✅ MessageSent broadcast SUCCESS', ['message_id' => $message->id]);
+    } catch (\Throwable $e) {
+        \Log::error('❌ MessageSent broadcast FAILED', [
+            'message_id' => $message->id,
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
         ]);
     }
+
+    // Notify receiver (database notification)
+    $order->load('customer', 'rider.user');
+    $receiver = null;
+
+    if ($request->user()->id === $order->customer_id) {
+        $receiver = $order->rider?->user;
+    } else {
+        $receiver = $order->customer;
+    }
+
+    if ($receiver && $receiver->id !== $request->user()->id) {
+        try {
+            $receiver->notify(new \App\Notifications\NewChatMessageNotification($message));
+        } catch (\Throwable $e) {
+            \Log::error('Notification failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    return response()->json([
+        'message' => [
+            'id' => $message->id,
+            'sender_id' => $message->sender_id,
+            'sender_name' => $message->sender->name,
+            'sender_role' => $message->sender->role,
+            'sender_avatar_url' => $message->sender->avatar_url,
+            'sender_initials' => $message->sender->initials,
+            'sender_avatar_color' => $message->sender->avatar_color,
+            'body' => $message->body,
+            'created_at' => $message->created_at->toIso8601String(),
+            'created_at_human' => $message->created_at->diffForHumans(),
+            'delivered_at' => $message->delivered_at?->toIso8601String(),
+            'read_at' => $message->read_at?->toIso8601String(),
+        ],
+    ]);
+}
 
     /**
      * Broadcast typing indicator.

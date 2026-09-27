@@ -60,4 +60,52 @@ class Message extends Model
 
         return 'received';
     }
+
+    // ============================================
+    // SENDER AVATAR ACCESSORS (para sa chat UI)
+    // ============================================
+
+    /**
+     * Sender's avatar URL (null kung wala).
+     */
+    public function getSenderAvatarUrlAttribute(): ?string
+    {
+        if (!$this->sender) {
+            return null;
+        }
+
+        return $this->sender->avatar_url ?: null;
+    }
+
+    /**
+     * Sender's initials (fallback sa avatar).
+     */
+    public function getSenderInitialsAttribute(): string
+    {
+        return $this->sender?->initials ?? '?';
+    }
+
+    /**
+     * Sender's avatar color (fallback sa avatar).
+     */
+    public function getSenderAvatarColorAttribute(): string
+    {
+        return $this->sender?->avatar_color ?? 'bg-gray-500';
+    }
+
+    /**
+     * Sender's role (customer, restaurant, rider, admin).
+     */
+    public function getSenderRoleAttribute(): ?string
+    {
+        return $this->sender?->role;
+    }
+
+    /**
+     * Sender's name.
+     */
+    public function getSenderNameAttribute(): string
+    {
+        return $this->sender?->name ?? 'Unknown';
+    }
 }

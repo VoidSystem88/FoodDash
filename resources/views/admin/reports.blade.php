@@ -96,65 +96,79 @@
         </div>
     </form>
 
-    {{-- ============================================ --}}
+        {{-- ============================================ --}}
     {{-- SUMMARY STATS --}}
     {{-- ============================================ --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
 
         {{-- TOTAL ORDERS --}}
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-4 transition-colors">
             <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Orders</p>
-                <div class="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center">
-                    <svg class="w-3.5 h-3.5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <p class="text-xs font-medium text-gray-500 dark:text-neutral-400 uppercase tracking-wide">Total Orders</p>
+                <div class="w-7 h-7 rounded-md bg-gray-100 dark:bg-dark-850 flex items-center justify-center">
+                    <svg class="w-3.5 h-3.5 text-gray-600 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl font-bold text-gray-900">{{ number_format($salesStats['total_orders']) }}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-neutral-100">{{ number_format($salesStats['total_orders']) }}</p>
         </div>
 
         {{-- FOOD COST --}}
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-4 transition-colors">
             <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Food Cost</p>
-                <div class="w-7 h-7 rounded-md bg-blue-50 flex items-center justify-center">
-                    <svg class="w-3.5 h-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <p class="text-xs font-medium text-gray-500 dark:text-neutral-400 uppercase tracking-wide">Food Cost</p>
+                <div class="w-7 h-7 rounded-md bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center">
+                    <svg class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl font-bold text-gray-900">₱{{ number_format($salesStats['total_food_cost'], 0) }}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-neutral-100">₱{{ number_format($salesStats['total_food_cost'], 0) }}</p>
         </div>
 
         {{-- DELIVERY FEES --}}
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-4 transition-colors">
             <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Delivery Fees</p>
-                <div class="w-7 h-7 rounded-md bg-cyan-50 flex items-center justify-center">
-                    <svg class="w-3.5 h-3.5 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <p class="text-xs font-medium text-gray-500 dark:text-neutral-400 uppercase tracking-wide">Delivery Fees</p>
+                <div class="w-7 h-7 rounded-md bg-cyan-50 dark:bg-cyan-950/40 flex items-center justify-center">
+                    <svg class="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl font-bold text-gray-900">₱{{ number_format($salesStats['total_delivery_fees'], 0) }}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-neutral-100">₱{{ number_format($salesStats['total_delivery_fees'], 0) }}</p>
         </div>
 
-        {{-- TOTAL REVENUE --}}
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
+        {{-- ⭐ PLATFORM COMMISSION --}}
+        <div class="bg-white dark:bg-dark-800 rounded-lg border-2 border-orange-300 dark:border-orange-800 p-4 transition-colors">
             <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Revenue</p>
-                <div class="w-7 h-7 rounded-md bg-emerald-50 flex items-center justify-center">
-                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <p class="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wide">Commission</p>
+                <div class="w-7 h-7 rounded-md bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center">
+                    <svg class="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
             </div>
-            <p class="text-2xl font-bold text-emerald-600">₱{{ number_format($salesStats['total_revenue'], 0) }}</p>
+            <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">₱{{ number_format($salesStats['total_commission'] ?? 0, 0) }}</p>
+        </div>
+
+        {{-- TOTAL REVENUE --}}
+        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-4 transition-colors">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-medium text-gray-500 dark:text-neutral-400 uppercase tracking-wide">Total Revenue</p>
+                <div class="w-7 h-7 rounded-md bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center">
+                    <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">₱{{ number_format($salesStats['total_revenue'], 0) }}</p>
         </div>
     </div>
 

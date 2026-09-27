@@ -12,7 +12,7 @@ class ConfigController extends Controller
     /**
      * Update general system configuration.
      */
-    public function update(Request $request)
+        public function update(Request $request)
     {
         $data = $request->validate([
             'town_address' => 'required|string|max:255',
@@ -20,6 +20,7 @@ class ConfigController extends Controller
             'town_center_lng' => 'required|numeric',
             'service_radius_km' => 'required|numeric|min:1',
             'default_delivery_fee' => 'required|numeric|min:0',
+            'commission_rate' => 'required|numeric|min:0|max:50',
         ]);
 
         $config = SystemConfig::current();

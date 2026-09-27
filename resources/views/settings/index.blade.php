@@ -5,9 +5,9 @@
 
     {{-- HEADER --}}
     <div class="mb-6">
-        <a href="{{ route('profile.index') }}" class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">← Back to profile</a>
-        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white mt-2">Advanced Settings</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage your account settings</p>
+        <a href="{{ route('profile.index') }}" class="text-sm text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-gray-300">← Back to profile</a>
+        <h1 class="text-2xl font-semibold text-gray-900 dark:text-neutral-100 mt-2">Advanced Settings</h1>
+        <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">Manage your account settings</p>
     </div>
 
     @if (session('success'))
@@ -23,31 +23,31 @@
     @endif
 
     {{-- PERSONAL INFO --}}
-    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6 mb-4 transition-colors">
-        <h2 class="font-semibold text-gray-900 dark:text-white mb-4">Personal Information</h2>
+    <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4 transition-colors">
+        <h2 class="font-semibold text-gray-900 dark:text-neutral-100 mb-4">Personal Information</h2>
 
         <form method="POST" action="{{ route('settings.profile') }}" class="space-y-4">
             @csrf
             @method('PATCH')
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Name</label>
                 <input type="text" name="name" value="{{ old('name', $user->name) }}" required
-                       class="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                       class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Email</label>
                 <input type="email" value="{{ $user->email }}" disabled
-                       class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-500 cursor-not-allowed">
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Email cannot be changed.</p>
+                       class="w-full border border-gray-300 dark:border-dark-600 rounded-lg px-3 py-2 text-sm bg-gray-100 dark:bg-dark-850 text-gray-500 dark:text-neutral-500 cursor-not-allowed">
+                <p class="text-xs text-gray-500 dark:text-neutral-400 mt-1">Email cannot be changed.</p>
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Phone</label>
                 <input type="text" name="phone" value="{{ old('phone', $user->phone) }}"
                        placeholder="09171234567"
-                       class="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                       class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
             </div>
 
             <button type="submit"
@@ -58,9 +58,9 @@
     </div>
 
     {{-- CHANGE PASSWORD --}}
-    <div class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6 mb-4 transition-colors" x-data="{ showPassword: false }">
+    <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4 transition-colors" x-data="{ showPassword: false }">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="font-semibold text-gray-900 dark:text-white">Change Password</h2>
+            <h2 class="font-semibold text-gray-900 dark:text-neutral-100">Change Password</h2>
             <button @click="showPassword = !showPassword"
                     type="button"
                     class="text-sm text-orange-600 dark:text-orange-400 hover:underline font-medium">
@@ -75,22 +75,22 @@
                 @method('PATCH')
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Current Password</label>
                     <input type="password" name="current_password" required
-                           class="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                           class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">New Password</label>
                     <input type="password" name="password" required minlength="8"
-                           class="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Minimum 8 characters.</p>
+                           class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                    <p class="text-xs text-gray-500 dark:text-neutral-400 mt-1">Minimum 8 characters.</p>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Confirm New Password</label>
                     <input type="password" name="password_confirmation" required
-                           class="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                           class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                 </div>
 
                 <button type="submit"
@@ -103,7 +103,7 @@
 
     {{-- DANGER ZONE (customer only) --}}
     @if ($user->isCustomer())
-        <div class="bg-white dark:bg-gray-900 rounded-lg border-2 border-red-200 dark:border-red-800 p-6 transition-colors" x-data="{ showDelete: false }">
+        <div class="bg-white dark:bg-dark-800 rounded-lg border-2 border-red-200 dark:border-red-800 p-6 transition-colors" x-data="{ showDelete: false }">
             <div class="flex items-start gap-3 mb-4">
                 <div class="flex-shrink-0">
                     <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -135,7 +135,7 @@
 
                 <div x-show="showDelete"
                      x-transition.scale.origin.center
-                     class="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-md w-full p-6"
+                     class="bg-white dark:bg-dark-800 rounded-lg shadow-xl max-w-md w-full p-6"
                      x-data="{ showPassword: false }">
 
                     <div class="flex items-start gap-3 mb-4">
@@ -146,8 +146,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-semibold text-gray-900 dark:text-white">Delete Account?</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            <h3 class="font-semibold text-gray-900 dark:text-neutral-100">Delete Account?</h3>
+                            <p class="text-sm text-gray-600 dark:text-neutral-400 mt-1">
                                 This action cannot be undone. All your data will be permanently deleted.
                             </p>
                         </div>
@@ -158,7 +158,7 @@
                         @method('DELETE')
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">
                                 Enter your password to confirm
                             </label>
                             <div class="relative">
@@ -166,11 +166,11 @@
                                        name="password"
                                        required
                                        placeholder="Your password"
-                                       class="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 pr-10 text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                       class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-lg px-3 py-2 pr-10 text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent">
 
                                 <button type="button"
                                         @click="showPassword = !showPassword"
-                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-neutral-500 hover:text-gray-600 dark:hover:text-gray-300">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                               d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -187,7 +187,7 @@
                                    value="1"
                                    required
                                    class="mt-0.5 rounded border-gray-300 dark:border-gray-600 text-red-600 focus:ring-red-500">
-                            <span class="text-xs text-gray-600 dark:text-gray-400">
+                            <span class="text-xs text-gray-600 dark:text-neutral-400">
                                 I understand that this action is <strong class="text-red-600 dark:text-red-400">permanent</strong> and cannot be undone.
                             </span>
                         </label>
@@ -195,7 +195,7 @@
                         <div class="flex gap-2 pt-2">
                             <button type="button"
                                     @click="showDelete = false"
-                                    class="flex-1 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                                    class="flex-1 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-neutral-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-dark-850 transition">
                                 Cancel
                             </button>
                             <button type="submit"

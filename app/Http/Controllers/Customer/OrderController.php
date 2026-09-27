@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Customer;
 
+use App\Events\NewOrderPlaced;
 use App\Events\OrderStatusUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\MenuItem;
@@ -69,15 +70,25 @@ class OrderController extends Controller
             $foodCost += $menuItems[$item['menu_item_id']]->price * $item['quantity'];
         }
 
-        $deliveryFee = SystemConfig::current()->default_delivery_fee;
+        // ============================================
+        // COMMISSION COMPUTATION
+        // ============================================
+        $config = SystemConfig::current();
+        $deliveryFee = $config->default_delivery_fee;
+        $commissionRate = $config->commission_rate;
+        $commissionAmount = round($foodCost * ($commissionRate / 100), 2);
+        $restaurantEarnings = $foodCost - $commissionAmount;
 
-        $order = DB::transaction(function () use ($data, $foodCost, $deliveryFee, $menuItems) {
+        $order = DB::transaction(function () use ($data, $foodCost, $deliveryFee, $commissionRate, $commissionAmount, $restaurantEarnings, $menuItems) {
             $order = Order::create([
                 'customer_id' => auth()->id(),
                 'restaurant_id' => $data['restaurant_id'],
                 'status' => 'received',
                 'food_cost' => $foodCost,
                 'delivery_fee' => $deliveryFee,
+                'commission_rate' => $commissionRate,
+                'commission_amount' => $commissionAmount,
+                'restaurant_earnings' => $restaurantEarnings,
                 'total_amount' => $foodCost + $deliveryFee,
                 'delivery_address' => $data['delivery_address'],
                 'delivery_lat' => $data['delivery_lat'],
@@ -103,6 +114,9 @@ class OrderController extends Controller
         if ($order->restaurant && $order->restaurant->user) {
             $order->restaurant->user->notify(new NewOrderForRestaurantNotification($order));
         }
+
+        // ⭐ BROADCAST NEW ORDER TO RESTAURANT (REAL-TIME)
+        broadcast(new NewOrderPlaced($order->load('items', 'customer')));
 
         return redirect()->route('customer.orders.show', $order)
             ->with('success', 'Order placed successfully!');

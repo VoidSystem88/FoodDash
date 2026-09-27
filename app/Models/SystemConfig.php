@@ -16,6 +16,7 @@ class SystemConfig extends Model
         'town_center_lng',
         'service_radius_km',
         'default_delivery_fee',
+        'commission_rate',
         'logo_path',
         'logo_height',
     ];
@@ -25,6 +26,7 @@ class SystemConfig extends Model
         'town_center_lng' => 'float',
         'service_radius_km' => 'float',
         'default_delivery_fee' => 'float',
+        'commission_rate' => 'float',
         'logo_height' => 'integer',
     ];
 
@@ -36,13 +38,11 @@ class SystemConfig extends Model
             'town_center_lng' => 124.6472,
             'service_radius_km' => 10,
             'default_delivery_fee' => 60,
+            'commission_rate' => 10,
             'logo_height' => 40,
         ]);
     }
 
-    /**
-     * Kunin ang public URL ng logo.
-     */
     public function getLogoUrlAttribute(): ?string
     {
         if (!$this->logo_path) {
@@ -58,22 +58,22 @@ class SystemConfig extends Model
         return asset('storage/' . $this->logo_path);
     }
 
-    /**
-     * Check kung may custom logo.
-     */
     public function hasLogo(): bool
     {
         return $this->logo_url !== null;
     }
 
-    /**
-     * Kunin ang logo height (clamped between 24-60px).
-     */
     public function getLogoHeightPxAttribute(): int
     {
         $height = $this->logo_height ?? 40;
-
-        // Clamp between 24 and 60
         return max(24, min(60, $height));
+    }
+
+    /**
+     * Kunin ang commission rate as decimal (e.g. 10 → 0.10)
+     */
+    public function getCommissionDecimalAttribute(): float
+    {
+        return ($this->commission_rate ?? 0) / 100;
     }
 }
