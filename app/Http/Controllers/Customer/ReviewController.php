@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Restaurant;
 use App\Models\Review;
 use App\Models\ReviewReport;
 use App\Models\ReviewVote;
@@ -20,9 +21,7 @@ class ReviewController extends Controller
         abort_unless($order->status === 'delivered', 422, 'You can only review delivered orders.');
 
         if ($order->review()->exists()) {
-            throw ValidationException::withMessages([
-                'review' => 'You have already reviewed this order.',
-            ]);
+            return back()->with('error', 'You have already reviewed this order.');
         }
 
         $data = $request->validate([
@@ -57,11 +56,17 @@ class ReviewController extends Controller
                 'is_verified_purchase' => true,
                 'status' => 'published',
             ]);
-
-            $order->restaurant->updateRatingStats();
         });
 
-        return back()->with('success', 'Salamat sa review mo! 🌟');
+        // ⭐ RECALCULATE RATING STATS
+        $restaurant = Restaurant::find($order->restaurant_id);
+        if ($restaurant) {
+            $restaurant->updateRatingStats();
+        }
+
+        return redirect()
+            ->route('customer.orders.show', $order)
+            ->with('success', 'Salamat sa review mo! 🌟');
     }
 
     public function update(Request $request, Review $review)
@@ -108,11 +113,20 @@ class ReviewController extends Controller
         return back()->with('success', 'Review deleted.');
     }
 
+    // ⭐ CORE: VOTE method
     public function vote(Request $request, Review $review)
     {
-        abort_if($review->user_id === auth()->id(), 422, 'Cannot vote on your own review.');
+        // Bawal i-vote ang sariling review
+        if ($review->user_id === auth()->id()) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Cannot vote on your own review.',
+            ], 422);
+        }
 
-        $data = $request->validate(['vote_type' => 'required|in:helpful,not_helpful']);
+        $data = $request->validate([
+            'vote_type' => 'required|in:helpful,not_helpful',
+        ]);
 
         $existing = ReviewVote::where('review_id', $review->id)
             ->where('user_id', auth()->id())
@@ -120,9 +134,11 @@ class ReviewController extends Controller
 
         if ($existing) {
             if ($existing->vote_type === $data['vote_type']) {
+                // Toggle off
                 $existing->delete();
                 $userVote = null;
             } else {
+                // Switch vote
                 $existing->update(['vote_type' => $data['vote_type']]);
                 $userVote = $data['vote_type'];
             }
@@ -140,15 +156,17 @@ class ReviewController extends Controller
 
         return response()->json([
             'ok' => true,
-            'helpful' => $review->helpful_count,
-            'not_helpful' => $review->not_helpful_count,
+            'helpful' => (int) $review->helpful_count,
+            'not_helpful' => (int) $review->not_helpful_count,
             'user_vote' => $userVote,
         ]);
     }
 
     public function report(Request $request, Review $review)
     {
-        abort_if($review->user_id === auth()->id(), 422, 'Cannot report your own review.');
+        if ($review->user_id === auth()->id()) {
+            return response()->json(['ok' => false, 'message' => 'Cannot report your own review.'], 422);
+        }
 
         if ($review->hasUserReported()) {
             return response()->json(['ok' => false, 'message' => 'Naka-report ka na.'], 422);

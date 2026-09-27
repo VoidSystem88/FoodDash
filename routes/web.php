@@ -186,7 +186,39 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::delete('/config/logo', [ConfigController::class, 'removeLogo'])->name('admin.config.logo.remove');
     Route::post('/config/logo/size', [ConfigController::class, 'updateLogoSize'])->name('admin.config.logo.size');
 });
+// ============================================
+// PUBLIC — Restaurant Reviews
+// ============================================
+Route::get('/restaurants/{restaurant}/reviews', [RestaurantReviewController::class, 'index'])
+    ->name('customer.restaurants.reviews');
 
+// ============================================
+// REVIEW ROUTES — PUBLIC (read-only, auth optional)
+// ============================================
+// (walang public write routes — naka-auth ang lahat ng writes)
+
+// ============================================
+// AUTHENTICATED — Customer Review Actions
+// ============================================
+Route::middleware(['auth', 'role:customer'])->group(function () {
+    // ⭐ Write new review (para sa delivered order)
+    Route::post('/orders/{order}/review', [ReviewController::class, 'store'])
+        ->name('customer.reviews.store');
+
+    // ⭐ Edit/delete review
+    Route::patch('/reviews/{review}', [ReviewController::class, 'update'])
+        ->name('customer.reviews.update');
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
+        ->name('customer.reviews.destroy');
+
+    // ⭐ LIKE/DISLIKE — ito ang kulang!
+    Route::post('/reviews/{review}/vote', [ReviewController::class, 'vote'])
+        ->name('customer.reviews.vote');
+
+    // ⭐ Report review
+    Route::post('/reviews/{review}/report', [ReviewController::class, 'report'])
+        ->name('customer.reviews.report');
+});
 // ============================================
 // NOTIFICATIONS (all authenticated users)
 // ============================================

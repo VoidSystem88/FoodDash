@@ -10,10 +10,8 @@ class RestaurantController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Restaurant::where('is_open', true)
-            ->withCount('menuItems');
+        $query = Restaurant::where('is_open', true)->withCount('menuItems');
 
-        // Search filter
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -22,14 +20,12 @@ class RestaurantController extends Controller
             });
         }
 
-        // Cuisine filter
         if ($request->filled('cuisine')) {
             $query->where('cuisine', $request->cuisine);
         }
 
         $restaurants = $query->get();
 
-        // Kunin lahat ng unique cuisines (para sa filter chips)
         $cuisines = Restaurant::where('is_open', true)
             ->whereNotNull('cuisine')
             ->distinct()
@@ -40,17 +36,19 @@ class RestaurantController extends Controller
     }
 
     public function show(Restaurant $restaurant)
-{
-    $restaurant->load(['menuItems' => function ($q) {
-        $q->where('is_available', true);
-    }]);
+    {
+        // ⭐ Force fresh load mula DB
+        $restaurant->refresh();
 
-    // ⭐ Load reviews para sa tab
-    $reviews = $restaurant->reviews()
-        ->with(['user', 'replies.user', 'votes'])
-        ->mostRecent()
-        ->paginate(5);
+        $restaurant->load(['menuItems' => function ($q) {
+            $q->where('is_available', true);
+        }]);
 
-    return view('customer.restaurant-show', compact('restaurant', 'reviews'));
-}
+        $reviews = $restaurant->reviews()
+            ->with(['user', 'replies.user', 'votes'])
+            ->orderByDesc('created_at')
+            ->paginate(5);
+
+        return view('customer.restaurant-show', compact('restaurant', 'reviews'));
+    }
 }

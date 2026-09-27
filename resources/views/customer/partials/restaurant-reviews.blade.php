@@ -9,12 +9,12 @@
             {{-- Big Rating --}}
             <div class="text-center md:border-r border-gray-100 dark:border-dark-700 md:pr-6">
                 <p class="text-6xl font-bold text-gray-900 dark:text-neutral-100">
-                    {{ number_format($restaurant->rating_avg, 1) }}
+                    {{ number_format((float)($restaurant->rating_avg ?? 0), 1) }}
                 </p>
 
                 <div class="flex justify-center gap-1 my-3">
                     @for ($i = 1; $i <= 5; $i++)
-                        <svg class="w-6 h-6 {{ $i <= round($restaurant->rating_avg) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-neutral-600' }}"
+                        <svg class="w-6 h-6 {{ $i <= round($restaurant->rating_avg ?? 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-neutral-600' }}"
                              viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
@@ -22,8 +22,8 @@
                 </div>
 
                 <p class="text-sm text-gray-500 dark:text-neutral-400">
-                    <strong class="text-gray-900 dark:text-neutral-100">{{ $restaurant->rating_count }}</strong>
-                    {{ Str::plural('review', $restaurant->rating_count) }}
+                    <strong class="text-gray-900 dark:text-neutral-100">{{ (int)($restaurant->rating_count ?? 0) }}</strong>
+                    {{ Str::plural('review', (int)($restaurant->rating_count ?? 0)) }}
                 </p>
             </div>
 
@@ -52,7 +52,13 @@
     {{-- ============================================ --}}
     @forelse ($reviews as $review)
         <div class="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-6"
-             x-data="reviewActions({{ $review->id }}, {{ $review->helpful_count }}, {{ $review->not_helpful_count }}, {{ json_encode($review->userVoteType()) }}, {{ json_encode($review->hasUserReported()) }})">
+             x-data='reviewActions(
+                 {{ $review->id }},
+                 {{ (int) $review->helpful_count }},
+                 {{ (int) $review->not_helpful_count }},
+                 @json($review->userVoteType()),
+                 @json($review->hasUserReported())
+             )'>
 
             {{-- Header --}}
             <div class="flex items-start gap-4 mb-4">
@@ -146,7 +152,7 @@
             {{-- Actions --}}
             <div class="flex items-center gap-4 mt-4 pt-4 border-t border-gray-100 dark:border-dark-700 text-sm">
 
-                <button @click="vote('helpful')"
+                <button type="button" @click="vote('helpful')"
                         :disabled="loading"
                         :class="userVote === 'helpful' ? 'text-orange-600 dark:text-orange-400 font-bold' : 'text-gray-500 dark:text-neutral-400 hover:text-orange-600'"
                         class="flex items-center gap-1.5 transition disabled:opacity-50">
@@ -156,9 +162,9 @@
                     <span x-text="'Helpful (' + helpfulCount + ')'"></span>
                 </button>
 
-                <button @click="vote('not_helpful')"
+                <button type="button" @click="vote('not_helpful')"
                         :disabled="loading"
-                        :class="userVote === 'not_helpful' ? 'text-gray-700 font-bold' : 'text-gray-500 dark:text-neutral-400 hover:text-gray-700'"
+                        :class="userVote === 'not_helpful' ? 'text-gray-700 dark:text-neutral-100 font-bold' : 'text-gray-500 dark:text-neutral-400 hover:text-gray-700'"
                         class="flex items-center gap-1.5 transition disabled:opacity-50">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
@@ -168,7 +174,7 @@
 
                 @auth
                     @if ($review->user_id !== auth()->id())
-                        <button @click="report()"
+                        <button type="button" @click="report()"
                                 :disabled="hasReported || loading"
                                 :class="hasReported ? 'text-gray-400 cursor-not-allowed' : 'text-gray-400 hover:text-red-500'"
                                 class="ml-auto flex items-center gap-1.5 transition text-xs">
@@ -188,7 +194,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-neutral-100 mb-1">Still no reviews</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-neutral-100 mb-1">Wala pang reviews</h3>
             <p class="text-sm text-gray-500 dark:text-neutral-400">Be the first to review {{ $restaurant->name }}!</p>
         </div>
     @endforelse
@@ -205,11 +211,11 @@
 <script>
 function reviewActions(reviewId, initialHelpful, initialNotHelpful, initialVote, initialReported) {
     return {
-        reviewId,
-        helpfulCount: initialHelpful,
-        notHelpfulCount: initialNotHelpful,
-        userVote: initialVote,
-        hasReported: initialReported,
+        reviewId: reviewId,
+        helpfulCount: Number(initialHelpful) || 0,
+        notHelpfulCount: Number(initialNotHelpful) || 0,
+        userVote: initialVote || null,
+        hasReported: initialReported === true,
         loading: false,
 
         async vote(type) {
@@ -228,35 +234,40 @@ function reviewActions(reviewId, initialHelpful, initialNotHelpful, initialVote,
                 });
 
                 const data = await res.json();
+
+                if (!res.ok) {
+                    console.error('Vote failed:', data);
+                    alert(data.message || 'Hindi ma-save ang vote. Subukan muli.');
+                    this.loading = false;
+                    return;
+                }
+
                 if (data.ok) {
-                    this.helpfulCount = data.helpful;
-                    this.notHelpfulCount = data.not_helpful;
+                    this.helpfulCount = Number(data.helpful) || 0;
+                    this.notHelpfulCount = Number(data.not_helpful) || 0;
                     this.userVote = data.user_vote;
                 }
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error('Network error:', err);
+                alert('Network error. Subukan muli.');
+            }
 
             this.loading = false;
         },
 
         async report() {
             if (this.hasReported || this.loading) return;
-
-            const reason = prompt(
-                'Bakit mo ito nire-report?\n\nOptions: spam, offensive, fake, irrelevant, other'
-            );
-
+            const reason = prompt('Bakit mo ito nire-report?\n\nOptions: spam, offensive, fake, irrelevant, other');
             if (!reason) return;
 
             const cleanReason = reason.toLowerCase().trim();
             const validReasons = ['spam', 'offensive', 'fake', 'irrelevant', 'other'];
-
             if (!validReasons.includes(cleanReason)) {
-                alert('Invalid reason.');
+                alert('Invalid reason. Pumili sa: ' + validReasons.join(', '));
                 return;
             }
 
             this.loading = true;
-
             try {
                 const res = await fetch(`/reviews/${this.reviewId}/report`, {
                     method: 'POST',
@@ -267,14 +278,16 @@ function reviewActions(reviewId, initialHelpful, initialNotHelpful, initialVote,
                     },
                     body: JSON.stringify({ reason: cleanReason }),
                 });
-
                 const data = await res.json();
                 if (data.ok) {
                     this.hasReported = true;
-                    alert(data.message);
+                    alert(data.message || 'Report submitted.');
+                } else {
+                    alert(data.message || 'Hindi ma-submit.');
                 }
-            } catch (err) { console.error(err); }
-
+            } catch (err) {
+                alert('Network error.');
+            }
             this.loading = false;
         }
     }

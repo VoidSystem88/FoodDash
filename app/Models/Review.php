@@ -84,8 +84,7 @@ class Review extends Model
 
     public function scopeWithPhotos($query)
     {
-        return $query->whereNotNull('images')
-            ->where('images', '!=', '[]');
+        return $query->whereNotNull('images')->where('images', '!=', '[]');
     }
 
     public function scopeByRating($query, int $rating)
@@ -95,8 +94,7 @@ class Review extends Model
 
     public function scopeMostHelpful($query)
     {
-        return $query->orderByDesc('helpful_count')
-            ->orderByDesc('created_at');
+        return $query->orderByDesc('helpful_count')->orderByDesc('created_at');
     }
 
     public function scopeMostRecent($query)
@@ -106,14 +104,12 @@ class Review extends Model
 
     public function scopeHighestRated($query)
     {
-        return $query->orderByDesc('rating')
-            ->orderByDesc('created_at');
+        return $query->orderByDesc('rating')->orderByDesc('created_at');
     }
 
     public function scopeLowestRated($query)
     {
-        return $query->orderBy('rating')
-            ->orderByDesc('created_at');
+        return $query->orderBy('rating')->orderByDesc('created_at');
     }
 
     // ============================================
@@ -138,8 +134,7 @@ class Review extends Model
 
     public function getIsEditableAttribute(): bool
     {
-        return $this->created_at
-            && $this->created_at->diffInDays(now()) <= 7;
+        return $this->created_at && $this->created_at->diffInDays(now()) <= 7;
     }
 
     public function getTimeAgoAttribute(): string
@@ -180,7 +175,6 @@ class Review extends Model
     {
         $this->increment('report_count');
 
-        // Auto-flag kapag 5+ reports
         if ($this->fresh()->report_count >= 5 && $this->status === 'published') {
             $this->update(['status' => 'flagged']);
         }
