@@ -13,7 +13,52 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Customer\FavoriteController;
+use App\Http\Controllers\Customer\ReviewController;
+use App\Http\Controllers\Customer\RestaurantReviewController;
+use App\Http\Controllers\Restaurant\ReviewReplyController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 
+
+
+// ============================================
+// PUBLIC — Restaurant Reviews
+// ============================================
+Route::get('/restaurants/{restaurant}/reviews', [RestaurantReviewController::class, 'index'])
+    ->name('customer.restaurants.reviews');
+
+// ============================================
+// CUSTOMER — Review Actions
+// ============================================
+Route::middleware(['auth', 'role:customer'])->group(function () {
+    Route::post('/orders/{order}/review', [ReviewController::class, 'store'])
+        ->name('customer.reviews.store');
+    Route::patch('/reviews/{review}', [ReviewController::class, 'update'])
+        ->name('customer.reviews.update');
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
+        ->name('customer.reviews.destroy');
+    Route::post('/reviews/{review}/vote', [ReviewController::class, 'vote'])
+        ->name('customer.reviews.vote');
+    Route::post('/reviews/{review}/report', [ReviewController::class, 'report'])
+        ->name('customer.reviews.report');
+});
+
+// ============================================
+// RESTAURANT — Reply to Reviews
+// ============================================
+Route::middleware(['auth', 'role:restaurant'])->prefix('restaurant')->group(function () {
+    Route::post('/reviews/{review}/reply', [ReviewReplyController::class, 'store'])
+        ->name('restaurant.reviews.reply');
+});
+
+// ============================================
+// ADMIN — Moderate Reviews
+// ============================================
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/reviews', [AdminReviewController::class, 'index'])->name('admin.reviews.index');
+    Route::patch('/reviews/{review}/hide', [AdminReviewController::class, 'hide'])->name('admin.reviews.hide');
+    Route::patch('/reviews/{review}/publish', [AdminReviewController::class, 'publish'])->name('admin.reviews.publish');
+    Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])->name('admin.reviews.destroy');
+});
 // ============================================
 // ROOT REDIRECT
 // ============================================
@@ -40,7 +85,7 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     // Favorites
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('customer.favorites');
     Route::post('/favorites/{restaurant}/toggle', [FavoriteController::class, 'toggle'])->name('customer.favorites.toggle');
-
+    Route::post('/favorites/food/{menuItem}/toggle', [\App\Http\Controllers\Customer\FavoriteFoodController::class, 'toggle'])->name('customer.favorites.food.toggle');
     // Orders
     Route::get('/orders', [CustomerOrderController::class, 'index'])->name('customer.orders');
     Route::post('/orders', [CustomerOrderController::class, 'store'])->name('customer.orders.store');

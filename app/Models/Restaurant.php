@@ -8,6 +8,43 @@ use Illuminate\Database\Eloquent\Model;
 
 class Restaurant extends Model
 {
+    // Sa relationships section
+public function reviews()
+{
+    return $this->hasMany(Review::class)->published();
+}
+
+public function allReviews()
+{
+    return $this->hasMany(Review::class);
+}
+
+// Sa accessors/helpers section
+public function updateRatingStats(): void
+{
+    $this->update([
+        'rating_avg' => round($this->reviews()->avg('rating') ?? 0, 2),
+        'rating_count' => $this->reviews()->count(),
+    ]);
+}
+
+public function getRatingBreakdownAttribute(): array
+{
+    $breakdown = [];
+    $total = $this->rating_count;
+
+    foreach ([5, 4, 3, 2, 1] as $stars) {
+        $count = $this->reviews()->where('rating', $stars)->count();
+        $breakdown[$stars] = [
+            'count' => $count,
+            'percentage' => $total > 0 ? round(($count / $total) * 100, 1) : 0,
+        ];
+    }
+
+    return $breakdown;
+}
+
+
     use HasFactory;
 
     protected $fillable = [

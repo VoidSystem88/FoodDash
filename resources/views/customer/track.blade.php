@@ -125,6 +125,233 @@
     @endif
 
     {{-- ============================================ --}}
+    {{-- REVIEW SECTION — para sa delivered orders --}}
+    {{-- ============================================ --}}
+    @if ($order->status === 'delivered' && $order->canBeReviewed())
+        <div x-data="reviewForm({{ $order->id }})"
+             class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 rounded-2xl border-2 border-orange-200 dark:border-orange-800 p-6 mb-4">
+
+            <div class="flex items-start gap-4 mb-4">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <span class="text-2xl">⭐</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-neutral-100">
+                        Rate your experience
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-neutral-400">
+                        Tulungan mo ang ibang customers sa review mo para sa
+                        <strong>{{ $order->restaurant->name }}</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <button type="button"
+                    @click="showModal = true"
+                    class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-bold shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg transition">
+                ⭐ Write a Review
+            </button>
+
+            {{-- Review Modal --}}
+            <div x-show="showModal"
+                 x-cloak
+                 x-transition.opacity
+                 @keydown.escape.window="showModal = false"
+                 @click.self="showModal = false"
+                 class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60"
+                 style="display: none;">
+
+                <div x-show="showModal"
+                     x-transition.scale.origin.center
+                     class="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+
+                    <div class="flex justify-between items-start mb-5">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-neutral-100">Rate your experience</h2>
+                            <p class="text-sm text-gray-500 dark:text-neutral-400">
+                                {{ $order->restaurant->name }}
+                            </p>
+                        </div>
+                        <button type="button"
+                                @click="showModal = false"
+                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form @submit.prevent="submit()" class="space-y-4">
+
+                        {{-- Star Rating --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-neutral-100 mb-2">
+                                Overall Rating *
+                            </label>
+                            <div class="flex gap-2">
+                                <template x-for="i in 5" :key="i">
+                                    <button type="button"
+                                            @click="rating = i"
+                                            @mouseenter="hoverRating = i"
+                                            @mouseleave="hoverRating = 0"
+                                            class="transition-transform hover:scale-110">
+                                        <svg class="w-10 h-10"
+                                             :class="i <= (hoverRating || rating) 
+                                                ? 'text-yellow-400 fill-yellow-400' 
+                                                : 'text-gray-300 dark:text-neutral-600'"
+                                             viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                    </button>
+                                </template>
+                            </div>
+                            <p x-show="rating > 0"
+                               x-text="['', 'Terrible 😞', 'Poor 😕', 'Average 😐', 'Good 😊', 'Excellent 🤩'][rating]"
+                               class="text-sm font-medium text-gray-600 dark:text-neutral-400 mt-2"></p>
+                        </div>
+
+                        {{-- Title --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-neutral-100 mb-2">
+                                Title <span class="text-gray-400 font-normal">(optional)</span>
+                            </label>
+                            <input type="text"
+                                   x-model="title"
+                                   maxlength="100"
+                                   placeholder="e.g. Best pizza in CDO!"
+                                   class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                        </div>
+
+                        {{-- Body --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-neutral-100 mb-2">
+                                Your Review *
+                            </label>
+                            <textarea x-model="body"
+                                      required
+                                      minlength="10"
+                                      maxlength="2000"
+                                      rows="5"
+                                      placeholder="Ano ang experience mo? Naging maayos ba ang pagkain at service?"
+                                      class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"></textarea>
+                            <p class="text-xs text-gray-500 dark:text-neutral-400 mt-1">
+                                <span x-text="body.length"></span>/2000 characters (min 10)
+                            </p>
+                        </div>
+
+                        {{-- Photos --}}
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-neutral-100 mb-2">
+                                Add Photos <span class="text-gray-400 font-normal">(optional, max 5)</span>
+                            </label>
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="(preview, i) in photoPreviews" :key="i">
+                                    <div class="relative w-20 h-20">
+                                        <img :src="preview" class="w-full h-full object-cover rounded-xl">
+                                        <button type="button"
+                                                @click="removePhoto(i)"
+                                                class="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition">
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <button type="button"
+                                        x-show="photoPreviews.length < 5"
+                                        @click="$refs.photoInput.click()"
+                                        class="w-20 h-20 border-2 border-dashed border-gray-300 dark:border-dark-600 rounded-xl flex flex-col items-center justify-center text-gray-400 dark:text-neutral-500 hover:border-orange-500 hover:text-orange-500 dark:hover:border-orange-500 transition">
+                                    <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <span class="text-xs">Add</span>
+                                </button>
+
+                                <input type="file"
+                                       x-ref="photoInput"
+                                       @change="onPhotoChange($event)"
+                                       accept="image/jpeg,image/jpg,image/png,image/webp"
+                                       multiple
+                                       class="hidden">
+                            </div>
+                        </div>
+
+                        {{-- Info --}}
+                        <div class="bg-blue-50 dark:bg-blue-950/30 rounded-xl p-3 flex gap-2">
+                            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                                Ang review mo ay makikita ng lahat. I-base ito sa tunay na experience mo.
+                            </p>
+                        </div>
+
+                        {{-- Actions --}}
+                        <div class="flex gap-2 pt-2">
+                            <button type="button"
+                                    @click="showModal = false"
+                                    class="flex-1 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-neutral-300 py-3 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-dark-850 transition">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                    :disabled="submitting || rating === 0 || body.length < 10"
+                                    :class="(submitting || rating === 0 || body.length < 10) 
+                                        ? 'opacity-40 cursor-not-allowed' 
+                                        : 'hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-98'"
+                                    class="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-bold shadow-md transition transform">
+                                <span x-show="!submitting">Submit Review</span>
+                                <span x-show="submitting">Submitting...</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- SHOW EXISTING REVIEW --}}
+    @if ($order->status === 'delivered' && $order->hasBeenReviewed())
+        @php $review = $order->review; @endphp
+        <div class="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl p-6 mb-4">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-bold text-green-900 dark:text-green-300">Review submitted</p>
+                    <p class="text-xs text-green-700 dark:text-green-400">
+                        Salamat sa feedback mo!
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-dark-800 rounded-xl p-4">
+                <div class="flex items-center gap-1 mb-2">
+                    @for ($i = 1; $i <= 5; $i++)
+                        <svg class="w-5 h-5 {{ $i <= $review->rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-neutral-600' }}"
+                             viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                    @endfor
+                </div>
+                @if ($review->title)
+                    <p class="font-bold text-gray-900 dark:text-neutral-100 mb-1">{{ $review->title }}</p>
+                @endif
+                <p class="text-sm text-gray-700 dark:text-neutral-300">{{ $review->body }}</p>
+                <p class="text-xs text-gray-400 dark:text-neutral-500 mt-2">
+                    Submitted {{ $review->created_at->diffForHumans() }}
+                </p>
+            </div>
+        </div>
+    @endif
+
+    {{-- ============================================ --}}
     {{-- CHAT WITH RIDER --}}
     {{-- ============================================ --}}
     @if ($order->canChat())
@@ -158,7 +385,7 @@
             <div x-show="isOpen" x-cloak x-transition>
                 <div x-ref="messagesContainer"
                      @scroll="onScroll()"
-                     class="h-96 overflow-y-auto p-4 space-y-2 bg-gray-50 dark:bg-dark-850 scroll-smooth">
+                     class="chat-scroll h-96 overflow-y-auto p-4 space-y-2 bg-gray-50 dark:bg-dark-850 scroll-smooth">
 
                     <template x-if="loading">
                         <p class="text-center text-sm text-gray-500 dark:text-neutral-400">Loading messages...</p>
@@ -346,10 +573,10 @@
         </div>
     </div>
 
-    {{-- RATING FORM --}}
+    {{-- RATING FORM (OLD — Restaurant & Rider stars only) --}}
     @if ($order->status === 'delivered' && !$order->restaurant_rating)
-        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6">
-            <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-4">Rate your order</p>
+        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4">
+            <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-4">Quick Rating</p>
             <form method="POST" action="{{ route('customer.orders.rate', $order) }}" class="space-y-5">
                 @csrf
 
@@ -415,6 +642,17 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
+    /* Completely hide scrollbar (pero scrollable pa rin) */
+    .chat-scroll::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+    .chat-scroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
     .chat-message {
         animation: slideIn 0.25s ease-out;
     }
@@ -492,7 +730,6 @@ function orderTracker(orderId) {
                 maxZoom: 19,
             }).addTo(this.map);
 
-                        // ⭐ RESTAURANT MARKER — actual profile image
             @php
                 $restaurantProfileUrl = $order->restaurant->profile_image_url;
                 $restaurantInitial = strtoupper(substr($order->restaurant->name, 0, 1));
@@ -559,7 +796,6 @@ function orderTracker(orderId) {
                 popupAnchor: [0, -28],
             });
 
-            // ⭐ CUSTOMER MARKER — custom image (cusicon.png)
             const deliveryIcon = L.divIcon({
                 html: `
                     <div style="position:relative;width:48px;height:48px;">
@@ -576,7 +812,6 @@ function orderTracker(orderId) {
                 popupAnchor: [0, -24],
             });
 
-            // ⭐ RIDER MARKER — custom image (ridicon.png)
             const riderIcon = L.divIcon({
                 html: `
                     <div style="position:relative;width:56px;height:56px;">
@@ -607,7 +842,6 @@ function orderTracker(orderId) {
                     .bindPopup('🛵 {{ $order->rider->user->name }}');
             @endif
 
-            // ⭐ Draw road-snapped route
             this.drawRoute(restaurantLat, restaurantLng, deliveryLat, deliveryLng);
 
             this.mapInitialized = true;
@@ -835,7 +1069,13 @@ function chatBox(orderId) {
 
             chatChannel.listen('.user.typing', (e) => {
                 if (e.user_id === this.currentUserId) return;
+
+                const wasTyping = this.typingName;
                 this.typingName = e.is_typing ? e.user_name : '';
+
+                if (e.is_typing && !wasTyping && this.isAtBottom) {
+                    this.$nextTick(() => this.scrollToBottom());
+                }
             });
 
             chatChannel.listen('.messages.read', (e) => {
@@ -1010,6 +1250,86 @@ function chatBox(orderId) {
                     this.isAtBottom = true;
                 }
             });
+        }
+    }
+}
+
+// ⭐ Review Form Function
+function reviewForm(orderId) {
+    return {
+        showModal: false,
+        rating: 0,
+        hoverRating: 0,
+        title: '',
+        body: '',
+        photos: [],
+        photoPreviews: [],
+        submitting: false,
+
+        onPhotoChange(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                if (this.photos.length >= 5) return;
+
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File too large (max 5MB): ' + file.name);
+                    return;
+                }
+
+                this.photos.push(file);
+
+                const reader = new FileReader();
+                reader.onload = (ev) => this.photoPreviews.push(ev.target.result);
+                reader.readAsDataURL(file);
+            });
+            e.target.value = '';
+        },
+
+        removePhoto(i) {
+            this.photos.splice(i, 1);
+            this.photoPreviews.splice(i, 1);
+        },
+
+        async submit() {
+            if (this.rating === 0) {
+                alert('Please select a rating.');
+                return;
+            }
+            if (this.body.length < 10) {
+                alert('Please write at least 10 characters.');
+                return;
+            }
+
+            this.submitting = true;
+
+            const formData = new FormData();
+            formData.append('rating', this.rating);
+            formData.append('title', this.title || '');
+            formData.append('body', this.body);
+            this.photos.forEach(photo => formData.append('images[]', photo));
+
+            try {
+                const res = await fetch(`/orders/${orderId}/review`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: formData,
+                });
+
+                if (res.ok) {
+                    window.location.reload();
+                } else {
+                    const data = await res.json();
+                    alert(data.message || 'Could not submit review.');
+                    this.submitting = false;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error. Please try again.');
+                this.submitting = false;
+            }
         }
     }
 }

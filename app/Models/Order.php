@@ -106,4 +106,21 @@ class Order extends Model
             'finding_rider',
         ]);
     }
+    // Sa relationships section
+public function review()
+{
+    return $this->hasOne(Review::class);
+}
+
+// Sa helpers section
+public function canBeReviewed(): bool
+{
+    return $this->status === 'delivered'
+        && !$this->review()->exists();
+}
+
+public function hasBeenReviewed(): bool
+{
+    return $this->review()->exists();
+}
 }

@@ -656,9 +656,8 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
     </nav>
     @endauth
 
-        {{-- ============================================ --}}
+    {{-- ============================================ --}}
     {{-- SLIDE-DOWN NOTIFICATION BANNER (Rider only) --}}
-    {{-- WALANG countdown — notification lang --}}
     {{-- ============================================ --}}
     @auth
         @if (auth()->user()->isRider())
@@ -671,7 +670,6 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
                         <div class="pointer-events-auto bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-dark-700 overflow-hidden cursor-pointer"
                              @click="goToOffer(offer.order_id)">
 
-                            {{-- TOP BAR — solid color lang, walang animation --}}
                             <div class="h-1 bg-gradient-to-r from-orange-500 to-orange-400"></div>
 
                             <div class="p-3.5">
@@ -730,11 +728,6 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
         });
     }
     </script>
-
-    {{-- ============================================ --}}
-    {{-- ALPINE.JS --}}
-    {{-- ============================================ --}}
-    <script src="//unpkg.com/alpinejs" defer></script>
 
     {{-- ============================================ --}}
     {{-- GLOBAL ALPINE FUNCTIONS --}}
@@ -1083,8 +1076,13 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
     </script>
 
     {{-- ============================================ --}}
-    {{-- PAGE-SPECIFIC SCRIPTS --}}
+    {{-- PAGE-SPECIFIC SCRIPTS (BEFORE Alpine!) --}}
     {{-- ============================================ --}}
     @stack('scripts')
+
+    {{-- ============================================ --}}
+    {{-- ALPINE.JS (LOADED LAST) --}}
+    {{-- ============================================ --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 </body>
 </html>

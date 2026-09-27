@@ -84,21 +84,22 @@ class OrderStatusNotification extends Notification
             'no_rider' => 'No Rider Available',
         ];
 
-        $icons = [
-            'confirmed' => '✅',
-            'preparing' => '👨‍🍳',
-            'finding_rider' => '🔍',
-            'rider_assigned' => '🛵',
-            'picked_up' => '📦',
-            'out_for_delivery' => '🚀',
-            'delivered' => '🎉',
-            'cancelled' => '❌',
-            'rejected' => '⚠️',
-            'no_rider' => '😔',
+        // ⭐ Icon identifiers (hindi emoji) — i-map sa SVG sa frontend
+        $iconKeys = [
+            'confirmed' => 'check-circle',
+            'preparing' => 'book-open',
+            'finding_rider' => 'magnifying-glass',
+            'rider_assigned' => 'truck',
+            'picked_up' => 'package',
+            'out_for_delivery' => 'lightning-bolt',
+            'delivered' => 'check-circle',
+            'cancelled' => 'x-circle',
+            'rejected' => 'warning-triangle',
+            'no_rider' => 'ban',
         ];
 
         $label = $labels[$this->order->status] ?? 'Order Update';
-        $icon = $icons[$this->order->status] ?? '📢';
+        $iconKey = $iconKeys[$this->order->status] ?? 'bell';
 
         $body = "Order #{$this->order->id} — {$label}";
         if ($this->order->status === 'rider_assigned' && $this->order->rider) {
@@ -113,7 +114,7 @@ class OrderStatusNotification extends Notification
                 title: $label,
                 body: $body,
                 url: route('customer.orders.show', $this->order),
-                icon: $icon,
+                icon: $iconKey,        // ⭐ identifier (hindi emoji)
                 createdAt: now()->toIso8601String(),
             ));
         }
@@ -122,7 +123,7 @@ class OrderStatusNotification extends Notification
             'title' => $label,
             'body' => $body,
             'url' => route('customer.orders.show', $this->order),
-            'icon' => $icon,
+            'icon' => $iconKey,        // ⭐ identifier
             'order_id' => $this->order->id,
         ];
     }

@@ -9,8 +9,7 @@ use NotificationChannels\WebPush\HasPushSubscriptions;
 
 class User extends Authenticatable
 {
-        use HasFactory, Notifiable, HasPushSubscriptions;
-
+    use HasFactory, Notifiable, HasPushSubscriptions;
 
     protected $fillable = [
         'name',
@@ -20,7 +19,7 @@ class User extends Authenticatable
         'role',
         'status',
         'phone',
-        'avatar',           
+        'avatar',
         'last_seen_at',
         'otp_code',
         'otp_expires_at',
@@ -52,6 +51,10 @@ class User extends Authenticatable
         ];
     }
 
+    // ============================================
+    // RELATIONSHIPS — Role-specific
+    // ============================================
+
     public function restaurant()
     {
         return $this->hasOne(Restaurant::class);
@@ -66,20 +69,57 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class, 'customer_id');
     }
-	public function favorites()
-{
-    return $this->hasMany(Favorite::class);
-}
 
-public function favoriteRestaurants()
-{
-    return $this->belongsToMany(Restaurant::class, 'favorites')->withTimestamps();
-}
+    // ============================================
+    // FAVORITES (Restaurants) — Many-to-Many
+    // ============================================
 
-public function hasFavorited(Restaurant $restaurant): bool
-{
-    return $this->favorites()->where('restaurant_id', $restaurant->id)->exists();
-}
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function favoriteRestaurants()
+    {
+        return $this->belongsToMany(
+            Restaurant::class,   // Related model
+            'favorites',         // Pivot table
+            'user_id',           // FK ng User sa pivot table
+            'restaurant_id'      // FK ng Restaurant sa pivot table
+        )->withTimestamps();
+    }
+
+    public function hasFavorited(Restaurant $restaurant): bool
+    {
+        return $this->favorites()
+            ->where('restaurant_id', $restaurant->id)
+            ->exists();
+    }
+
+    // ============================================
+    // FAVORITES (Foods / Menu Items) — Many-to-Many
+    // ============================================
+
+    public function favoriteFoods()
+    {
+        return $this->belongsToMany(
+            MenuItem::class,     // Related model
+            'favorite_foods',    // Pivot table
+            'user_id',           // FK ng User sa pivot table
+            'menu_item_id'       // FK ng MenuItem sa pivot table
+        )->withTimestamps();
+    }
+
+    public function hasFavoritedFood(MenuItem $menuItem): bool
+    {
+        return $this->favoriteFoods()
+            ->wherePivot('menu_item_id', $menuItem->id)
+            ->exists();
+    }
+
+    // ============================================
+    // ROLE HELPERS
+    // ============================================
 
     public function isCustomer(): bool
     {
@@ -219,20 +259,25 @@ public function hasFavorited(Restaurant $restaurant): bool
         return !is_null($this->password_reset_otp_verified_at)
             && $this->password_reset_otp_verified_at->diffInMinutes(now()) <= 15;
     }
+
+    // ========================================
+    // AVATAR ACCESSORS
+    // ========================================
+
     public function getAvatarUrlAttribute(): string
-{
-    if (!$this->avatar) {
-        return '';
+    {
+        if (!$this->avatar) {
+            return '';
+        }
+
+        $path = storage_path('app/public/' . $this->avatar);
+
+        if (!file_exists($path)) {
+            return '';
+        }
+
+        return asset('storage/' . $this->avatar);
     }
-
-    $path = storage_path('app/public/' . $this->avatar);
-
-    if (!file_exists($path)) {
-        return '';
-    }
-
-    return asset('storage/' . $this->avatar);
-}
 
     public function getInitialsAttribute(): string
     {
@@ -265,16 +310,16 @@ public function hasFavorited(Restaurant $restaurant): bool
     }
 
     public function isOnline(): bool
-{
-    if (!$this->last_seen_at) {
-        return false;
+    {
+        if (!$this->last_seen_at) {
+            return false;
+        }
+
+        // Ensure na Carbon instance
+        $lastSeen = $this->last_seen_at instanceof \Carbon\Carbon
+            ? $this->last_seen_at
+            : \Carbon\Carbon::parse($this->last_seen_at);
+
+        return $lastSeen->diffInMinutes(now()) < 5;
     }
-
-    // Ensure na Carbon instance
-    $lastSeen = $this->last_seen_at instanceof \Carbon\Carbon
-        ? $this->last_seen_at
-        : \Carbon\Carbon::parse($this->last_seen_at);
-
-    return $lastSeen->diffInMinutes(now()) < 5;
-}
 }

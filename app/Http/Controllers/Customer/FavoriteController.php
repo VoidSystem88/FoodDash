@@ -10,22 +10,30 @@ use Illuminate\Http\Request;
 class FavoriteController extends Controller
 {
     /**
-     * Favorites page — list ng lahat ng favorite restaurants.
+     * Favorites page — list ng lahat ng favorite restaurants at foods.
      */
     public function index()
-    {
-        $favorites = auth()->user()
-            ->favoriteRestaurants()
-            ->where('is_open', true)
-            ->withCount('menuItems')
-            ->latest('favorites.created_at')
-            ->get();
+{
+    $user = auth()->user();
 
-        return view('customer.favorites', compact('favorites'));
-    }
+    // Favorite restaurants
+    $favorites = $user->favoriteRestaurants()
+        ->where('is_open', true)
+        ->withCount('menuItems')
+        ->latest('favorites.created_at')
+        ->get();
+
+    // Favorite foods
+    $favoriteFoods = $user->favoriteFoods()
+        ->with(['restaurant'])
+        ->latest('favorite_foods.created_at')
+        ->get();
+
+    return view('customer.favorites', compact('favorites', 'favoriteFoods'));
+}
 
     /**
-     * Toggle favorite (AJAX).
+     * Toggle favorite restaurant (AJAX).
      */
     public function toggle(Request $request, Restaurant $restaurant)
     {

@@ -40,11 +40,17 @@ class RestaurantController extends Controller
     }
 
     public function show(Restaurant $restaurant)
-    {
-        $restaurant->load(['menuItems' => function ($q) {
-            $q->where('is_available', true);
-        }]);
+{
+    $restaurant->load(['menuItems' => function ($q) {
+        $q->where('is_available', true);
+    }]);
 
-        return view('customer.restaurant-show', compact('restaurant'));
-    }
+    // ⭐ Load reviews para sa tab
+    $reviews = $restaurant->reviews()
+        ->with(['user', 'replies.user', 'votes'])
+        ->mostRecent()
+        ->paginate(5);
+
+    return view('customer.restaurant-show', compact('restaurant', 'reviews'));
+}
 }

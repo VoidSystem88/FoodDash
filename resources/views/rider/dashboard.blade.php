@@ -29,7 +29,7 @@
                 </div>
             </div>
 
-                        @if ($currentOrder)
+            @if ($currentOrder)
                 {{-- May active order — disabled toggle --}}
                 <button type="button"
                         disabled
@@ -107,7 +107,7 @@
     </div>
 
     {{-- ============================================ --}}
-    {{-- NEW: AVAILABLE OFFERS (Stacked, hindi popup) --}}
+    {{-- AVAILABLE OFFERS (Stacked, hindi popup) --}}
     {{-- ============================================ --}}
     <template x-if="offers.length > 0">
         <div class="mb-6">
@@ -155,35 +155,17 @@
 
                         {{-- BODY --}}
                         <div class="p-4">
-                                            {{-- PICKUP --}}
-                <div class="flex gap-4 mb-5 pb-5 border-b border-gray-100 dark:border-dark-700">
-                    <div class="flex-shrink-0">
-                        @if ($currentOrder->restaurant->profile_image_url)
-                            <img src="{{ $currentOrder->restaurant->profile_image_url }}"
-                                 alt="{{ $currentOrder->restaurant->name }}"
-                                 class="w-14 h-14 rounded-xl object-cover border-2 border-red-300 dark:border-red-800 shadow-sm">
-                        @else
-                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white text-xl font-bold shadow-sm">
-                                {{ strtoupper(substr($currentOrder->restaurant->name, 0, 1)) }}
+                            {{-- PICKUP (para sa OFFER — galing sa Alpine variable, hindi $currentOrder) --}}
+                            <div class="flex items-start gap-2 mb-3">
+                                <div class="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-950/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <span class="text-xs">🏪</span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-[10px] text-gray-500 dark:text-neutral-400 uppercase tracking-wide font-medium">Pickup From</p>
+                                    <p class="text-sm font-semibold text-gray-900 dark:text-neutral-100 line-clamp-1" x-text="offer.restaurant"></p>
+                                    <p class="text-xs text-gray-500 dark:text-neutral-400 line-clamp-1" x-text="offer.restaurant_address"></p>
+                                </div>
                             </div>
-                        @endif
-                    </div>
-
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs text-gray-500 dark:text-neutral-400 uppercase tracking-wide font-medium mb-1">Pickup From</p>
-                        <p class="font-bold text-gray-900 dark:text-neutral-100">{{ $currentOrder->restaurant->name }}</p>
-                        <p class="text-sm text-gray-600 dark:text-neutral-400 mt-0.5">{{ $currentOrder->restaurant->address }}</p>
-
-                        <div class="flex items-center gap-2 mt-3 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
-                            <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            <span class="text-xs font-medium text-gray-700 dark:text-neutral-300">Pay restaurant:</span>
-                            <span class="text-sm font-bold text-red-600 dark:text-red-400">₱{{ number_format($currentOrder->restaurant_earnings ?? $currentOrder->food_cost, 2) }}</span>
-                        </div>
-                    </div>
-                </div>
 
                             {{-- DROPOFF --}}
                             <div class="flex items-start gap-2 mb-3">
@@ -287,16 +269,16 @@
             </div>
 
             <div class="p-6">
-                                {{-- PICKUP --}}
+                {{-- PICKUP — safe na may null check --}}
                 <div class="flex gap-4 mb-5 pb-5 border-b border-gray-100 dark:border-dark-700">
                     <div class="relative flex-shrink-0">
-                        @if ($currentOrder->restaurant->profile_image_url)
+                        @if ($currentOrder->restaurant && $currentOrder->restaurant->profile_image_url)
                             <img src="{{ $currentOrder->restaurant->profile_image_url }}"
                                  alt="{{ $currentOrder->restaurant->name }}"
                                  class="w-12 h-12 rounded-xl object-cover border-2 border-red-300 dark:border-red-800 shadow-sm">
                         @else
                             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white text-lg font-bold shadow-sm">
-                                {{ strtoupper(substr($currentOrder->restaurant->name, 0, 1)) }}
+                                {{ $currentOrder->restaurant ? strtoupper(substr($currentOrder->restaurant->name, 0, 1)) : '?' }}
                             </div>
                         @endif
                         {{-- Badge --}}
@@ -306,8 +288,15 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-xs text-gray-500 dark:text-neutral-400 uppercase tracking-wide font-medium mb-0.5">Pickup From</p>
-                        <p class="font-bold text-gray-900 dark:text-neutral-100">{{ $currentOrder->restaurant->name }}</p>
-                        <p class="text-sm text-gray-600 dark:text-neutral-400 mt-0.5">{{ $currentOrder->restaurant->address }}</p>
+
+                        {{-- Safe null coalescing operator --}}
+                        <p class="font-bold text-gray-900 dark:text-neutral-100">
+                            {{ $currentOrder->restaurant->name ?? 'Restaurant not found' }}
+                        </p>
+
+                        <p class="text-sm text-gray-600 dark:text-neutral-400 mt-0.5">
+                            {{ $currentOrder->restaurant->address ?? 'Address unavailable' }}
+                        </p>
 
                         <div class="flex items-center gap-2 mt-3 bg-red-50 dark:bg-red-950/30 rounded-lg px-3 py-2">
                             <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -315,12 +304,14 @@
                                       d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                             <span class="text-xs font-medium text-gray-700 dark:text-neutral-300">Pay restaurant:</span>
-                            <span class="text-sm font-bold text-red-600 dark:text-red-400">₱{{ number_format($currentOrder->restaurant_earnings ?? $currentOrder->food_cost, 2) }}</span>
+                            <span class="text-sm font-bold text-red-600 dark:text-red-400">
+                                ₱{{ number_format($currentOrder->restaurant_earnings ?? $currentOrder->food_cost, 2) }}
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                                {{-- DROP-OFF --}}
+                {{-- DROP-OFF --}}
                 <div class="flex gap-4 mb-5 pb-5 border-b border-gray-100 dark:border-dark-700">
                     <div class="flex-shrink-0">
                         @php
@@ -421,8 +412,8 @@
                 {{-- CHAT WITH CUSTOMER --}}
                 @if ($currentOrder->canChat())
                     <div x-data="chatBox({{ $currentOrder->id }})"
-     x-init="init()"   ← IMPORTANT
-     class="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+                         x-init="init()"
+                         class="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
 
                         <div class="bg-gray-50 dark:bg-dark-850 px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-700 transition"
                              @click="isOpen = !isOpen">
@@ -452,8 +443,8 @@
 
                         <div x-show="isOpen" x-cloak x-transition>
                             <div x-ref="messagesContainer"
-                                 @scroll="onScroll()"
-                                 class="h-80 overflow-y-auto p-4 space-y-2 bg-gray-50 dark:bg-dark-850">
+     @scroll="onScroll()"
+     class="chat-scroll h-80 overflow-y-auto p-4 space-y-2 bg-gray-50 dark:bg-dark-850">
                                 <template x-if="loading">
                                     <p class="text-center text-sm text-gray-500 dark:text-neutral-400 py-4">Loading messages...</p>
                                 </template>
@@ -467,57 +458,57 @@
                                 </template>
 
                                 <template x-for="msg in messages" :key="msg.id">
-    <div :class="msg.sender_id === currentUserId ? 'flex justify-end' : 'flex justify-start'"
-         class="chat-message gap-2 items-end">
+                                    <div :class="msg.sender_id === currentUserId ? 'flex justify-end' : 'flex justify-start'"
+                                         class="chat-message gap-2 items-end">
 
-        {{-- ⭐ AVATAR — left side para sa kausap --}}
-        <template x-if="msg.sender_id !== currentUserId">
-            <div class="flex-shrink-0">
-                <template x-if="msg.sender_avatar_url">
-                    <img :src="msg.sender_avatar_url"
-                         :alt="msg.sender_name"
-                         class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
-                </template>
-                <template x-if="!msg.sender_avatar_url">
-                    <div :class="msg.sender_avatar_color || 'bg-gray-500'"
-                         class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
-                         x-text="msg.sender_initials || '?'"></div>
-                </template>
-            </div>
-        </template>
+                                        {{-- AVATAR — left side para sa kausap --}}
+                                        <template x-if="msg.sender_id !== currentUserId">
+                                            <div class="flex-shrink-0">
+                                                <template x-if="msg.sender_avatar_url">
+                                                    <img :src="msg.sender_avatar_url"
+                                                         :alt="msg.sender_name"
+                                                         class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
+                                                </template>
+                                                <template x-if="!msg.sender_avatar_url">
+                                                    <div :class="msg.sender_avatar_color || 'bg-gray-500'"
+                                                         class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
+                                                         x-text="msg.sender_initials || '?'"></div>
+                                                </template>
+                                            </div>
+                                        </template>
 
-        {{-- MESSAGE BUBBLE --}}
-        <div :class="msg.sender_id === currentUserId
-                ? 'bg-orange-600 text-white rounded-br-none'
-                : 'bg-white dark:bg-dark-850 text-gray-900 dark:text-neutral-100 border border-gray-200 dark:border-dark-700 rounded-bl-none'"
-             class="max-w-[75%] px-3 py-2 rounded-2xl shadow-sm transition-all duration-200">
-            <p class="text-xs font-medium mb-0.5 opacity-75"
-               x-text="msg.sender_name"></p>
-            <p class="text-sm break-words whitespace-pre-wrap"
-               x-text="msg.body"></p>
-            <div class="flex items-center justify-end gap-1 mt-1">
-                <span class="text-[10px] opacity-60"
-                      x-text="msg.created_at_human"></span>
-            </div>
-        </div>
+                                        {{-- MESSAGE BUBBLE --}}
+                                        <div :class="msg.sender_id === currentUserId
+                                                ? 'bg-orange-600 text-white rounded-br-none'
+                                                : 'bg-white dark:bg-dark-850 text-gray-900 dark:text-neutral-100 border border-gray-200 dark:border-dark-700 rounded-bl-none'"
+                                             class="max-w-[75%] px-3 py-2 rounded-2xl shadow-sm transition-all duration-200">
+                                            <p class="text-xs font-medium mb-0.5 opacity-75"
+                                               x-text="msg.sender_name"></p>
+                                            <p class="text-sm break-words whitespace-pre-wrap"
+                                               x-text="msg.body"></p>
+                                            <div class="flex items-center justify-end gap-1 mt-1">
+                                                <span class="text-[10px] opacity-60"
+                                                      x-text="msg.created_at_human"></span>
+                                            </div>
+                                        </div>
 
-        {{-- ⭐ AVATAR — right side para sa sarili --}}
-        <template x-if="msg.sender_id === currentUserId">
-            <div class="flex-shrink-0">
-                <template x-if="msg.sender_avatar_url">
-                    <img :src="msg.sender_avatar_url"
-                         :alt="msg.sender_name"
-                         class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
-                </template>
-                <template x-if="!msg.sender_avatar_url">
-                    <div :class="msg.sender_avatar_color || 'bg-orange-500'"
-                         class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
-                         x-text="msg.sender_initials || '?'"></div>
-                </template>
-            </div>
-        </template>
-    </div>
-</template>
+                                        {{-- AVATAR — right side para sa sarili --}}
+                                        <template x-if="msg.sender_id === currentUserId">
+                                            <div class="flex-shrink-0">
+                                                <template x-if="msg.sender_avatar_url">
+                                                    <img :src="msg.sender_avatar_url"
+                                                         :alt="msg.sender_name"
+                                                         class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
+                                                </template>
+                                                <template x-if="!msg.sender_avatar_url">
+                                                    <div :class="msg.sender_avatar_color || 'bg-orange-500'"
+                                                         class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
+                                                         x-text="msg.sender_initials || '?'"></div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
 
                                 <template x-if="typingName">
                                     <div class="flex justify-start">
@@ -611,8 +602,6 @@
     {{-- ============================================ --}}
     {{-- WAITING / OFFLINE STATE --}}
     {{-- ============================================ --}}
- 
-
     @if (!$currentOrder && $rider->is_online)
         <div x-show="offers.length === 0" class="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-10 text-center transition-colors">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-950/40 mb-4">
@@ -689,7 +678,6 @@ function riderDash(riderId) {
         },
 
         async loadExistingOffers() {
-            // Refresh offers list on load (para sa mga nauna nang nag-offer)
             try {
                 const res = await fetch('/rider/offers/active', {
                     headers: {
@@ -712,12 +700,11 @@ function riderDash(riderId) {
                     }));
                 }
             } catch (err) {
-                // silent — baka walang route
+                // silent
             }
         },
 
         async loadOffer(orderId) {
-            // Skip kung nasa list na
             if (this.offers.find(o => o.order_id === orderId)) return;
 
             try {
@@ -779,12 +766,10 @@ function riderDash(riderId) {
             } catch (e) { /* silent */ }
         },
 
-                async toggleOnline() {
+        async toggleOnline() {
             if (this.toggling) return;
 
-            // ⭐ CHECK kung may active order
             @if ($currentOrder)
-                // May active order — huwag payagan mag-offline
                 if (this.online) {
                     alert('⚠️ Cannot go offline — you have an active delivery (Order #{{ $currentOrder->id }}). Complete it first.');
                     return;
@@ -805,7 +790,6 @@ function riderDash(riderId) {
                 const data = await res.json();
 
                 if (!data.ok) {
-                    // Server rejected — may active order pala
                     alert('⚠️ ' + (data.message || 'Cannot toggle status'));
                     this.online = data.is_online;
                     this.toggling = false;
@@ -908,7 +892,6 @@ function chatBox(orderId) {
         init() {
             console.log('💬 Rider chatBox.init() for order:', orderId);
 
-            // ⭐ LEAVE muna para walang lumang listener
             if (window.Echo) {
                 window.Echo.leave(`order.${orderId}.chat`);
                 console.log('🚪 Left old channel');
@@ -916,7 +899,6 @@ function chatBox(orderId) {
 
             this.loadMessages();
 
-            // ⭐ DELAY subscribe para siguradong cleared
             setTimeout(() => {
                 this.subscribeToChat(orderId);
             }, 300);
@@ -966,19 +948,31 @@ function chatBox(orderId) {
             });
 
             chatChannel.listen('.user.typing', (e) => {
-                if (e.user_id === this.currentUserId) return;
-                this.typingName = e.is_typing ? e.user_name : '';
-            });
+    if (e.user_id === this.currentUserId) return;
 
-            chatChannel.listen('.messages.read', (e) => {
-                if (e.reader_id === this.currentUserId) return;
-                this.messages.forEach(m => {
-                    if (e.message_ids.includes(m.id) && m.sender_id === this.currentUserId) {
-                        m.status = 'seen';
-                        m.read_at = e.read_at;
-                    }
-                });
-            });
+    const wasTyping = this.typingName;
+    this.typingName = e.is_typing ? e.user_name : '';
+
+    // ⭐ Auto-scroll kapag nagsimula mag-type ang kausap
+    if (e.is_typing && !wasTyping && this.isAtBottom) {
+        this.$nextTick(() => this.scrollToBottom());
+    }
+});
+
+            chatChannel.listen('.message.sent', (e) => {
+    if (e.sender_id === this.currentUserId) return;
+
+    e.status = 'received';
+    this.messages.push(e);
+
+    // ⭐ Auto-scroll sa bawat bagong message, pero hindi kapag nag-scroll up ang user
+    if (this.isAtBottom) {
+        this.markAsRead();
+        this.$nextTick(() => this.scrollToBottom());
+    } else {
+        this.unread++;
+    }
+});
 
             this.channel = chatChannel;
             this.listenerAttached = true;
@@ -1130,4 +1124,3 @@ function chatBox(orderId) {
 }
 </script>
 @endpush
-
