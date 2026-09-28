@@ -158,6 +158,10 @@
                                 @endif
                                 {{ Str::limit($lastMessage->body, 50) }}
                             </p>
+                        @elseif ($convo['is_active'])
+                            <p class="text-sm text-orange-600 dark:text-orange-400 italic truncate mt-0.5">
+                                Tap to start chatting...
+                            </p>
                         @endif
                     </div>
 

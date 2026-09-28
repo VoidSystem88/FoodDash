@@ -20,6 +20,7 @@ class User extends Authenticatable
         'status',
         'phone',
         'avatar',
+        'gender',
         'last_seen_at',
         'otp_code',
         'otp_expires_at',
@@ -50,7 +51,17 @@ class User extends Authenticatable
             'last_seen_at' => 'datetime',
         ];
     }
-
+    /**
+ * Kunin ang customer marker icon base sa gender.
+ */
+public function getCustomerMarkerIconAttribute(): string
+{
+    return match ($this->gender) {
+        'female' => '/images/customergirl.png',
+        'male' => '/images/customerman.png',
+        default => '/images/customerman.png',  // default fallback
+    };
+}
     // ============================================
     // RELATIONSHIPS — Role-specific
     // ============================================

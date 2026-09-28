@@ -168,17 +168,38 @@ class Restaurant extends Model
     }
 
     public function isOpenNow(): bool
-    {
-        if (!$this->is_open) return false;
-        if (!$this->hasSchedule()) return true;
-
-        $today = $this->todayHours;
-        if (!$today || !$today->is_open) return false;
-        if (!$today->open_time || !$today->close_time) return false;
-
-        $now = now()->format('H:i:s');
-        return $now >= $today->open_time && $now < $today->close_time;
+{
+    // (1) Manually closed → always closed (owner override)
+    if (!$this->is_open) {
+        return false;
     }
+
+    // (2) Manually open + walang schedule → always open
+    if (!$this->hasSchedule()) {
+        return true;
+    }
+
+    $today = $this->todayHours;
+
+    // (3) Manually open, may schedule ngayon at bukas
+    //     → i-validate kung nasa loob ng oras
+    if ($today && $today->is_open && $today->open_time && $today->close_time) {
+        $now = now()->format('H:i:s');
+
+        // Kung within schedule, open. Kung labas, closed.
+        // PERO: kung manually ni-open ng owner, override.
+        // Paano natin malalaman ang override? Kung ang owner ay nag-toggle
+        // ng Open, naka-set ang `is_open = true`. Ang schedule check ay
+        // pang-auto-close lang kapag LUMIPAS na ang closing time.
+        //
+        // Gusto natin: manual Open = panalo sa schedule.
+        return true;
+    }
+
+    // (4) Manually open PERO sarado ang schedule ngayon
+    //     → manual override, ituring na OPEN
+    return true;
+}
 
     public function getStatusLabelAttribute(): string
     {

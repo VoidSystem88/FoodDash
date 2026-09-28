@@ -43,16 +43,54 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Phone</label>
-                <input type="text" name="phone" value="{{ old('phone', $user->phone) }}"
-                       placeholder="09171234567"
-                       class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-            </div>
+    <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Phone</label>
+    <input type="text" name="phone" value="{{ old('phone', $user->phone) }}"
+           placeholder="09171234567"
+           class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+</div>
 
-            <button type="submit"
-                    class="bg-orange-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-orange-700 transition">
-                Save Changes
-            </button>
+{{-- ⭐ GENDER SELECTOR --}}
+@if ($user->isCustomer())
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-neutral-300 mb-1">Gender</label>
+        <div class="grid grid-cols-2 gap-2">
+            <label class="cursor-pointer">
+                <input type="radio"
+                       name="gender"
+                       value="male"
+                       @checked(old('gender', $user->gender) === 'male')
+                       class="peer sr-only">
+                <div class="flex items-center justify-center gap-2 border-2 border-gray-200 dark:border-dark-600 rounded-xl py-3 transition peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/30 hover:bg-gray-50 dark:hover:bg-dark-850">
+                    <svg class="w-5 h-5 text-gray-500 dark:text-neutral-400 peer-checked:text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span class="text-sm font-medium text-gray-700 dark:text-neutral-300">Male</span>
+                </div>
+            </label>
+            <label class="cursor-pointer">
+                <input type="radio"
+                       name="gender"
+                       value="female"
+                       @checked(old('gender', $user->gender) === 'female')
+                       class="peer sr-only">
+                <div class="flex items-center justify-center gap-2 border-2 border-gray-200 dark:border-dark-600 rounded-xl py-3 transition peer-checked:border-pink-500 peer-checked:bg-pink-50 dark:peer-checked:bg-pink-950/30 hover:bg-gray-50 dark:hover:bg-dark-850">
+                    <svg class="w-5 h-5 text-gray-500 dark:text-neutral-400 peer-checked:text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span class="text-sm font-medium text-gray-700 dark:text-neutral-300">Female</span>
+                </div>
+            </label>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-neutral-400 mt-1.5">
+            Makikita ng rider ang icon na tumutugma sa iyong gender sa mapa.
+        </p>
+    </div>
+@endif
+
+<button type="submit"
+        class="bg-orange-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-orange-700 transition">
+    Save Changes
+</button>
         </form>
     </div>
 

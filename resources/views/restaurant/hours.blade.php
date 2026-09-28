@@ -149,7 +149,6 @@
 @endsection
 
 @push('scripts')
-<script src="//unpkg.com/alpinejs" defer></script>
 <style>
     .active\:scale-98:active { transform: scale(0.98); }
 </style>
@@ -157,16 +156,12 @@
 function hoursForm() {
     return {
         setAllDays(isOpen, openTime = '09:00', closeTime = '21:00') {
-            // Hanapin lahat ng time inputs at i-set
+            // Set all time inputs
             document.querySelectorAll('input[type="time"]').forEach((el, idx) => {
-                if (idx % 2 === 0) {
-                    el.value = openTime;
-                } else {
-                    el.value = closeTime;
-                }
+                el.value = idx % 2 === 0 ? openTime : closeTime;
             });
 
-            // I-trigger ang Alpine models
+            // Trigger Alpine models
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                 cb.checked = isOpen;
                 cb.dispatchEvent(new Event('change'));

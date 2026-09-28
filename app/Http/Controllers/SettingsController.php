@@ -22,20 +22,27 @@ class SettingsController extends Controller
      * Update personal info.
      */
     public function updateProfile(Request $request)
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-        ]);
+    $data = $request->validate([
+        'name' => 'required|string|max:255',
+        'phone' => 'nullable|string|max:20',
+        'gender' => 'nullable|in:male,female',
+    ]);
 
-        $user->name = $data['name'];
-        $user->phone = $data['phone'] ?? null;
-        $user->save();
+    $user->name = $data['name'];
+    $user->phone = $data['phone'] ?? null;
 
-        return back()->with('success', 'Profile updated successfully.');
+    // Gender — para sa customer marker icon lang
+    if ($user->isCustomer()) {
+        $user->gender = $data['gender'] ?? null;
     }
+
+    $user->save();
+
+    return back()->with('success', 'Profile updated successfully.');
+}
 
     /**
      * Update password.

@@ -17,8 +17,16 @@ class ChatController extends Controller
         $showHidden = $request->boolean('show_hidden');
 
         $query = Order::with(['restaurant', 'rider.user', 'items'])
-            ->where('customer_id', $userId)
-            ->whereHas('messages');
+        ->where('customer_id', $userId)
+        ->where(function ($q) {
+            // May existing messages
+            $q->whereHas('messages')
+            // O active order (para lumabas agad ang chat kahit walang messages)
+            ->orWhere(function ($sub) {
+                $sub->whereNotNull('rider_id')
+                    ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery']);
+            });
+        });
 
         // Filter: kung hindi show_hidden, hindi ipakita ang hidden (o may bagong message)
         if (!$showHidden) {

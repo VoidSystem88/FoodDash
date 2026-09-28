@@ -39,21 +39,28 @@ class AvailabilityController extends Controller
      * Chat inbox — listahan ng lahat ng orders na may messages.
      */
     public function chatInbox(Request $request)
-    {
-        $rider = auth()->user()->rider;
-        $userId = auth()->id();
-        $showHidden = $request->boolean('show_hidden');
+{
+    $rider = auth()->user()->rider;
+    $userId = auth()->id();
+    $showHidden = $request->boolean('show_hidden');
 
-        if (!$rider) {
-            return view('rider.chat-inbox', [
-                'conversations' => collect(),
-                'showHidden' => $showHidden,
-            ]);
-        }
+    if (!$rider) {
+        return view('rider.chat-inbox', [
+            'conversations' => collect(),
+            'showHidden' => $showHidden,
+        ]);
+    }
 
-        $query = Order::with(['restaurant', 'customer', 'items'])
-            ->where('rider_id', $rider->id)
-            ->whereHas('messages');
+    $query = Order::with(['restaurant', 'customer', 'items'])
+        ->where('rider_id', $rider->id)
+        ->where(function ($q) {
+            // May existing messages
+            $q->whereHas('messages')
+              // O active order (para lumabas agad ang chat kahit walang messages)
+              ->orWhere(function ($sub) {
+                  $sub->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery']);
+              });
+        });
 
         // Filter: kung hindi show_hidden, hindi ipakita ang hidden (o may bagong message)
         if (!$showHidden) {

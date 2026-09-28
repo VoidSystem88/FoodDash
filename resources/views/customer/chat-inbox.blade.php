@@ -14,14 +14,7 @@
             </div>
 
             <div class="flex items-center gap-2">
-                {{-- Toggle hidden --}}
-                <a href="{{ route('customer.chat', ['show_hidden' => $showHidden ? 0 : 1]) }}"
-                   class="inline-flex items-center gap-2 text-sm {{ $showHidden ? 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800' : 'text-gray-600 dark:text-neutral-400 border-gray-200 dark:border-dark-600' }} border px-3 py-2 rounded-lg font-medium transition hover:bg-gray-50 dark:hover:bg-dark-850">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                    </svg>
-                    <span class="hidden sm:inline">{{ $showHidden ? 'Hide Cleared' : 'Show Cleared' }}</span>
-                </a>
+              
 
                 @if ($conversations->count() > 0)
                     <div x-data="{ showConfirm: false }">
@@ -88,8 +81,8 @@
     @if ($conversations->isEmpty())
         {{-- EMPTY STATE --}}
         <div class="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-12 text-center">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-dark-850 mb-4">
-                <svg class="w-10 h-10 text-gray-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-orange-50 dark:bg-orange-950/40 mb-4">
+                <svg class="w-10 h-10 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
             </div>
@@ -136,7 +129,7 @@
                         @endif
 
                         @if ($convo['is_active'])
-                            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white dark:border-dark-800 rounded-full"></span>
+                            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-orange-500 border-2 border-white dark:border-dark-800 rounded-full"></span>
                         @endif
                     </div>
 
@@ -175,7 +168,7 @@
                                 Cleared
                             </span>
                         @elseif ($convo['is_active'])
-                            <span class="text-[10px] bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
+                            <span class="text-[10px] bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
                                 Active
                             </span>
                         @else

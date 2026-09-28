@@ -6,10 +6,10 @@
     {{-- ============================================ --}}
     {{-- HERO HEADER --}}
     {{-- ============================================ --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-red-500 via-red-500 to-pink-600 rounded-2xl shadow-xl text-white">
+    <div class="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-500 to-orange-600 rounded-2xl shadow-xl text-white">
 
         <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl opacity-10 -mr-20 -mt-20"></div>
-        <div class="absolute bottom-0 left-0 w-48 h-48 bg-pink-300 rounded-full blur-3xl opacity-20 -ml-16 -mb-16"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-yellow-300 rounded-full blur-3xl opacity-20 -ml-16 -mb-16"></div>
 
         <div class="relative p-6">
             <div class="flex items-center gap-3 mb-4">
@@ -91,8 +91,8 @@
         <div x-show="tab === 'restaurants'" x-cloak>
             @if ($favorites->isEmpty())
                 <div class="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-12 text-center">
-                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-50 dark:bg-red-950/40 mb-4">
-                        <svg class="w-10 h-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-orange-50 dark:bg-orange-950/40 mb-4">
+                        <svg class="w-10 h-10 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                     </div>
@@ -132,13 +132,13 @@
                                     {{-- OPEN/CLOSED BADGE --}}
                                     <div class="absolute top-2 left-2 z-10">
                                         @if ($isOpen)
-                                            <span class="inline-flex items-center gap-1 bg-white/95 dark:bg-dark-800/95 backdrop-blur text-green-700 dark:text-green-400 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                            <span class="inline-flex items-center gap-1 bg-white/95 dark:bg-dark-800/95 backdrop-blur text-orange-700 dark:text-orange-300 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
                                                 Open
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center gap-1 bg-white/95 dark:bg-dark-800/95 backdrop-blur text-red-700 dark:text-red-400 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                            <span class="inline-flex items-center gap-1 bg-white/95 dark:bg-dark-800/95 backdrop-blur text-gray-700 dark:text-neutral-300 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
                                                 Closed
                                             </span>
                                         @endif
@@ -154,7 +154,7 @@
                                     </div>
 
                                     @if ($restaurant->display_badge)
-                                        <span class="inline-block text-[10px] bg-amber-800 dark:bg-amber-900 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider mb-2">
+                                        <span class="inline-block text-[10px] bg-orange-800 dark:bg-orange-900 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider mb-2">
                                             {{ $restaurant->display_badge }}
                                         </span>
                                     @endif
@@ -170,7 +170,7 @@
                                     <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-dark-700">
                                         <div class="flex items-center gap-1 text-xs">
                                             @if ($restaurant->rating_count > 0)
-                                                <svg class="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" viewBox="0 0 20 20">
+                                                <svg class="w-3.5 h-3.5 text-orange-500 fill-orange-500" viewBox="0 0 20 20">
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                 </svg>
                                                 <span class="font-bold text-gray-900 dark:text-neutral-100">
@@ -200,7 +200,7 @@
                                     :disabled="loading"
                                     title="Remove from favorites"
                                     class="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/95 dark:bg-dark-800/95 backdrop-blur shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition">
-                                <svg class="w-4 h-4 text-red-500 fill-red-500" viewBox="0 0 24 24" fill="currentColor">
+                                <svg class="w-4 h-4 text-orange-500 fill-orange-500" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                 </svg>
                             </button>
@@ -265,7 +265,7 @@
                                         type="button"
                                         :disabled="loading"
                                         class="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-white/95 dark:bg-dark-800/95 backdrop-blur shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition">
-                                    <svg class="w-4 h-4 text-red-500 fill-red-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <svg class="w-4 h-4 text-orange-500 fill-orange-500" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                     </svg>
                                 </button>

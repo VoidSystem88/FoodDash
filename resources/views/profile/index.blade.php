@@ -3,10 +3,8 @@
 @section('content')
 <div class="max-w-2xl mx-auto" x-data="profileAvatar()">
 
-    
-
     @if (session('success'))
-        <div class="mb-4 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300 rounded-lg text-sm">
+        <div class="mb-4 p-3 bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-300 rounded-lg text-sm">
             {{ session('success') }}
         </div>
     @endif
@@ -40,9 +38,9 @@
                     </svg>
                 </div>
 
-                {{-- GREEN/GRAY DOT --}}
+                {{-- ONLINE DOT --}}
                 @if ($user->isOnline())
-                    <span class="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-4 border-white dark:border-dark-800 rounded-full"></span>
+                    <span class="absolute bottom-1 right-1 w-5 h-5 bg-orange-500 border-4 border-white dark:border-dark-800 rounded-full"></span>
                 @else
                     <span class="absolute bottom-1 right-1 w-5 h-5 bg-gray-400 border-4 border-white dark:border-dark-800 rounded-full"></span>
                 @endif
@@ -79,8 +77,8 @@
          x-data="themeToggle()">
 
         <div class="px-6 py-4 border-b border-gray-100 dark:border-dark-700 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-indigo-900/40 dark:to-indigo-950/40 flex items-center justify-center">
-                <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/40 dark:to-orange-950/40 flex items-center justify-center">
+                <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
@@ -98,19 +96,18 @@
                 <button type="button"
                         @click="setTheme('light')"
                         :class="theme === 'light'
-                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 ring-2 ring-indigo-500'
+                                ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 ring-2 ring-orange-500'
                                 : 'border-gray-200 dark:border-dark-600 hover:border-gray-300 dark:hover:border-gray-600'"
                         class="relative border-2 rounded-xl p-3 flex flex-col items-center gap-2 transition">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                         :class="theme === 'light' ? 'text-amber-500' : 'text-gray-400 dark:text-neutral-500'">
+                         :class="theme === 'light' ? 'text-orange-500' : 'text-gray-400 dark:text-neutral-500'">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                     <span class="text-xs font-medium text-gray-700 dark:text-neutral-300">Light</span>
 
-                    {{-- Check badge sa upper-right --}}
                     <template x-if="theme === 'light'">
-                        <span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-indigo-500 flex items-center justify-center">
+                        <span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center">
                             <svg class="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                             </svg>
@@ -122,19 +119,18 @@
                 <button type="button"
                         @click="setTheme('dark')"
                         :class="theme === 'dark'
-                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 ring-2 ring-indigo-500'
+                                ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 ring-2 ring-orange-500'
                                 : 'border-gray-200 dark:border-dark-600 hover:border-gray-300 dark:hover:border-gray-600'"
                         class="relative border-2 rounded-xl p-3 flex flex-col items-center gap-2 transition">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                         :class="theme === 'dark' ? 'text-indigo-400' : 'text-gray-400 dark:text-neutral-500'">
+                         :class="theme === 'dark' ? 'text-orange-500' : 'text-gray-400 dark:text-neutral-500'">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                     </svg>
                     <span class="text-xs font-medium text-gray-700 dark:text-neutral-300">Dark</span>
 
-                    {{-- Check badge sa upper-right --}}
                     <template x-if="theme === 'dark'">
-                        <span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-indigo-500 flex items-center justify-center">
+                        <span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center">
                             <svg class="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                             </svg>
@@ -146,19 +142,18 @@
                 <button type="button"
                         @click="setTheme('system')"
                         :class="theme === 'system'
-                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 ring-2 ring-indigo-500'
+                                ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/40 ring-2 ring-orange-500'
                                 : 'border-gray-200 dark:border-dark-600 hover:border-gray-300 dark:hover:border-gray-600'"
                         class="relative border-2 rounded-xl p-3 flex flex-col items-center gap-2 transition">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                         :class="theme === 'system' ? 'text-indigo-500' : 'text-gray-400 dark:text-neutral-500'">
+                         :class="theme === 'system' ? 'text-orange-500' : 'text-gray-400 dark:text-neutral-500'">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                               d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                     <span class="text-xs font-medium text-gray-700 dark:text-neutral-300">System</span>
 
-                    {{-- Check badge sa upper-right --}}
                     <template x-if="theme === 'system'">
-                        <span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-indigo-500 flex items-center justify-center">
+                        <span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center">
                             <svg class="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                             </svg>
@@ -180,7 +175,7 @@
             </p>
         </div>
     </div>
-    
+
     {{-- STATS --}}
     @if ($stats)
         <div class="grid grid-cols-3 gap-3 mb-4">
@@ -191,7 +186,7 @@
                 </div>
                 <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4 text-center transition-colors">
                     <p class="text-xs text-gray-500 dark:text-neutral-400">Delivered</p>
-                    <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $stats['delivered_orders'] }}</p>
+                    <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ $stats['delivered_orders'] }}</p>
                 </div>
                 <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4 text-center transition-colors">
                     <p class="text-xs text-gray-500 dark:text-neutral-400">Total Spent</p>
@@ -204,7 +199,7 @@
                 </div>
                 <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4 text-center transition-colors">
                     <p class="text-xs text-gray-500 dark:text-neutral-400">Earnings</p>
-                    <p class="text-2xl font-bold text-green-600 dark:text-green-400">₱{{ number_format($stats['total_earnings'], 0) }}</p>
+                    <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">₱{{ number_format($stats['total_earnings'], 0) }}</p>
                 </div>
                 <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4 text-center transition-colors">
                     <p class="text-xs text-gray-500 dark:text-neutral-400">Rating</p>
@@ -217,7 +212,7 @@
                 </div>
                 <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4 text-center transition-colors">
                     <p class="text-xs text-gray-500 dark:text-neutral-400">Sales</p>
-                    <p class="text-2xl font-bold text-green-600 dark:text-green-400">₱{{ number_format($stats['total_sales'], 0) }}</p>
+                    <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">₱{{ number_format($stats['total_sales'], 0) }}</p>
                 </div>
                 <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-lg p-4 text-center transition-colors">
                     <p class="text-xs text-gray-500 dark:text-neutral-400">Rating</p>
@@ -271,8 +266,6 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </a>
-
-        
 
         {{-- LOGOUT --}}
         <div x-data="{ showLogout: false }">
@@ -350,26 +343,21 @@ function profileAvatar() {
             const file = e.target.files[0];
             if (!file) return;
 
-            // Validate size (5MB)
             if (file.size > 5 * 1024 * 1024) {
                 alert('File is too large. Maximum 5MB.');
                 e.target.value = '';
                 return;
             }
 
-            // Validate type
             if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
                 alert('Invalid file type. Use JPG, PNG, or WebP.');
                 e.target.value = '';
                 return;
             }
 
-            // Store temporarily sa sessionStorage
             const reader = new FileReader();
             reader.onload = (ev) => {
                 sessionStorage.setItem('temp_avatar_image', ev.target.result);
-
-                // Redirect sa crop page
                 window.location.href = '{{ route('profile.avatar') }}';
             };
             reader.readAsDataURL(file);
@@ -401,6 +389,5 @@ function themeToggle() {
         }
     }
 }
-
 </script>
 @endpush

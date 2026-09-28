@@ -97,14 +97,6 @@
                         <p class="text-sm break-words whitespace-pre-wrap" x-text="msg.body"></p>
                         <div class="flex items-center justify-end gap-1 mt-1">
                             <span class="text-[10px] opacity-60" x-text="msg.created_at_human"></span>
-                            <template x-if="msg.sender_id === currentUserId">
-                                <span class="text-[10px] leading-none"
-                                      :class="msg.status === 'seen' ? 'text-blue-200 font-bold' : 'opacity-70'">
-                                    <span x-show="msg.status === 'sent'">🕐</span>
-                                    <span x-show="msg.status === 'delivered'">✓</span>
-                                    <span x-show="msg.status === 'seen'">✓✓</span>
-                                </span>
-                            </template>
                         </div>
                     </div>
 
@@ -124,7 +116,6 @@
                     </template>
                 </div>
             </template>
-
             <template x-if="typingName">
                 <div class="flex justify-start">
                     <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 px-3 py-2 rounded-2xl rounded-bl-none shadow-sm">
@@ -137,44 +128,139 @@
                     </div>
                 </div>
             </template>
+            {{-- ⭐ STATUS INDICATOR — nasa pinakababa, para lang sa huling message mo --}}
+<template x-if="!typingName && lastMessageIsMine && lastOwnMessage">
+    <div class="flex justify-end pr-1 mt-1">
+
+        {{-- "Sending..." text --}}
+        <template x-if="lastOwnMessage.status === 'sent'">
+            <p class="text-[10px] text-gray-400 dark:text-neutral-500 italic">
+                Sending...
+            </p>
+        </template>
+
+        {{-- Hollow orange check — delivered (hindi pa nabasa) --}}
+        <template x-if="lastOwnMessage.status === 'delivered'">
+            <div class="w-4 h-4 rounded-full border-2 border-orange-500 flex items-center justify-center">
+                <svg class="w-2.5 h-2.5 text-orange-500"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+        </template>
+
+        {{-- Solid orange check — seen (nabasa na) --}}
+        <template x-if="lastOwnMessage.status === 'seen'">
+            <div class="w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center shadow-sm">
+                <svg class="w-2.5 h-2.5 text-white"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+        </template>
+
+    </div>
+</template>>
         </div>
 
-        {{-- INPUT — flex-shrink-0 --}}
-        <div class="border-t border-gray-200 dark:border-dark-700 p-4 bg-white dark:bg-dark-800 flex-shrink-0">
-            @if (in_array($currentOrder->status, ['rider_assigned', 'picked_up', 'out_for_delivery']))
-                <form @submit.prevent="sendMessage()" class="flex gap-2">
-                    <input type="text"
-                           x-model="newMessage"
-                           @input="onTypingInput()"
-                           @keydown.enter.prevent="sendMessage()"
-                           placeholder="Type a message..."
-                           maxlength="1000"
-                           class="flex-1 border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
-                    <button type="submit"
-                            :disabled="!newMessage.trim() || sending"
-                            :class="(!newMessage.trim() || sending) ? 'opacity-40 cursor-not-allowed' : 'hover:bg-orange-700 active:scale-95'"
-                            class="bg-orange-600 text-white w-11 h-11 rounded-full flex items-center justify-center shadow-md transition transform flex-shrink-0">
-                        <template x-if="!sending">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                            </svg>
-                        </template>
-                        <template x-if="sending">
-                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                            </svg>
-                        </template>
+       {{-- INPUT --}}
+<div class="border-t border-gray-200 dark:border-dark-700 bg-white dark:bg-dark-800 flex-shrink-0"
+     x-data="{ showEmojiPicker: false }">
+
+    @if (in_array($currentOrder->status, ['rider_assigned', 'picked_up', 'out_for_delivery']))
+
+        {{-- ⭐ EMOJI PICKER (collapsible) --}}
+        <div x-show="showEmojiPicker"
+             x-cloak
+             x-transition
+             class="border-b border-gray-200 dark:border-dark-700 p-3 bg-gray-50 dark:bg-dark-850">
+
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-semibold text-gray-500 dark:text-neutral-400 uppercase tracking-wider">
+                    Quick Emojis
+                </p>
+                <button type="button"
+                        @click="showEmojiPicker = false"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Emoji grid --}}
+            <div class="flex flex-wrap gap-1">
+                @foreach (['😀','😁','😂','🤣','😊','😍','😘','😎','🤔','😅','😢','😭','😡','🥺','😴','🤤','👍','👎','👏','🙏','💪','👋','🤝','❤️','💕','💯','🔥','⭐','✨','🎉','🎊','🍔','🍕','🍟','🍗','🍜','🍰','☕','🥤','🛵','🚴','🏠','🏪','⏰','📍','✅','❌','⚠️','💬','📞','🙌'] as $emoji)
+                    <button type="button"
+                            @click="
+                                const input = $refs.messageInput;
+                                const start = input.selectionStart;
+                                const end = input.selectionEnd;
+                                newMessage = newMessage.substring(0, start) + '{{ $emoji }}' + newMessage.substring(end);
+                                $nextTick(() => {
+                                    input.focus();
+                                    input.setSelectionRange(start + 2, start + 2);
+                                });
+                            "
+                            class="text-xl w-9 h-9 rounded-lg hover:bg-white dark:hover:bg-dark-800 hover:scale-110 active:scale-95 transition-transform flex items-center justify-center">
+                        {{ $emoji }}
                     </button>
-                </form>
-            @else
-                <div class="text-center py-2">
-                    <p class="text-xs text-gray-500 dark:text-neutral-400">
-                        This order is {{ $currentOrder->status }}. Chat is read-only.
-                    </p>
-                </div>
-            @endif
+                @endforeach
+            </div>
         </div>
+
+        {{-- Message input --}}
+        <form @submit.prevent="sendMessage()" class="p-3 md:p-4 flex gap-2 items-center">
+
+            {{-- Emoji toggle button --}}
+            <button type="button"
+                    @click="showEmojiPicker = !showEmojiPicker"
+                    :class="showEmojiPicker ? 'bg-orange-100 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-dark-850'"
+                    class="w-11 h-11 rounded-full flex items-center justify-center transition flex-shrink-0"
+                    title="Emojis">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
+
+            {{-- Text input --}}
+            <input type="text"
+                   x-ref="messageInput"
+                   x-model="newMessage"
+                   @input="onTypingInput()"
+                   @keydown.enter.prevent="sendMessage()"
+                   placeholder="Type a message..."
+                   maxlength="1000"
+                   class="flex-1 border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
+
+            {{-- Send button --}}
+            <button type="submit"
+                    :disabled="!newMessage.trim() || sending"
+                    :class="(!newMessage.trim() || sending) ? 'opacity-40 cursor-not-allowed' : 'hover:bg-orange-700 active:scale-95'"
+                    class="bg-orange-600 text-white w-11 h-11 rounded-full flex items-center justify-center shadow-md transition transform flex-shrink-0">
+                <template x-if="!sending">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                </template>
+                <template x-if="sending">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                </template>
+            </button>
+        </form>
+
+    @else
+        {{-- Read-only --}}
+        <div class="p-3 md:p-4 text-center">
+            <p class="text-xs text-gray-500 dark:text-neutral-400">
+                This order is {{ $currentOrder->status }}. Chat is read-only.
+            </p>
+        </div>
+    @endif
+</div>
     </div>
 
 </div>
@@ -225,7 +311,7 @@ function chatPage(orderId) {
             if (window.Echo) {
                 window.Echo.leave(`order.${orderId}.chat`);
             }
-
+            
             this.loadMessages();
 
             setTimeout(() => {
@@ -270,7 +356,32 @@ function chatPage(orderId) {
             this.channel = chatChannel;
             this.listenerAttached = true;
         },
+// ⭐ Kunin ang huling message na galing sa current user
+// ⭐ Kunin ang huling message sa buong conversation
+get lastMessage() {
+    if (this.messages.length === 0) return null;
+    return this.messages[this.messages.length - 1];
+},
 
+// ⭐ Kunin ang huling message na galing sa iyo
+get lastOwnMessage() {
+    if (this.messages.length === 0) return null;
+
+    for (let i = this.messages.length - 1; i >= 0; i--) {
+        if (this.messages[i].sender_id === this.currentUserId) {
+            return this.messages[i];
+        }
+    }
+
+    return null;
+},
+
+// ⭐ Check kung ang huling message ay galing sa iyo
+get lastMessageIsMine() {
+    const last = this.lastMessage;
+    if (!last) return false;
+    return last.sender_id === this.currentUserId;
+},
         async loadMessages() {
             try {
                 const res = await fetch('{{ route('rider.chat.index', $currentOrder) }}', {

@@ -4,12 +4,9 @@
 <div x-data="orderTracker({{ $order->id }})" x-init="init()">
     <div class="flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-2xl font-semibold text-gray-900 dark:text-neutral-100">Order #{{ $order->id }}</h1>
             <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">{{ $order->restaurant->name }}</p>
         </div>
-        <a href="{{ route('customer.orders') }}" class="text-sm text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-neutral-200">
-            Back
-        </a>
+        
     </div>
 
     {{-- STATUS --}}
@@ -326,7 +323,7 @@
                 <div>
                     <p class="font-bold text-green-900 dark:text-green-300">Review submitted</p>
                     <p class="text-xs text-green-700 dark:text-green-400">
-                        Salamat sa feedback mo!
+                        Thank you for your review.
                     </p>
                 </div>
             </div>
@@ -351,153 +348,50 @@
         </div>
     @endif
 
-    {{-- ============================================ --}}
-    {{-- CHAT WITH RIDER --}}
+       {{-- ============================================ --}}
+    {{-- CHAT WITH RIDER — button na magre-redirect sa chat page --}}
     {{-- ============================================ --}}
     @if ($order->canChat())
-        <div x-data="chatBox({{ $order->id }})"
-             x-init="init()"
-             class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 mb-4 overflow-hidden">
+        @php
+            $unreadChat = $order->messages()
+                ->where('sender_id', '!=', auth()->id())
+                ->whereNull('read_at')
+                ->count();
+        @endphp
 
-            {{-- HEADER --}}
-            <div class="bg-orange-600 text-white px-5 py-3 flex justify-between items-center cursor-pointer"
-                 @click="isOpen = !isOpen">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <span class="font-semibold">Chat with Rider</span>
-                    <template x-if="unread > 0">
-                        <span class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full animate-pulse"
-                              x-text="unread"></span>
-                    </template>
+        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-4 mb-4">
+            <a href="{{ route('customer.chat.show', $order) }}"
+               class="flex items-center justify-between gap-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-4 rounded-xl font-semibold shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-98 transition transform">
+
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-sm">Chat with Rider</p>
+                        <p class="text-xs text-white/80">
+                            @if ($order->rider)
+                                {{ $order->rider->user->name }}
+                            @else
+                                Rider
+                            @endif
+                        </p>
+                    </div>
+
+                    @if ($unreadChat > 0)
+                        <span class="bg-white text-orange-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                            {{ $unreadChat }} new
+                        </span>
+                    @endif
                 </div>
-                <svg class="w-5 h-5 transition-transform duration-200"
-                     :class="isOpen ? 'rotate-180' : ''"
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M19 9l-7 7-7-7" />
+
+                <svg class="w-5 h-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-            </div>
-
-            {{-- CHAT BODY --}}
-            <div x-show="isOpen" x-cloak x-transition>
-                <div x-ref="messagesContainer"
-                     @scroll="onScroll()"
-                     class="chat-scroll h-96 overflow-y-auto p-4 space-y-2 bg-gray-50 dark:bg-dark-850 scroll-smooth">
-
-                    <template x-if="loading">
-                        <p class="text-center text-sm text-gray-500 dark:text-neutral-400">Loading messages...</p>
-                    </template>
-
-                    <template x-if="!loading && messages.length === 0">
-                        <div class="text-center py-12">
-                            <p class="text-4xl mb-2">💬</p>
-                            <p class="text-sm text-gray-500 dark:text-neutral-400">No messages yet.</p>
-                            <p class="text-xs text-gray-400 dark:text-neutral-500 mt-1">Say hi to your rider!</p>
-                        </div>
-                    </template>
-
-                    <template x-for="msg in messages" :key="msg.id">
-                        <div :class="msg.sender_id === currentUserId ? 'flex justify-end' : 'flex justify-start'"
-                             class="chat-message gap-2 items-end">
-
-                            {{-- AVATAR — left side para sa kausap --}}
-                            <template x-if="msg.sender_id !== currentUserId">
-                                <div class="flex-shrink-0">
-                                    <template x-if="msg.sender_avatar_url">
-                                        <img :src="msg.sender_avatar_url"
-                                             :alt="msg.sender_name"
-                                             class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
-                                    </template>
-                                    <template x-if="!msg.sender_avatar_url">
-                                        <div :class="msg.sender_avatar_color || 'bg-gray-500'"
-                                             class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
-                                             x-text="msg.sender_initials || '?'"></div>
-                                    </template>
-                                </div>
-                            </template>
-
-                            {{-- MESSAGE BUBBLE --}}
-                            <div :class="msg.sender_id === currentUserId
-                                    ? 'bg-orange-600 text-white rounded-br-none'
-                                    : 'bg-white dark:bg-dark-800 text-gray-900 dark:text-neutral-100 border border-gray-200 dark:border-dark-700 rounded-bl-none'"
-                                 class="max-w-[75%] px-3 py-2 rounded-2xl shadow-sm transition-all duration-200">
-                                <p class="text-xs font-medium mb-0.5 opacity-75"
-                                   x-text="msg.sender_name"></p>
-                                <p class="text-sm break-words whitespace-pre-wrap"
-                                   x-text="msg.body"></p>
-                                <div class="flex items-center justify-end gap-1 mt-1">
-                                    <span class="text-[10px] opacity-60"
-                                          x-text="msg.created_at_human"></span>
-                                    <template x-if="msg.sender_id === currentUserId">
-                                        <span class="text-[11px] leading-none"
-                                              :title="statusLabel(msg)"
-                                              :class="msg.status === 'seen' ? 'text-blue-200 font-bold' : 'opacity-70'">
-                                            <span x-show="msg.status === 'sent'">🕐</span>
-                                            <span x-show="msg.status === 'delivered'">✓</span>
-                                            <span x-show="msg.status === 'seen'">✓✓</span>
-                                        </span>
-                                    </template>
-                                </div>
-                            </div>
-
-                            {{-- AVATAR — right side para sa sarili --}}
-                            <template x-if="msg.sender_id === currentUserId">
-                                <div class="flex-shrink-0">
-                                    <template x-if="msg.sender_avatar_url">
-                                        <img :src="msg.sender_avatar_url"
-                                             :alt="msg.sender_name"
-                                             class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
-                                    </template>
-                                    <template x-if="!msg.sender_avatar_url">
-                                        <div :class="msg.sender_avatar_color || 'bg-orange-500'"
-                                             class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
-                                             x-text="msg.sender_initials || '?'"></div>
-                                    </template>
-                                </div>
-                            </template>
-                        </div>
-                    </template>
-
-                    {{-- TYPING INDICATOR --}}
-                    <template x-if="typingName">
-                        <div class="flex justify-start chat-message gap-2 items-end">
-                            <div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-dark-700 flex-shrink-0"></div>
-                            <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 px-3 py-2 rounded-2xl rounded-bl-none shadow-sm">
-                                <p class="text-xs text-gray-500 dark:text-neutral-400 mb-1" x-text="typingName + ' is typing'"></p>
-                                <div class="flex gap-1">
-                                    <span class="typing-dot"></span>
-                                    <span class="typing-dot" style="animation-delay: 0.15s"></span>
-                                    <span class="typing-dot" style="animation-delay: 0.3s"></span>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                {{-- INPUT --}}
-                <div class="border-t border-gray-200 dark:border-dark-700 p-3 bg-white dark:bg-dark-800">
-                    <form @submit.prevent="sendMessage()" class="flex gap-2">
-                        <input type="text"
-                               x-model="newMessage"
-                               @input="onTypingInput()"
-                               @keydown.enter.prevent="sendMessage()"
-                               @blur="stopTyping()"
-                               placeholder="Type a message..."
-                               maxlength="1000"
-                               class="flex-1 border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
-                        <button type="submit"
-                                :disabled="!newMessage.trim() || sending"
-                                :class="(!newMessage.trim() || sending) ? 'opacity-40 cursor-not-allowed' : 'hover:bg-orange-700'"
-                                class="bg-orange-600 text-white px-5 py-2 rounded-full text-sm font-medium transition">
-                            <span x-show="!sending">Send</span>
-                            <span x-show="sending">...</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
+            </a>
         </div>
     @endif
 
@@ -738,95 +632,115 @@ function orderTracker(orderId) {
             const restaurantProfileUrl = '{{ $restaurantProfileUrl }}';
             const restaurantInitial = '{{ $restaurantInitial }}';
 
-            const restaurantIcon = L.divIcon({
-                html: restaurantProfileUrl ? `
-                    <div style="position:relative;width:56px;height:56px;">
-                        <div style="
-                            width:56px;
-                            height:56px;
-                            border-radius:50%;
-                            overflow:hidden;
-                            border:4px solid #ef4444;
-                            box-shadow:0 4px 10px rgba(239,68,68,0.5), 0 2px 6px rgba(0,0,0,0.3);
-                            background:white;
-                        ">
-                            <img src="${restaurantProfileUrl}"
-                                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;width:100%;height:100%;background:#ef4444;color:white;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;&quot;>${restaurantInitial}</div>';"
-                                 style="width:100%;height:100%;object-fit:cover;"
-                                 alt="Restaurant">
-                        </div>
-                        <div style="
-                            position:absolute;
-                            bottom:-2px;
-                            right:-2px;
-                            background:#ef4444;
-                            color:white;
-                            width:20px;
-                            height:20px;
-                            border-radius:50%;
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            font-size:12px;
-                            border:2px solid white;
-                            box-shadow:0 2px 4px rgba(0,0,0,0.3);
-                        ">🏪</div>
-                    </div>
-                ` : `
-                    <div style="position:relative;width:56px;height:56px;">
-                        <div style="
-                            background:#ef4444;
-                            color:white;
-                            width:56px;
-                            height:56px;
-                            border-radius:50%;
-                            display:flex;
-                            align-items:center;
-                            justify-content:center;
-                            font-size:24px;
-                            font-weight:bold;
-                            border:4px solid white;
-                            box-shadow:0 4px 10px rgba(0,0,0,0.4);
-                        ">${restaurantInitial}</div>
-                    </div>
-                `,
-                className: '',
-                iconSize: [56, 56],
-                iconAnchor: [28, 28],
-                popupAnchor: [0, -28],
-            });
+            @php
+    $trackingRestaurantUrl = $order->restaurant->profile_image_url ?? '';
+    $trackingRestaurantInitial = strtoupper(substr($order->restaurant->name, 0, 1));
+@endphp
 
-            const deliveryIcon = L.divIcon({
-                html: `
-                    <div style="position:relative;width:48px;height:48px;">
-                        <img src="/images/cusicon.png"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                             style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4));"
-                             alt="Customer">
-                        <div style="display:none;background:#10b981;color:white;width:44px;height:44px;border-radius:50%;align-items:center;justify-content:center;font-size:22px;border:3px solid white;box-shadow:0 3px 6px rgba(0,0,0,0.4);position:absolute;top:2px;left:2px;">🏠</div>
-                    </div>
-                `,
-                className: '',
-                iconSize: [48, 48],
-                iconAnchor: [24, 24],
-                popupAnchor: [0, -24],
-            });
+const trackingRestaurantUrl = '{{ $trackingRestaurantUrl }}';
+const trackingRestaurantInitial = '{{ $trackingRestaurantInitial }}';
+
+const restaurantIcon = L.divIcon({
+    html: trackingRestaurantUrl ? `
+        <div style="position:relative;width:52px;height:52px;">
+            <div style="
+                width:52px;
+                height:52px;
+                border-radius:50%;
+                overflow:hidden;
+                border:3px solid #ef4444;
+                box-shadow:0 3px 8px rgba(239,68,68,0.5), 0 2px 4px rgba(0,0,0,0.3);
+                background:white;
+            ">
+                <img src="${trackingRestaurantUrl}"
+                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;width:100%;height:100%;background:#ef4444;color:white;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;&quot;>${trackingRestaurantInitial}</div>';"
+                     style="width:100%;height:100%;object-fit:cover;"
+                     alt="Restaurant">
+            </div>
+            <div style="
+                position:absolute;
+                bottom:-4px;
+                left:50%;
+                transform:translateX(-50%);
+                background:#ef4444;
+                color:white;
+                padding:1px 6px;
+                border-radius:8px;
+                font-size:9px;
+                font-weight:bold;
+                border:2px solid white;
+                box-shadow:0 2px 4px rgba(0,0,0,0.3);
+                white-space:nowrap;
+            ">STORE</div>
+        </div>
+    ` : `
+        <div style="position:relative;width:52px;height:52px;">
+            <div style="
+                background:#ef4444;
+                color:white;
+                width:52px;
+                height:52px;
+                border-radius:50%;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:22px;
+                font-weight:bold;
+                border:3px solid white;
+                box-shadow:0 3px 8px rgba(0,0,0,0.4);
+            ">${trackingRestaurantInitial}</div>
+            <div style="
+                position:absolute;
+                bottom:-4px;
+                left:50%;
+                transform:translateX(-50%);
+                background:#ef4444;
+                color:white;
+                padding:1px 6px;
+                border-radius:8px;
+                font-size:9px;
+                font-weight:bold;
+                border:2px solid white;
+                box-shadow:0 2px 4px rgba(0,0,0,0.3);
+                white-space:nowrap;
+            ">STORE</div>
+        </div>
+    `,
+    className: '',
+    iconSize: [52, 60],
+    iconAnchor: [26, 30],
+});
+            @php
+    $trackingCustomerIcon = auth()->user()->gender === 'female'
+        ? '/images/customergirl.png'
+        : '/images/customerman.png';
+@endphp
+
+const deliveryIcon = L.divIcon({
+    html: `
+        <div style="position:relative;width:48px;height:48px;">
+            <img src="{{ $trackingCustomerIcon }}"
+                 style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4));"
+                 alt="You">
+        </div>
+    `,
+    className: '',
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
+});
 
             const riderIcon = L.divIcon({
-                html: `
-                    <div style="position:relative;width:56px;height:56px;">
-                        <img src="/images/ridicon.png"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                             style="width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5));"
-                             alt="Rider">
-                        <div style="display:none;background:#f97316;color:white;width:52px;height:52px;border-radius:50%;align-items:center;justify-content:center;font-size:26px;border:3px solid white;box-shadow:0 3px 6px rgba(0,0,0,0.4);position:absolute;top:2px;left:2px;">🛵</div>
-                    </div>
-                `,
-                className: '',
-                iconSize: [56, 56],
-                iconAnchor: [28, 28],
-                popupAnchor: [0, -28],
-            });
+    html: `
+        <div style="position:relative;width:56px;height:56px;">
+            <img src="/images/rider.png"
+                 style="width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5));"
+                 alt="Rider">
+        </div>
+    `,
+    className: '',
+    iconSize: [56, 56],
+    iconAnchor: [28, 28],
+});
 
             this.restaurantMarker = L.marker([restaurantLat, restaurantLng], { icon: restaurantIcon })
                 .addTo(this.map)

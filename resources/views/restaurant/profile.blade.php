@@ -3,85 +3,34 @@
 @section('content')
 <div class="max-w-3xl mx-auto space-y-5" x-data="imageUploader()">
 
-        {{-- HEADER --}}
-    <div class="mb-6 flex justify-between items-center" x-data="{ showLogout: false, ...themeToggle() }">
-        <div>
-            <h1 class="text-2xl font-semibold text-gray-900 dark:text-neutral-100">Restaurant Profile</h1>
-            <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">Manage your restaurant details and images</p>
-        </div>
-
-        <div class="flex items-center gap-2">
-            {{-- DARK MODE TOGGLE --}}
-            <button type="button"
-                    @click="setTheme(theme === 'dark' ? 'light' : 'dark')"
-                    class="p-2 text-gray-600 dark:text-neutral-400 hover:text-orange-600 dark:hover:text-orange-400 transition rounded-full hover:bg-gray-100 dark:hover:bg-dark-850"
-                    title="Toggle dark mode">
-                <svg x-show="theme === 'light' || theme === 'system'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-                <svg x-show="theme === 'dark'" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-            </button>
-
-            {{-- LOGOUT BUTTON --}}
-            <button type="button"
-                    @click="showLogout = true"
-                    class="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 hover:bg-red-50 px-4 py-2 rounded-lg font-medium transition dark:text-red-400 dark:border-red-800 dark:hover:border-red-700 dark:hover:bg-red-950/30">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                Logout
-            </button>
-        </div>
-
-                {{-- LOGOUT CONFIRMATION MODAL --}}
-        <div x-show="showLogout"
-             x-cloak
-             x-transition.opacity
-             @keydown.escape.window="showLogout = false"
-             class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4"
-             @click.self="showLogout = false">
-
-            <div x-show="showLogout"
-                 x-transition.scale.origin.center
-                 class="bg-white dark:bg-dark-800 rounded-2xl shadow-xl max-w-sm w-full p-6">
-
-                <div class="flex justify-center mb-4">
-                    <div class="w-14 h-14 rounded-full bg-red-100 dark:bg-red-950/40 flex items-center justify-center">
-                        <svg class="w-7 h-7 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                    </div>
-                </div>
-
-                <div class="text-center mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-neutral-100">Logout?</h3>
-                    <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">Are you sure you want to logout?</p>
-                </div>
-
-                <div class="flex gap-2">
-                    <button type="button"
-                            @click="showLogout = false"
-                            class="flex-1 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-neutral-300 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-dark-850 transition">
-                        Cancel
-                    </button>
-
-                    <form method="POST" action="{{ route('logout') }}" class="flex-1">
-                        @csrf
-                        <button type="submit"
-                                class="w-full bg-red-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-red-700 shadow-md hover:shadow-lg active:scale-95 transition transform">
-                            Yes, Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+     {{-- HEADER --}}
+<div class="mb-6 flex justify-between items-center" x-data="{ showLogout: false, ...themeToggle() }">
+    <div>
+        <h1 class="text-2xl font-semibold text-gray-900 dark:text-neutral-100">Restaurant Profile</h1>
+        <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">Manage your restaurant details and images</p>
     </div>
+
+    <div class="flex items-center gap-2">
+        {{-- DARK MODE TOGGLE --}}
+        <button type="button"
+                @click="setTheme(theme === 'dark' ? 'light' : 'dark')"
+                ...>
+            ...
+        </button>
+
+        {{-- LOGOUT BUTTON --}}
+        <button type="button"
+                @click="showLogout = true"
+                ...>
+            ...
+        </button>
+    </div>
+
+    {{-- LOGOUT CONFIRMATION MODAL --}}
+    <div x-show="showLogout" ...>
+        ...
+    </div>
+</div>
 
     {{-- ALERTS --}}
     @if (session('success'))
@@ -221,7 +170,88 @@
             </div>
         </div>
     </div>
+    {{-- ============================================ --}}
+    {{-- RESTAURANT STATUS (Open/Close Toggle) --}}
+    {{-- ============================================ --}}
+    <div class="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 overflow-hidden">
 
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-dark-700 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-100 to-green-50 dark:from-green-950/40 dark:to-green-900/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <h2 class="font-bold text-gray-900 dark:text-neutral-100">Restaurant Status</h2>
+                <p class="text-xs text-gray-500 dark:text-neutral-400">Manually open or close your restaurant</p>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <div class="flex items-center justify-between gap-4 p-4 rounded-xl
+                {{ $restaurant->is_open
+                    ? 'bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800'
+                    : 'bg-gray-50 dark:bg-dark-850 border border-gray-200 dark:border-dark-600' }}">
+
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="w-3 h-3 rounded-full flex-shrink-0 {{ $restaurant->is_open ? 'bg-green-500 animate-pulse' : 'bg-red-500' }}"></span>
+                    <div class="min-w-0">
+                        <p class="font-bold text-sm
+                            {{ $restaurant->is_open
+                                ? 'text-green-900 dark:text-green-300'
+                                : 'text-gray-900 dark:text-neutral-100' }}">
+                            {{ $restaurant->is_open ? 'Open Now' : 'Closed Now' }}
+                        </p>
+                        <p class="text-xs
+                            {{ $restaurant->is_open
+                                ? 'text-green-700 dark:text-green-400'
+                                : 'text-gray-500 dark:text-neutral-400' }}">
+                            {{ $restaurant->is_open
+                                ? 'You are accepting orders from customers.'
+                                : 'You are not accepting orders right now.' }}
+                        </p>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ route('restaurant.toggle-open') }}" class="flex-shrink-0">
+                    @csrf
+                    <button type="submit"
+                            class="px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg active:scale-95 transition transform
+                                {{ $restaurant->is_open
+                                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                                    : 'bg-green-600 hover:bg-green-700 text-white' }}">
+                        {{ $restaurant->is_open ? 'Close Restaurant' : 'Open Restaurant' }}
+                    </button>
+                </form>
+            </div>
+
+            {{-- Info: auto-toggle based on schedule --}}
+            @if ($restaurant->hasSchedule())
+                <div class="mt-3 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 flex items-start gap-2">
+                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                        This is a <strong>manual override</strong>. If you have a schedule set, the system will automatically open/close your restaurant based on your <a href="{{ route('restaurant.hours') }}" class="underline font-semibold">operating hours</a>.
+                    </p>
+                </div>
+            @else
+                <div class="mt-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 flex items-start gap-2">
+                    <svg class="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <p class="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                        <strong>No schedule set.</strong>
+                        <a href="{{ route('restaurant.hours') }}" class="underline font-semibold">Set your operating hours</a>
+                        to automatically open and close your restaurant.
+                    </p>
+                </div>
+            @endif
+        </div>
+    </div>
     {{-- ============================================ --}}
     {{-- PROFILE DETAILS FORM --}}
     {{-- ============================================ --}}
@@ -412,5 +442,103 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+</script>
+@endpush
+@push('scripts')
+<script>
+function imageUploader() {
+    return {
+        submitFile(event, url) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File is too large. Max 5MB.');
+                event.target.value = '';
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                alert('Invalid file type.');
+                event.target.value = '';
+                return;
+            }
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+            form.enctype = 'multipart/form-data';
+            form.style.display = 'none';
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = '{{ csrf_token() }}';
+            form.appendChild(csrfInput);
+
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.name = url.includes('cover') ? 'cover' : 'profile_image';
+
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            form.appendChild(fileInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+}
+
+// Combine showLogout + themeToggle into one function
+function profileHeader() {
+    return {
+        // Logout modal state
+        showLogout: false,
+
+        // Theme state
+        theme: 'system',
+
+        init() {
+            const stored = localStorage.getItem('theme');
+            this.theme = stored || 'system';
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (this.theme === 'system') {
+                    this.applyTheme();
+                }
+            });
+        },
+
+        setTheme(mode) {
+            this.theme = mode;
+            localStorage.setItem('theme', mode);
+            this.applyTheme();
+        },
+
+        applyTheme() {
+            const isDark = this.theme === 'dark' ||
+                (this.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+    }
+}
+
+// Keep this for the badge preview
+document.addEventListener('DOMContentLoaded', function() {
+    const badgeInput = document.querySelector('input[name="badge"]');
+    const preview = document.getElementById('badge-preview');
+
+    if (badgeInput && preview) {
+        badgeInput.addEventListener('input', function() {
+            const value = this.value.trim() || '{{ $restaurant->cuisine ?: "BADGE" }}';
+            preview.textContent = value;
+        });
+    }
+});
 </script>
 @endpush

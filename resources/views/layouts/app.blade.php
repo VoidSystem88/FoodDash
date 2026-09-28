@@ -766,22 +766,20 @@
     }
     </script>
 
-    {{-- ============================================ --}}
+        {{-- ============================================ --}}
     {{-- GLOBAL ALPINE FUNCTIONS --}}
     {{-- ============================================ --}}
-    <script>
-            function customerChatBadge() {
+        <script>
+    function customerChatBadge() {
         return {
             unread: 0,
             interval: null,
 
             init() {
                 this.fetchUnread();
-
                 this.interval = setInterval(() => {
                     this.fetchUnread();
                 }, 10000);
-
                 window.addEventListener('beforeunload', () => {
                     if (this.interval) clearInterval(this.interval);
                 });
@@ -803,18 +801,17 @@
             }
         }
     }
-           function chatBadge() {
+
+    function chatBadge() {
         return {
             unread: 0,
             interval: null,
 
             init() {
                 this.fetchUnread();
-
                 this.interval = setInterval(() => {
                     this.fetchUnread();
                 }, 10000);
-
                 window.addEventListener('beforeunload', () => {
                     if (this.interval) clearInterval(this.interval);
                 });
@@ -836,15 +833,17 @@
             }
         }
     }
-    
+
     function pwaInstall() {
         return {
             showInstall: false,
             deferredPrompt: null,
             dismissed: false,
+
             init() {
                 if (window.matchMedia('(display-mode: standalone)').matches) return;
                 if (localStorage.getItem('pwa-dismissed') === 'yes') return;
+
                 window.addEventListener('beforeinstallprompt', (e) => {
                     e.preventDefault();
                     this.deferredPrompt = e;
@@ -855,6 +854,7 @@
                     this.deferredPrompt = null;
                 });
             },
+
             async install() {
                 if (!this.deferredPrompt) return;
                 this.deferredPrompt.prompt();
@@ -862,35 +862,43 @@
                 if (outcome === 'accepted') this.showInstall = false;
                 this.deferredPrompt = null;
             },
+
             dismiss() {
                 this.showInstall = false;
                 localStorage.setItem('pwa-dismissed', 'yes');
             }
         }
     }
-    public function chat()
-    {
-        $rider = auth()->user()->rider;
 
-        // Priority: active order
-        $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
-            ->where('rider_id', $rider->id)
-            ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
-            ->latest()
-            ->first();
-
-        // Fallback: latest delivered order (para may chat history)
-        if (!$currentOrder) {
-            $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
-                ->where('rider_id', $rider->id)
-                ->where('status', 'delivered')
-                ->whereHas('messages') // dapat may messages
-                ->latest()
-                ->first();
+    function themeToggle() {
+        return {
+            theme: 'system',
+            init() {
+                const stored = localStorage.getItem('theme');
+                this.theme = stored || 'system';
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    if (this.theme === 'system') {
+                        this.applyTheme();
+                    }
+                });
+            },
+            setTheme(mode) {
+                this.theme = mode;
+                localStorage.setItem('theme', mode);
+                this.applyTheme();
+            },
+            applyTheme() {
+                const isDark = this.theme === 'dark' ||
+                    (this.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
         }
-
-        return view('rider.chat', compact('currentOrder'));
     }
+
     function notificationBell() {
         return {
             isOpen: false,
@@ -1167,35 +1175,6 @@
                     tag: `order-${order.order_id}`,
                     requireInteraction: true,
                 });
-            }
-        }
-    }
-
-    function themeToggle() {
-        return {
-            theme: 'system',
-            init() {
-                const stored = localStorage.getItem('theme');
-                this.theme = stored || 'system';
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                    if (this.theme === 'system') {
-                        this.applyTheme();
-                    }
-                });
-            },
-            setTheme(mode) {
-                this.theme = mode;
-                localStorage.setItem('theme', mode);
-                this.applyTheme();
-            },
-            applyTheme() {
-                const isDark = this.theme === 'dark' ||
-                    (this.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-                if (isDark) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
             }
         }
     }
