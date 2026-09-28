@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use App\Notifications\NewReviewNotification;
 
 class ReviewController extends Controller
 {
@@ -44,8 +45,8 @@ class ReviewController extends Controller
             }
         }
 
-        DB::transaction(function () use ($order, $data, $imagePaths) {
-            Review::create([
+                $review = DB::transaction(function () use ($order, $data, $imagePaths) {
+            $review = Review::create([
                 'order_id' => $order->id,
                 'user_id' => auth()->id(),
                 'restaurant_id' => $order->restaurant_id,
@@ -56,17 +57,27 @@ class ReviewController extends Controller
                 'is_verified_purchase' => true,
                 'status' => 'published',
             ]);
+
+            $order->restaurant->updateRatingStats();
+
+            return $review;
         });
 
-        // ⭐ RECALCULATE RATING STATS
-        $restaurant = Restaurant::find($order->restaurant_id);
-        if ($restaurant) {
-            $restaurant->updateRatingStats();
+        // Send notification sa restaurant owner
+        try {
+            $restaurantUser = $order->restaurant->user;
+
+            if ($restaurantUser) {
+                $restaurantUser->notify(new NewReviewNotification($review));
+            }
+        } catch (\Throwable $e) {
+            \Log::error('Failed to send new review notification', [
+                'review_id' => $review->id,
+                'error' => $e->getMessage(),
+            ]);
         }
 
-        return redirect()
-            ->route('customer.orders.show', $order)
-            ->with('success', 'Salamat sa review mo! 🌟');
+        return back()->with('success', 'Thanks for your review! 🌟');
     }
 
     public function update(Request $request, Review $review)

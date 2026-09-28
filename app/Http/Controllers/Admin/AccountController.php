@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\Rider;
 use App\Models\User;
+use App\Notifications\AccountApprovedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -266,12 +267,25 @@ class AccountController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    public function approve(User $user)
+            public function approve(User $user)
     {
         $user->update(['status' => 'approved']);
-        return back()->with('success', "{$user->name} has been approved.");
-    }
 
+        // Send approval email notification
+        try {
+            $user->notify(new AccountApprovedNotification(
+                role: $user->role,
+                restaurantName: $user->restaurant?->name,
+            ));
+        } catch (\Throwable $e) {
+            \Log::error('Failed to send approval email', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return back()->with('success', "{$user->name} has been approved. An email has been sent.");
+    }
     public function disable(User $user)
     {
         if ($user->role === 'admin') {

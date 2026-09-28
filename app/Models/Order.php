@@ -17,6 +17,8 @@ class Order extends Model
         'rejection_reason',
         'cancellation_reason',
         'cancelled_at',
+        'hidden_for_rider_at',     
+        'hidden_for_customer_at',
         'food_cost',
         'delivery_fee',
         'commission_rate',
@@ -42,6 +44,8 @@ class Order extends Model
         'delivery_lng' => 'float',
         'is_external_order' => 'boolean',
         'cancelled_at' => 'datetime',
+        'hidden_for_rider_at' => 'datetime',     
+        'hidden_for_customer_at' => 'datetime',
     ];
 
     public function customer()

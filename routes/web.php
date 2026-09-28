@@ -46,8 +46,36 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
 // RESTAURANT — Reply to Reviews
 // ============================================
 Route::middleware(['auth', 'role:restaurant'])->prefix('restaurant')->group(function () {
-    Route::post('/reviews/{review}/reply', [ReviewReplyController::class, 'store'])
-        ->name('restaurant.reviews.reply');
+    Route::get('/dashboard', [RestaurantOrderController::class, 'dashboard'])->name('restaurant.dashboard');
+
+    Route::post('/orders/{order}/confirm', [RestaurantOrderController::class, 'confirm'])->name('restaurant.orders.confirm');
+    Route::post('/orders/{order}/reject', [RestaurantOrderController::class, 'reject'])->name('restaurant.orders.reject');
+    Route::post('/orders/{order}/ready', [RestaurantOrderController::class, 'markReady'])->name('restaurant.orders.ready');
+    Route::post('/orders/external', [RestaurantOrderController::class, 'storeExternal'])->name('restaurant.orders.external');
+    Route::get('/orders', [RestaurantOrderController::class, 'orders'])->name('restaurant.orders');
+
+    Route::get('/analytics', [RestaurantOrderController::class, 'analytics'])->name('restaurant.analytics');
+
+    // Operating Hours
+    Route::get('/hours', [RestaurantOrderController::class, 'hours'])->name('restaurant.hours');
+    Route::patch('/hours', [RestaurantOrderController::class, 'updateHours'])->name('restaurant.hours.update');
+
+    // ⭐ REVIEWS MANAGEMENT
+    Route::get('/reviews', [ReviewReplyController::class, 'index'])->name('restaurant.reviews.index');
+    Route::post('/reviews/{review}/reply', [ReviewReplyController::class, 'store'])->name('restaurant.reviews.reply');
+
+    Route::post('/toggle-open', [RestaurantOrderController::class, 'toggleOpen'])->name('restaurant.toggle-open');
+    Route::get('/profile', fn() => view('restaurant.profile', ['restaurant' => auth()->user()->restaurant]))->name('restaurant.profile');
+    Route::patch('/profile', [RestaurantOrderController::class, 'updateProfile'])->name('restaurant.profile.update');
+
+    Route::resource('menu-items', MenuItemController::class);
+    Route::patch('/menu-items/{menuItem}/toggle', [MenuItemController::class, 'toggleAvailability'])->name('menu-items.toggle');
+
+    // Image uploads
+    Route::post('/profile/cover', [RestaurantOrderController::class, 'uploadCover'])->name('restaurant.profile.cover');
+    Route::delete('/profile/cover', [RestaurantOrderController::class, 'removeCover'])->name('restaurant.profile.cover.remove');
+    Route::post('/profile/image', [RestaurantOrderController::class, 'uploadProfileImage'])->name('restaurant.profile.image');
+    Route::delete('/profile/image', [RestaurantOrderController::class, 'removeProfileImage'])->name('restaurant.profile.image.remove');
 });
 
 // ============================================
@@ -138,17 +166,26 @@ Route::middleware(['auth', 'role:restaurant'])->prefix('restaurant')->group(func
 // RIDER ROUTES
 // ============================================
 Route::middleware(['auth', 'role:rider'])->prefix('rider')->group(function () {
+    Route::get('/chat', [AvailabilityController::class, 'chatInbox'])->name('rider.chat');
+    Route::get('/chat/{order}', [AvailabilityController::class, 'chat'])->name('rider.chat.show');
+    Route::get('/chat/unread-active', [AvailabilityController::class, 'unreadActive'])->name('rider.chat.unread-active');
+    Route::delete('/chat/clear-all', [AvailabilityController::class, 'clearChats'])->name('rider.chat.clear-all');
+    Route::get('/chat/unread-active', [AvailabilityController::class, 'unreadActive'])->name('rider.chat.unread-active');
+    Route::get('/chat', [AvailabilityController::class, 'chat'])->name('rider.chat');
     Route::get('/dashboard', [AvailabilityController::class, 'dashboard'])->name('rider.dashboard');
     Route::get('/history', [AvailabilityController::class, 'history'])->name('rider.history');
     Route::get('/earnings', [AvailabilityController::class, 'earnings'])->name('rider.earnings');
     Route::post('/online', [AvailabilityController::class, 'toggleOnline'])->name('rider.online');
     Route::post('/location', [AvailabilityController::class, 'updateLocation'])->name('rider.location');
+    Route::get('/chat/unread-active', [AvailabilityController::class, 'unreadActive'])->name('rider.chat.unread-active');
+    Route::delete('/chat/clear-all', [AvailabilityController::class, 'clearChats'])->name('rider.chat.clear-all');
 
+    Route::get('/chat', [AvailabilityController::class, 'chatInbox'])->name('rider.chat');
+    Route::get('/chat/{order}', [AvailabilityController::class, 'chat'])->name('rider.chat.show');
     Route::post('/orders/{order}/accept', [RiderOrderController::class, 'accept'])->name('rider.orders.accept');
     Route::patch('/orders/{order}/status', [RiderOrderController::class, 'updateStatus'])->name('rider.orders.status');
     Route::post('/orders/{order}/payment', [RiderOrderController::class, 'recordPayment'])->name('rider.orders.payment');
 
-    // ⭐ NEW: Get offer details (para sa global popup)
     Route::get('/offers/{order}/details', [RiderOrderController::class, 'showOffer'])->name('rider.offers.details');
 
     Route::get('/orders/{order}/chat', [ChatController::class, 'index'])->name('rider.chat.index');
@@ -201,6 +238,17 @@ Route::get('/restaurants/{restaurant}/reviews', [RestaurantReviewController::cla
 // AUTHENTICATED — Customer Review Actions
 // ============================================
 Route::middleware(['auth', 'role:customer'])->group(function () {
+        // Chat inbox — listahan ng lahat ng conversations
+    Route::get('/chat', [\App\Http\Controllers\Customer\ChatController::class, 'inbox'])->name('customer.chat');
+
+    // Specific chat page
+    Route::get('/chat/{order}', [\App\Http\Controllers\Customer\ChatController::class, 'show'])->name('customer.chat.show');
+
+    // Unread count for badge
+    Route::get('/chat/unread-active', [\App\Http\Controllers\Customer\ChatController::class, 'unreadActive'])->name('customer.chat.unread-active');
+
+    // Clear all chats (soft hide)
+    Route::delete('/chat/clear-all', [\App\Http\Controllers\Customer\ChatController::class, 'clearChats'])->name('customer.chat.clear-all');
     // ⭐ Write new review (para sa delivered order)
     Route::post('/orders/{order}/review', [ReviewController::class, 'store'])
         ->name('customer.reviews.store');

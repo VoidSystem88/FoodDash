@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Message;
 use Illuminate\Http\Request;
 
 class AvailabilityController extends Controller
 {
+    
     public function dashboard()
     {
         $rider = auth()->user()->rider;
@@ -30,7 +32,119 @@ class AvailabilityController extends Controller
 
         return view('rider.dashboard', compact('rider', 'currentOrder', 'completedToday', 'earningsToday'));
     }
+    /**
+     * Get unread chat count for active order.
+     */
+        /**
+     * Chat inbox — listahan ng lahat ng orders na may messages.
+     */
+    public function chatInbox(Request $request)
+    {
+        $rider = auth()->user()->rider;
+        $userId = auth()->id();
+        $showHidden = $request->boolean('show_hidden');
 
+        if (!$rider) {
+            return view('rider.chat-inbox', [
+                'conversations' => collect(),
+                'showHidden' => $showHidden,
+            ]);
+        }
+
+        $query = Order::with(['restaurant', 'customer', 'items'])
+            ->where('rider_id', $rider->id)
+            ->whereHas('messages');
+
+        // Filter: kung hindi show_hidden, hindi ipakita ang hidden (o may bagong message)
+        if (!$showHidden) {
+            $query->where(function ($q) {
+                $q->whereNull('hidden_for_rider_at')
+                  ->orWhereHas('messages', function ($sub) {
+                      $sub->whereColumn('messages.created_at', '>', 'orders.hidden_for_rider_at');
+                  });
+            });
+        }
+
+        $orders = $query
+            ->orderByRaw("
+                CASE
+                    WHEN status IN ('rider_assigned', 'picked_up', 'out_for_delivery') THEN 0
+                    ELSE 1
+                END
+            ")
+            ->orderByDesc('updated_at')
+            ->get();
+
+        $conversations = $orders->map(function ($order) use ($userId) {
+            $lastMessage = $order->messages()->latest()->first();
+            $unreadCount = $order->messages()
+                ->where('sender_id', '!=', $userId)
+                ->whereNull('read_at')
+                ->count();
+            $totalMessages = $order->messages()->count();
+
+            return [
+                'order' => $order,
+                'last_message' => $lastMessage,
+                'unread_count' => $unreadCount,
+                'total_messages' => $totalMessages,
+                'is_active' => in_array($order->status, [
+                    'rider_assigned', 'picked_up', 'out_for_delivery'
+                ]),
+                'is_hidden' => !is_null($order->hidden_for_rider_at),
+            ];
+        });
+
+        return view('rider.chat-inbox', compact('conversations', 'showHidden'));
+    }
+
+  
+
+    /**
+     * Unread count for active order.
+     */
+    public function unreadActive()
+    {
+        $rider = auth()->user()->rider;
+
+        if (!$rider) {
+            return response()->json(['unread' => 0]);
+        }
+
+        $activeOrder = Order::where('rider_id', $rider->id)
+            ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
+            ->first();
+
+        if (!$activeOrder) {
+            return response()->json(['unread' => 0]);
+        }
+
+        $unread = $activeOrder->messages()
+            ->where('sender_id', '!=', auth()->id())
+            ->whereNull('read_at')
+            ->count();
+
+        return response()->json(['unread' => $unread]);
+    }
+
+    /**
+     * Clear all chats (soft hide — proof pa rin).
+     */
+    public function clearChats()
+    {
+        $rider = auth()->user()->rider;
+
+        if (!$rider) {
+            return back()->with('error', 'Rider not found.');
+        }
+
+        $updatedCount = Order::where('rider_id', $rider->id)
+            ->whereHas('messages')
+            ->update(['hidden_for_rider_at' => now()]);
+
+        return back()->with('success', "Hidden {$updatedCount} chat conversations. Messages are still kept for records.");
+    }
+    
     public function history()
     {
         $rider = auth()->user()->rider;
@@ -234,5 +348,33 @@ class AvailabilityController extends Controller
         }
 
         return response()->json(['ok' => true]);
+    }
+        /**
+     * Chat page para sa active order.
+     */
+        public function chat()
+    {
+        $rider = auth()->user()->rider;
+
+        // Priority: active order
+        $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
+            ->where('rider_id', $rider->id)
+            ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
+            ->latest()
+            ->first();
+
+        // Fallback: latest delivered order na may messages (para makita ang history)
+        if (!$currentOrder) {
+            $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
+                ->where('rider_id', $rider->id)
+                ->where('status', 'delivered')
+                ->whereHas('messages')
+                ->latest()
+                ->first();
+        }
+
+        // Walang redirect — hayaan pumasok sa chat page
+        // Kung walang $currentOrder, magpapakita ng "No active chats" sa view
+        return view('rider.chat', compact('currentOrder'));
     }
 }

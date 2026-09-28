@@ -14,6 +14,7 @@ class Restaurant extends Model
         'user_id',
         'name',
         'address',
+        'badge',
         'cuisine',
         'cover_image',
         'profile_image',
@@ -37,7 +38,10 @@ class Restaurant extends Model
     // ============================================
     // RELATIONSHIPS
     // ============================================
-
+    public function getDisplayBadgeAttribute(): ?string
+    {
+        return $this->badge ?: $this->cuisine;
+    }
     public function user()
     {
         return $this->belongsTo(User::class);

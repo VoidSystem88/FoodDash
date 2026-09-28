@@ -3,20 +3,33 @@
 @section('content')
 <div class="max-w-3xl mx-auto space-y-5" x-data="imageUploader()">
 
-    {{-- HEADER --}}
-    <div class="mb-6 flex justify-between items-center" x-data="{ showLogout: false }">
+        {{-- HEADER --}}
+    <div class="mb-6 flex justify-between items-center" x-data="{ showLogout: false, ...themeToggle() }">
         <div>
-            <h1 class="text-2xl font-semibold text-gray-900">Restaurant Profile</h1>
-            <p class="text-sm text-gray-500 mt-1">Manage your restaurant details and images</p>
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-neutral-100">Restaurant Profile</h1>
+            <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">Manage your restaurant details and images</p>
         </div>
 
         <div class="flex items-center gap-2">
-            
+            {{-- DARK MODE TOGGLE --}}
+            <button type="button"
+                    @click="setTheme(theme === 'dark' ? 'light' : 'dark')"
+                    class="p-2 text-gray-600 dark:text-neutral-400 hover:text-orange-600 dark:hover:text-orange-400 transition rounded-full hover:bg-gray-100 dark:hover:bg-dark-850"
+                    title="Toggle dark mode">
+                <svg x-show="theme === 'light' || theme === 'system'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <svg x-show="theme === 'dark'" x-cloak class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </button>
 
             {{-- LOGOUT BUTTON --}}
             <button type="button"
                     @click="showLogout = true"
-                    class="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 hover:bg-red-50 px-4 py-2 rounded-lg font-medium transition">
+                    class="flex items-center gap-2 text-sm text-red-600 hover:text-red-700 border border-red-200 hover:border-red-300 hover:bg-red-50 px-4 py-2 rounded-lg font-medium transition dark:text-red-400 dark:border-red-800 dark:hover:border-red-700 dark:hover:bg-red-950/30">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -25,7 +38,7 @@
             </button>
         </div>
 
-        {{-- LOGOUT CONFIRMATION MODAL --}}
+                {{-- LOGOUT CONFIRMATION MODAL --}}
         <div x-show="showLogout"
              x-cloak
              x-transition.opacity
@@ -35,11 +48,11 @@
 
             <div x-show="showLogout"
                  x-transition.scale.origin.center
-                 class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
+                 class="bg-white dark:bg-dark-800 rounded-2xl shadow-xl max-w-sm w-full p-6">
 
                 <div class="flex justify-center mb-4">
-                    <div class="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center">
-                        <svg class="w-7 h-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-14 h-14 rounded-full bg-red-100 dark:bg-red-950/40 flex items-center justify-center">
+                        <svg class="w-7 h-7 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
@@ -47,14 +60,14 @@
                 </div>
 
                 <div class="text-center mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900">Logout?</h3>
-                    <p class="text-sm text-gray-500 mt-1">Are you sure you want to logout?</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-neutral-100">Logout?</h3>
+                    <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">Are you sure you want to logout?</p>
                 </div>
 
                 <div class="flex gap-2">
                     <button type="button"
                             @click="showLogout = false"
-                            class="flex-1 border border-gray-300 text-gray-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition">
+                            class="flex-1 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-neutral-300 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-dark-850 transition">
                         Cancel
                     </button>
 
@@ -200,9 +213,9 @@
                     {{ $restaurant->address }}
                 </div>
 
-                @if ($restaurant->cuisine)
-                    <span class="text-xs px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 font-semibold">
-                        {{ $restaurant->cuisine }}
+                                @if ($restaurant->display_badge)
+                    <span class="text-xs px-2.5 py-1 rounded-full bg-amber-800 dark:bg-amber-900 text-white font-bold uppercase tracking-wider">
+                        {{ $restaurant->display_badge }}
                     </span>
                 @endif
             </div>
@@ -227,16 +240,44 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('restaurant.profile.update') }}" class="p-6 space-y-5">
+                <form method="POST" action="{{ route('restaurant.profile.update') }}" class="p-6 space-y-5">
             @csrf
             @method('PATCH')
 
             <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-1.5">
+                <label class="block text-xs font-semibold text-gray-700 dark:text-neutral-300 mb-1.5">
                     Restaurant Name <span class="text-red-500">*</span>
                 </label>
                 <input type="text" name="name" value="{{ old('name', $restaurant->name) }}" required
-                       class="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                       class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+            </div>
+
+            {{-- BADGE (OPTIONAL) --}}
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 dark:text-neutral-300 mb-1.5">
+                    Badge
+                    <span class="text-gray-400 dark:text-neutral-500 font-normal">(optional)</span>
+                </label>
+                <input type="text" name="badge"
+                       value="{{ old('badge', $restaurant->badge) }}"
+                       maxlength="50"
+                       placeholder="e.g. Best Seller, New, Fast Delivery"
+                       class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+
+                {{-- Preview --}}
+                <div class="mt-2 flex items-center gap-2">
+                    <p class="text-xs text-gray-500 dark:text-neutral-400">
+                        Preview:
+                    </p>
+                    <span id="badge-preview"
+                          class="inline-block text-[10px] bg-amber-800 dark:bg-amber-900 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                        {{ $restaurant->badge ?: ($restaurant->cuisine ?: 'BADGE') }}
+                    </span>
+                </div>
+
+                <p class="text-xs text-gray-500 dark:text-neutral-400 mt-1.5">
+                    Kung walang custom badge, awtomatikong <strong>{{ $restaurant->cuisine ?: 'walang badge' }}</strong> (mula sa cuisine) ang lalabas.
+                </p>
             </div>
 
             <div>
@@ -358,5 +399,18 @@ function imageUploader() {
         }
     }
 }
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const badgeInput = document.querySelector('input[name="badge"]');
+    const preview = document.getElementById('badge-preview');
+
+    if (badgeInput && preview) {
+        badgeInput.addEventListener('input', function() {
+            const value = this.value.trim() || '{{ $restaurant->cuisine ?: "BADGE" }}';
+            preview.textContent = value;
+        });
+    }
+});
+</script>
 </script>
 @endpush

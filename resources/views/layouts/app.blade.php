@@ -53,7 +53,7 @@
                         @endif
                     </a>
 
-                    {{-- CUSTOMER DESKTOP --}}
+                                        {{-- CUSTOMER DESKTOP --}}
                     @if (auth()->user()->isCustomer())
                         <div class="hidden md:flex items-center gap-1">
                             <a href="{{ route('customer.restaurants') }}"
@@ -68,24 +68,47 @@
                                class="px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('customer.orders*') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
                                 Orders
                             </a>
+                            <a href="{{ route('customer.chat') }}"
+                               x-data="customerChatBadge()"
+                               x-init="init()"
+                               class="relative px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('customer.chat*') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }} inline-flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                Chat
+                                <span x-show="unread > 0"
+                                      x-cloak
+                                      class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
+                                      x-text="unread > 99 ? '99+' : unread"></span>
+                            </a>
                         </div>
                     @endif
 
-                    {{-- RIDER DESKTOP --}}
+                                        {{-- RIDER DESKTOP --}}
                     @if (auth()->user()->isRider())
                         <div class="hidden md:flex items-center gap-1">
                             <a href="{{ route('rider.dashboard') }}"
                                class="px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('rider.dashboard') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
                                 Dashboard
                             </a>
-                            <a href="{{ route('rider.history') }}"
-                               class="px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('rider.history') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
-                                History
-                            </a>
                             <a href="{{ route('rider.earnings') }}"
                                class="px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('rider.earnings*') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
                                 Earnings
                             </a>
+                                            <a href="{{ route('rider.chat') }}"
+                   x-data="chatBadge()"
+                   x-init="init()"
+                   class="relative flex flex-col items-center justify-center flex-1 h-full transition {{ request()->routeIs('rider.chat*') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <span class="text-[10px] mt-0.5 font-medium">Chat</span>
+                    <span x-show="unread > 0"
+                          x-cloak
+                          class="absolute top-1 right-1/4 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1"
+                          x-text="unread > 99 ? '99+' : unread"></span>
+                </a>
                         </div>
                     @endif
 
@@ -107,6 +130,10 @@
                             <a href="{{ route('restaurant.hours') }}"
                                class="px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('restaurant.hours*') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
                                 Hours
+                            </a>
+                            <a href="{{ route('restaurant.reviews.index') }}"
+                               class="px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('restaurant.reviews*') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
+                                Reviews
                             </a>
                             <a href="{{ route('restaurant.analytics') }}"
                                class="px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('restaurant.analytics') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
@@ -151,7 +178,7 @@
                             </svg>
 
                             <template x-if="totalUnread > 0">
-                                <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 animate-pulse"
+                                <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
                                       x-text="totalUnread > 99 ? '99+' : totalUnread"></span>
                             </template>
                         </button>
@@ -185,12 +212,12 @@
                             {{-- BODY --}}
                             <div class="max-h-[70vh] overflow-y-auto">
 
-                                {{-- ⭐ LIVE DELIVERY OFFERS (Rider only) --}}
+                                {{-- LIVE DELIVERY OFFERS (Rider only) --}}
                                 <template x-if="offers.length > 0">
                                     <div>
                                         <div class="px-4 py-2 bg-orange-50 dark:bg-orange-950/30 border-b border-orange-100 dark:border-orange-900/50">
                                             <p class="text-[10px] font-bold text-orange-700 dark:text-orange-300 uppercase tracking-wider flex items-center gap-1.5">
-                                                <svg class="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                     <circle cx="10" cy="10" r="10" opacity="0.3"/>
                                                     <circle cx="10" cy="10" r="5"/>
                                                 </svg>
@@ -204,7 +231,9 @@
 
                                                 <div class="flex gap-3">
                                                     <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md">
-                                                        <span class="text-lg">🚴</span>
+                                                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1" />
+                                                        </svg>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <div class="flex items-start justify-between gap-2 mb-1">
@@ -270,9 +299,24 @@
                                 <template x-for="n in notifications" :key="n.id">
                                     <a :href="'/notifications/' + n.id + '/read'"
                                        :class="n.read ? 'bg-white dark:bg-dark-800' : 'bg-orange-50 dark:bg-orange-950/20'"
-class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:border-0 hover:bg-gray-50 dark:hover:bg-dark-850 transition">
-                                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center text-lg"
-                                             x-text="n.icon || '🔔'"></div>
+                                       class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:border-0 hover:bg-gray-50 dark:hover:bg-dark-850 transition">
+                                        <div class="flex-shrink-0 w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center">
+                                            <template x-if="n.icon === 'star'">
+                                                <svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            </template>
+                                            <template x-if="n.icon === 'chat'">
+                                                <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                </svg>
+                                            </template>
+                                            <template x-if="!n.icon || (n.icon !== 'star' && n.icon !== 'chat')">
+                                                <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                                </svg>
+                                            </template>
+                                        </div>
                                         <div class="flex-1 min-w-0">
                                             <p class="text-sm font-medium text-gray-900 dark:text-neutral-100 line-clamp-1" x-text="n.title"></p>
                                             <p class="text-xs text-gray-600 dark:text-neutral-400 line-clamp-2 mt-0.5" x-text="n.body"></p>
@@ -439,7 +483,7 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-800/95 dark:backdrop-blur-md border-t border-gray-200 dark:border-dark-700 z-40 transition-colors">
         <div class="flex justify-around items-center h-16">
 
-            {{-- CUSTOMER MOBILE --}}
+                        {{-- CUSTOMER MOBILE --}}
             @if (auth()->user()->isCustomer())
                 <a href="{{ route('customer.restaurants') }}"
                    class="flex flex-col items-center justify-center flex-1 h-full transition {{ request()->routeIs('customer.restaurants*') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
@@ -468,19 +512,20 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
                     <span class="text-[10px] mt-0.5 font-medium">Orders</span>
                 </a>
 
-                <a href="{{ route('notifications.index') }}"
-                   class="flex flex-col items-center justify-center flex-1 h-full transition relative {{ request()->routeIs('notifications*') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
+                <a href="{{ route('customer.chat') }}"
+                   x-data="customerChatBadge()"
+                   x-init="init()"
+                   class="relative flex flex-col items-center justify-center flex-1 h-full transition {{ request()->routeIs('customer.chat*') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <span class="text-[10px] mt-0.5 font-medium">Alerts</span>
+                    <span class="text-[10px] mt-0.5 font-medium">Chat</span>
 
-                    @if ($globalUnread > 0)
-                        <span class="absolute top-1 right-1/4 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1">
-                            {{ $globalUnread > 99 ? '99+' : $globalUnread }}
-                        </span>
-                    @endif
+                    <span x-show="unread > 0"
+                          x-cloak
+                          class="absolute top-1 right-1/4 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1"
+                          x-text="unread > 99 ? '99+' : unread"></span>
                 </a>
 
                 <a href="{{ route('profile.index') }}"
@@ -493,7 +538,7 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
                 </a>
             @endif
 
-            {{-- RIDER MOBILE --}}
+                        {{-- RIDER MOBILE --}}
             @if (auth()->user()->isRider())
                 <a href="{{ route('rider.dashboard') }}"
                    class="flex flex-col items-center justify-center flex-1 h-full transition {{ request()->routeIs('rider.dashboard') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
@@ -504,13 +549,20 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
                     <span class="text-[10px] mt-0.5 font-medium">Home</span>
                 </a>
 
-                <a href="{{ route('rider.history') }}"
-                   class="flex flex-col items-center justify-center flex-1 h-full transition {{ request()->routeIs('rider.history') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
+                <a href="{{ route('rider.chat') }}"
+                   x-data="chatBadge()"
+                   x-init="init()"
+                   class="relative flex flex-col items-center justify-center flex-1 h-full transition {{ request()->routeIs('rider.chat') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    <span class="text-[10px] mt-0.5 font-medium">History</span>
+                    <span class="text-[10px] mt-0.5 font-medium">Chat</span>
+
+                    <span x-show="unread > 0"
+                          x-cloak
+                          class="absolute top-1 right-1/4 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1"
+                          x-text="unread > 99 ? '99+' : unread"></span>
                 </a>
 
                 <a href="{{ route('rider.earnings') }}"
@@ -520,21 +572,6 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
                               d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     <span class="text-[10px] mt-0.5 font-medium">Earnings</span>
-                </a>
-
-                <a href="{{ route('notifications.index') }}"
-                   class="flex flex-col items-center justify-center flex-1 h-full transition relative {{ request()->routeIs('notifications*') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                    <span class="text-[10px] mt-0.5 font-medium">Alerts</span>
-
-                    @if ($globalUnread > 0)
-                        <span class="absolute top-1 right-1/4 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1">
-                            {{ $globalUnread > 99 ? '99+' : $globalUnread }}
-                        </span>
-                    @endif
                 </a>
 
                 <a href="{{ route('profile.index') }}"
@@ -576,13 +613,13 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
                     <span class="text-[10px] mt-0.5 font-medium">Menu</span>
                 </a>
 
-                <a href="{{ route('restaurant.hours') }}"
-                   class="flex flex-col items-center justify-center flex-1 h-full transition {{ request()->routeIs('restaurant.hours*') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
+                <a href="{{ route('restaurant.reviews.index') }}"
+                   class="flex flex-col items-center justify-center flex-1 h-full transition relative {{ request()->routeIs('restaurant.reviews*') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                     </svg>
-                    <span class="text-[10px] mt-0.5 font-medium">Hours</span>
+                    <span class="text-[10px] mt-0.5 font-medium">Reviews</span>
                 </a>
 
                 <a href="{{ route('restaurant.analytics') }}"
@@ -684,7 +721,7 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
                                     <div class="flex-1 min-w-0">
                                         <div class="flex items-center justify-between gap-2 mb-0.5">
                                             <p class="text-xs font-semibold text-orange-600 dark:text-orange-400 uppercase tracking-wide">
-                                                🚴 New Delivery Offer
+                                                New Delivery Offer
                                             </p>
                                         </div>
 
@@ -733,6 +770,73 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
     {{-- GLOBAL ALPINE FUNCTIONS --}}
     {{-- ============================================ --}}
     <script>
+            function customerChatBadge() {
+        return {
+            unread: 0,
+            interval: null,
+
+            init() {
+                this.fetchUnread();
+
+                this.interval = setInterval(() => {
+                    this.fetchUnread();
+                }, 10000);
+
+                window.addEventListener('beforeunload', () => {
+                    if (this.interval) clearInterval(this.interval);
+                });
+            },
+
+            async fetchUnread() {
+                try {
+                    const res = await fetch('{{ route('customer.chat.unread-active') }}', {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        }
+                    });
+                    const data = await res.json();
+                    if (typeof data.unread === 'number') {
+                        this.unread = data.unread;
+                    }
+                } catch (err) { /* silent */ }
+            }
+        }
+    }
+           function chatBadge() {
+        return {
+            unread: 0,
+            interval: null,
+
+            init() {
+                this.fetchUnread();
+
+                this.interval = setInterval(() => {
+                    this.fetchUnread();
+                }, 10000);
+
+                window.addEventListener('beforeunload', () => {
+                    if (this.interval) clearInterval(this.interval);
+                });
+            },
+
+            async fetchUnread() {
+                try {
+                    const res = await fetch('{{ route('rider.chat.unread-active') }}', {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        }
+                    });
+                    const data = await res.json();
+                    if (typeof data.unread === 'number') {
+                        this.unread = data.unread;
+                    }
+                } catch (err) { /* silent */ }
+            }
+        }
+    }
+    
     function pwaInstall() {
         return {
             showInstall: false,
@@ -764,7 +868,29 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
             }
         }
     }
+    public function chat()
+    {
+        $rider = auth()->user()->rider;
 
+        // Priority: active order
+        $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
+            ->where('rider_id', $rider->id)
+            ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
+            ->latest()
+            ->first();
+
+        // Fallback: latest delivered order (para may chat history)
+        if (!$currentOrder) {
+            $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
+                ->where('rider_id', $rider->id)
+                ->where('status', 'delivered')
+                ->whereHas('messages') // dapat may messages
+                ->latest()
+                ->first();
+        }
+
+        return view('rider.chat', compact('currentOrder'));
+    }
     function notificationBell() {
         return {
             isOpen: false,
@@ -1023,7 +1149,7 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
                 if (!('Notification' in window)) return;
                 if (Notification.permission !== 'granted') return;
 
-                new Notification('🚴 New Delivery Offer!', {
+                new Notification('New Delivery Offer!', {
                     body: `${offer.restaurant} — ₱${offer.delivery_fee} fee`,
                     icon: '/icon-192.png',
                     tag: `offer-${offer.order_id}`,
@@ -1035,7 +1161,7 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
                 if (!('Notification' in window)) return;
                 if (Notification.permission !== 'granted') return;
 
-                new Notification('🛒 New Order Received!', {
+                new Notification('New Order Received!', {
                     body: `${order.customer_name} — ₱${order.total_amount} (${order.items_count} items)`,
                     icon: '/icon-192.png',
                     tag: `order-${order.order_id}`,
@@ -1076,13 +1202,13 @@ class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:b
     </script>
 
     {{-- ============================================ --}}
-    {{-- PAGE-SPECIFIC SCRIPTS (BEFORE Alpine!) --}}
-    {{-- ============================================ --}}
-    @stack('scripts')
-
-    {{-- ============================================ --}}
-    {{-- ALPINE.JS (LOADED LAST) --}}
+    {{-- ALPINE.JS (LOADED FIRST) --}}
     {{-- ============================================ --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+
+    {{-- ============================================ --}}
+    {{-- PAGE-SPECIFIC SCRIPTS (AFTER Alpine!) --}}
+    {{-- ============================================ --}}
+    @stack('scripts')
 </body>
 </html>

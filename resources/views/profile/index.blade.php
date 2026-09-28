@@ -3,13 +3,7 @@
 @section('content')
 <div class="max-w-2xl mx-auto" x-data="profileAvatar()">
 
-    {{-- HEADER --}}
-    <div class="mb-6 flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-semibold text-gray-900 dark:text-neutral-100">My Profile</h1>
-            <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">View your account information</p>
-        </div>
-    </div>
+    
 
     @if (session('success'))
         <div class="mb-4 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300 rounded-lg text-sm">

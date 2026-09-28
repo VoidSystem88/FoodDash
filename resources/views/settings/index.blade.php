@@ -5,7 +5,6 @@
 
     {{-- HEADER --}}
     <div class="mb-6">
-        <a href="{{ route('profile.index') }}" class="text-sm text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-gray-300">← Back to profile</a>
         <h1 class="text-2xl font-semibold text-gray-900 dark:text-neutral-100 mt-2">Advanced Settings</h1>
         <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">Manage your account settings</p>
     </div>

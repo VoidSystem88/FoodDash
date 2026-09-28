@@ -37,11 +37,11 @@
                     @endif
                 </div>
 
-                <div class="flex-1 pb-1">
+                    <div class="flex-1 pb-1 min-w-0">
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-neutral-100 leading-tight">{{ $restaurant->name }}</h1>
-                    @if ($restaurant->cuisine)
-                        <span class="inline-block mt-1 text-xs px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 font-semibold">
-                            {{ $restaurant->cuisine }}
+                    @if ($restaurant->display_badge)
+                        <span class="inline-block mt-1 text-xs px-2.5 py-1 rounded-full bg-amber-800 dark:bg-amber-900 text-white font-bold uppercase tracking-wider">
+                            {{ $restaurant->display_badge }}
                         </span>
                     @endif
                 </div>

@@ -153,9 +153,9 @@
                                         </h2>
                                     </div>
 
-                                    @if ($restaurant->cuisine)
-                                        <span class="inline-block text-[10px] bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide mb-2">
-                                            {{ $restaurant->cuisine }}
+                                    @if ($restaurant->display_badge)
+                                        <span class="inline-block text-[10px] bg-amber-800 dark:bg-amber-900 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider mb-2">
+                                            {{ $restaurant->display_badge }}
                                         </span>
                                     @endif
 

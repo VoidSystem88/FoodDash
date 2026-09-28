@@ -3,18 +3,7 @@
 @section('content')
 <div class="max-w-4xl mx-auto">
 
-    {{-- HEADER --}}
-    <div class="mb-6 flex justify-between items-center">
-        <div>
-            <h1 class="text-2xl font-semibold text-gray-900 dark:text-neutral-100">Earnings</h1>
-            <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">Track your delivery income</p>
-        </div>
-
-        <a href="{{ route('rider.dashboard') }}"
-           class="text-sm text-gray-500 dark:text-neutral-400 hover:text-gray-700 dark:hover:text-gray-300">
-            ← Back
-        </a>
-    </div>
+    
 
     {{-- PERIOD SELECTOR --}}
     <div class="flex gap-2 mb-6">

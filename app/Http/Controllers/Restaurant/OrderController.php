@@ -12,14 +12,26 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    public function dashboard()
+        public function dashboard()
     {
         $restaurant = auth()->user()->restaurant;
 
+        // Active orders lang — hindi kasama ang delivered, cancelled, rejected, no_rider
+        $activeStatuses = [
+            'received',
+            'confirmed',
+            'preparing',
+            'finding_rider',
+            'rider_assigned',
+            'picked_up',
+            'out_for_delivery',
+        ];
+
         $orders = Order::with(['customer', 'rider', 'items'])
             ->where('restaurant_id', $restaurant->id)
+            ->whereIn('status', $activeStatuses)
+            ->orderByRaw("FIELD(status, 'received', 'confirmed', 'preparing', 'finding_rider', 'rider_assigned', 'picked_up', 'out_for_delivery')")
             ->latest()
-            ->limit(50)
             ->get();
 
         $avgRating = Order::where('restaurant_id', $restaurant->id)
@@ -30,9 +42,27 @@ class OrderController extends Controller
             ->whereNotNull('restaurant_rating')
             ->count();
 
+        // Pending count — para sa hero stats
+        $pendingCount = Order::where('restaurant_id', $restaurant->id)
+            ->where('status', 'received')
+            ->count();
+
+        // Today's stats
+        $todayOrders = Order::where('restaurant_id', $restaurant->id)
+            ->whereDate('created_at', today())
+            ->count();
+
+        $todaySales = Order::where('restaurant_id', $restaurant->id)
+            ->where('status', 'delivered')
+            ->whereDate('created_at', today())
+            ->sum('food_cost');
+
         $ratingStats = [
             'avg' => $avgRating ? round($avgRating, 1) : null,
             'total' => $totalRatings,
+            'pending' => $pendingCount,
+            'today_orders' => $todayOrders,
+            'today_sales' => $todaySales,
         ];
 
         return view('restaurant.dashboard', compact('restaurant', 'orders', 'ratingStats'));
@@ -160,6 +190,8 @@ class OrderController extends Controller
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'prep_time_minutes' => 'nullable|integer|min:1|max:120',
+            'badge' => 'nullable|string|max:50',
+
         ]);
         
         $restaurant = auth()->user()->restaurant;

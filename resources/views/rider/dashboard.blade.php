@@ -139,7 +139,9 @@
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center">
-                                        <span class="text-base">🚴</span>
+                                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1" />
+                                        </svg>
                                     </div>
                                     <div>
                                         <p class="font-bold text-sm" x-text="offer.restaurant"></p>
@@ -155,10 +157,12 @@
 
                         {{-- BODY --}}
                         <div class="p-4">
-                            {{-- PICKUP (para sa OFFER — galing sa Alpine variable, hindi $currentOrder) --}}
+                            {{-- PICKUP --}}
                             <div class="flex items-start gap-2 mb-3">
                                 <div class="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-950/40 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <span class="text-xs">🏪</span>
+                                    <svg class="w-3.5 h-3.5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-[10px] text-gray-500 dark:text-neutral-400 uppercase tracking-wide font-medium">Pickup From</p>
@@ -170,7 +174,10 @@
                             {{-- DROPOFF --}}
                             <div class="flex items-start gap-2 mb-3">
                                 <div class="w-7 h-7 rounded-lg bg-green-50 dark:bg-green-950/40 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                    <span class="text-xs">📍</span>
+                                    <svg class="w-3.5 h-3.5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-[10px] text-gray-500 dark:text-neutral-400 uppercase tracking-wide font-medium">Deliver to</p>
@@ -269,7 +276,7 @@
             </div>
 
             <div class="p-6">
-                {{-- PICKUP — safe na may null check --}}
+                {{-- PICKUP --}}
                 <div class="flex gap-4 mb-5 pb-5 border-b border-gray-100 dark:border-dark-700">
                     <div class="relative flex-shrink-0">
                         @if ($currentOrder->restaurant && $currentOrder->restaurant->profile_image_url)
@@ -281,19 +288,17 @@
                                 {{ $currentOrder->restaurant ? strtoupper(substr($currentOrder->restaurant->name, 0, 1)) : '?' }}
                             </div>
                         @endif
-                        {{-- Badge --}}
-                        <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-xs border-2 border-white dark:border-dark-800 shadow-sm">
-                            🏪
+                        <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center border-2 border-white dark:border-dark-800 shadow-sm">
+                            <svg class="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
                         </div>
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-xs text-gray-500 dark:text-neutral-400 uppercase tracking-wide font-medium mb-0.5">Pickup From</p>
-
-                        {{-- Safe null coalescing operator --}}
                         <p class="font-bold text-gray-900 dark:text-neutral-100">
                             {{ $currentOrder->restaurant->name ?? 'Restaurant not found' }}
                         </p>
-
                         <p class="text-sm text-gray-600 dark:text-neutral-400 mt-0.5">
                             {{ $currentOrder->restaurant->address ?? 'Address unavailable' }}
                         </p>
@@ -368,7 +373,7 @@
                 </div>
 
                 {{-- ACTION BUTTONS --}}
-                <div class="flex flex-wrap gap-2 mb-4">
+                <div class="flex flex-wrap gap-2">
                     @if ($currentOrder->status === 'rider_assigned')
                         <form method="POST" action="{{ route('rider.orders.status', $currentOrder) }}" class="flex-1">
                             @csrf
@@ -409,149 +414,14 @@
                     @endif
                 </div>
 
-                {{-- CHAT WITH CUSTOMER --}}
-                @if ($currentOrder->canChat())
-                    <div x-data="chatBox({{ $currentOrder->id }})"
-                         x-init="init()"
-                         class="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-
-                        <div class="bg-gray-50 dark:bg-dark-850 px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-700 transition"
-                             @click="isOpen = !isOpen">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-sm text-gray-900 dark:text-neutral-100">Chat with Customer</p>
-                                    <p class="text-xs text-gray-500 dark:text-neutral-400">Order #{{ $currentOrder->id }}</p>
-                                </div>
-                                <template x-if="unread > 0">
-                                    <span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse"
-                                          x-text="unread"></span>
-                                </template>
-                            </div>
-                            <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                                 :class="isOpen ? 'rotate-180' : ''"
-                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-
-                        <div x-show="isOpen" x-cloak x-transition>
-                            <div x-ref="messagesContainer"
-     @scroll="onScroll()"
-     class="chat-scroll h-80 overflow-y-auto p-4 space-y-2 bg-gray-50 dark:bg-dark-850">
-                                <template x-if="loading">
-                                    <p class="text-center text-sm text-gray-500 dark:text-neutral-400 py-4">Loading messages...</p>
-                                </template>
-
-                                <template x-if="!loading && messages.length === 0">
-                                    <div class="text-center py-8">
-                                        <div class="text-4xl mb-2">💬</div>
-                                        <p class="text-sm text-gray-500 dark:text-neutral-400">No messages yet</p>
-                                        <p class="text-xs text-gray-400 dark:text-neutral-500 mt-1">Say hi to your customer!</p>
-                                    </div>
-                                </template>
-
-                                <template x-for="msg in messages" :key="msg.id">
-                                    <div :class="msg.sender_id === currentUserId ? 'flex justify-end' : 'flex justify-start'"
-                                         class="chat-message gap-2 items-end">
-
-                                        {{-- AVATAR — left side para sa kausap --}}
-                                        <template x-if="msg.sender_id !== currentUserId">
-                                            <div class="flex-shrink-0">
-                                                <template x-if="msg.sender_avatar_url">
-                                                    <img :src="msg.sender_avatar_url"
-                                                         :alt="msg.sender_name"
-                                                         class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
-                                                </template>
-                                                <template x-if="!msg.sender_avatar_url">
-                                                    <div :class="msg.sender_avatar_color || 'bg-gray-500'"
-                                                         class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
-                                                         x-text="msg.sender_initials || '?'"></div>
-                                                </template>
-                                            </div>
-                                        </template>
-
-                                        {{-- MESSAGE BUBBLE --}}
-                                        <div :class="msg.sender_id === currentUserId
-                                                ? 'bg-orange-600 text-white rounded-br-none'
-                                                : 'bg-white dark:bg-dark-850 text-gray-900 dark:text-neutral-100 border border-gray-200 dark:border-dark-700 rounded-bl-none'"
-                                             class="max-w-[75%] px-3 py-2 rounded-2xl shadow-sm transition-all duration-200">
-                                            <p class="text-xs font-medium mb-0.5 opacity-75"
-                                               x-text="msg.sender_name"></p>
-                                            <p class="text-sm break-words whitespace-pre-wrap"
-                                               x-text="msg.body"></p>
-                                            <div class="flex items-center justify-end gap-1 mt-1">
-                                                <span class="text-[10px] opacity-60"
-                                                      x-text="msg.created_at_human"></span>
-                                            </div>
-                                        </div>
-
-                                        {{-- AVATAR — right side para sa sarili --}}
-                                        <template x-if="msg.sender_id === currentUserId">
-                                            <div class="flex-shrink-0">
-                                                <template x-if="msg.sender_avatar_url">
-                                                    <img :src="msg.sender_avatar_url"
-                                                         :alt="msg.sender_name"
-                                                         class="w-8 h-8 rounded-full object-cover border-2 border-white dark:border-dark-800 shadow-sm">
-                                                </template>
-                                                <template x-if="!msg.sender_avatar_url">
-                                                    <div :class="msg.sender_avatar_color || 'bg-orange-500'"
-                                                         class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white dark:border-dark-800 shadow-sm"
-                                                         x-text="msg.sender_initials || '?'"></div>
-                                                </template>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
-
-                                <template x-if="typingName">
-                                    <div class="flex justify-start">
-                                        <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-600 px-3 py-2 rounded-2xl rounded-bl-none shadow-sm">
-                                            <p class="text-xs text-gray-500 dark:text-neutral-400 mb-1" x-text="typingName + ' is typing'"></p>
-                                            <div class="flex gap-1">
-                                                <span class="typing-dot"></span>
-                                                <span class="typing-dot" style="animation-delay: 0.15s"></span>
-                                                <span class="typing-dot" style="animation-delay: 0.3s"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-
-                            <div class="border-t border-gray-200 dark:border-dark-600 p-3 bg-white dark:bg-dark-800">
-                                <form @submit.prevent="sendMessage()" class="flex gap-2">
-                                    <input type="text"
-                                           x-model="newMessage"
-                                           @input="onTypingInput()"
-                                           @keydown.enter.prevent="sendMessage()"
-                                           placeholder="Type a message..."
-                                           maxlength="1000"
-                                           class="flex-1 border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
-                                    <button type="submit"
-                                            :disabled="!newMessage.trim() || sending"
-                                            :class="(!newMessage.trim() || sending) ? 'opacity-40 cursor-not-allowed' : 'hover:bg-orange-700'"
-                                            class="bg-orange-600 text-white px-5 py-2 rounded-full text-sm font-medium transition">
-                                        <span x-show="!sending">Send</span>
-                                        <span x-show="sending">...</span>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
                 {{-- PAYMENT RECORDING --}}
                 @if ($currentOrder->status === 'delivered' && !$currentOrder->payment)
                     <div class="mt-4 p-5 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-xl border border-green-200 dark:border-green-800">
                         <div class="flex items-center gap-3 mb-3">
                             <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
-                                <span class="text-lg">💰</span>
+                                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                             </div>
                             <div>
                                 <p class="font-semibold text-green-900 dark:text-green-300">Record Payment</p>
@@ -614,7 +484,9 @@
     @elseif (!$rider->is_online)
         <div class="bg-white dark:bg-dark-800 rounded-2xl border border-gray-200 dark:border-dark-700 p-10 text-center transition-colors">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-dark-850 mb-4">
-                <span class="text-2xl">⚪</span>
+                <svg class="w-8 h-8 text-gray-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
             </div>
             <h3 class="font-bold text-gray-900 dark:text-neutral-100 mb-1">You're Offline</h3>
             <p class="text-sm text-gray-500 dark:text-neutral-400">Toggle online to start receiving delivery offers</p>
@@ -624,6 +496,8 @@
             </button>
         </div>
     @endif
+
+    
 
 </div>
 @endsection
@@ -645,6 +519,20 @@
     .active\:scale-98:active {
         transform: scale(0.98);
     }
+    .chat-scroll::-webkit-scrollbar {
+        display: none;
+    }
+    .chat-scroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .chat-message {
+        animation: slideIn 0.25s ease-out;
+    }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 <script>
 function riderDash(riderId) {
@@ -664,12 +552,10 @@ function riderDash(riderId) {
                     });
             }
 
-            // Countdown ticker
             this.timer = setInterval(() => {
                 this.tickCountdowns();
             }, 1000);
 
-            // Load existing offers on page load
             this.loadExistingOffers();
 
             if (this.online) {
@@ -878,6 +764,17 @@ function chatBox(orderId) {
         newMessage: '',
         unread: 0,
         currentUserId: {{ auth()->id() }},
+
+        posX: 0,
+        posY: 0,
+        isDragging: false,
+        dragStartX: 0,
+        dragStartY: 0,
+        dragStartPosX: 0,
+        dragStartPosY: 0,
+        hasMoved: false,
+        bubbleSize: 56,
+        storageKey: 'fooddash_chat_bubble_pos',
         currentUserName: '{{ auth()->user()->name }}',
         currentUserAvatar: '{{ auth()->user()->avatar_url }}',
         currentUserInitials: '{{ auth()->user()->initials }}',
@@ -889,12 +786,12 @@ function chatBox(orderId) {
         isAtBottom: true,
         listenerAttached: false,
 
-        init() {
-            console.log('💬 Rider chatBox.init() for order:', orderId);
+                init() {
+            // ⭐ Initialize drag position
+            this.initPosition();
 
             if (window.Echo) {
                 window.Echo.leave(`order.${orderId}.chat`);
-                console.log('🚪 Left old channel');
             }
 
             this.loadMessages();
@@ -902,42 +799,146 @@ function chatBox(orderId) {
             setTimeout(() => {
                 this.subscribeToChat(orderId);
             }, 300);
+
+            // Handle window resize para hindi lumabas sa screen
+            window.addEventListener('resize', () => this.clampPosition());
+        },
+
+        // ⭐ DRAG: Initialize position from storage or default
+        initPosition() {
+            const saved = localStorage.getItem(this.storageKey);
+
+            if (saved) {
+                try {
+                    const pos = JSON.parse(saved);
+                    this.posX = pos.x;
+                    this.posY = pos.y;
+                    this.$nextTick(() => this.clampPosition());
+                    return;
+                } catch (e) {
+                    // Fall through to default
+                }
+            }
+
+            // Default: bottom-right
+            this.$nextTick(() => {
+                const winW = window.innerWidth;
+                const winH = window.innerHeight;
+                this.posX = winW - this.bubbleSize - 16; // 16px margin
+                this.posY = winH - this.bubbleSize - 80; // 80px offset for bottom nav
+            });
+        },
+
+        // ⭐ DRAG: Start dragging
+        startDrag(e) {
+            // Wag mag-start ng drag kung naka-open ang chat panel
+            if (this.isOpen) return;
+
+            // Ignore right-click
+            if (e.type === 'mousedown' && e.button !== 0) return;
+
+            this.isDragging = true;
+            this.hasMoved = false;
+
+            const point = e.touches ? e.touches[0] : e;
+            this.dragStartX = point.clientX;
+            this.dragStartY = point.clientY;
+            this.dragStartPosX = this.posX;
+            this.dragStartPosY = this.posY;
+
+            // Attach global listeners
+            if (e.type === 'mousedown') {
+                document.addEventListener('mousemove', this.onDragMove);
+                document.addEventListener('mouseup', this.onDragEnd);
+            } else {
+                document.addEventListener('touchmove', this.onDragMove, { passive: false });
+                document.addEventListener('touchend', this.onDragEnd);
+            }
+
+            e.preventDefault();
+        },
+
+        // ⭐ DRAG: Move
+        onDragMove(e) {
+            if (!this.isDragging) return;
+
+            const point = e.touches ? e.touches[0] : e;
+            const dx = point.clientX - this.dragStartX;
+            const dy = point.clientY - this.dragStartY;
+
+            // Threshold para ma-detect kung drag o click
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                this.hasMoved = true;
+            }
+
+            this.posX = this.dragStartPosX + dx;
+            this.posY = this.dragStartPosY + dy;
+
+            this.clampPosition();
+
+            if (e.cancelable) e.preventDefault();
+        },
+
+        // ⭐ DRAG: End
+        onDragEnd(e) {
+            if (!this.isDragging) return;
+
+            this.isDragging = false;
+
+            // Remove global listeners
+            document.removeEventListener('mousemove', this.onDragMove);
+            document.removeEventListener('mouseup', this.onDragEnd);
+            document.removeEventListener('touchmove', this.onDragMove);
+            document.removeEventListener('touchend', this.onDragEnd);
+
+            // Save position
+            if (this.hasMoved) {
+                localStorage.setItem(this.storageKey, JSON.stringify({
+                    x: this.posX,
+                    y: this.posY,
+                }));
+            }
+        },
+
+        // ⭐ DRAG: Clamp position sa loob ng screen
+        clampPosition() {
+            const winW = window.innerWidth;
+            const winH = window.innerHeight;
+            const margin = 8;
+
+            // Clamp X
+            if (this.posX < margin) this.posX = margin;
+            if (this.posX > winW - this.bubbleSize - margin) {
+                this.posX = winW - this.bubbleSize - margin;
+            }
+
+            // Clamp Y (may bottom offset para sa mobile nav)
+            const bottomOffset = winW < 768 ? 80 : 16;
+            if (this.posY < margin) this.posY = margin;
+            if (this.posY > winH - this.bubbleSize - bottomOffset) {
+                this.posY = winH - this.bubbleSize - bottomOffset;
+            }
         },
 
         subscribeToChat(orderId) {
             if (this.listenerAttached) return;
 
             if (typeof window.Echo === 'undefined') {
-                console.error('❌ Echo not available');
+                console.error('Echo not available');
                 return;
             }
 
-            console.log('🔌 Subscribing to order.' + orderId + '.chat');
-
             const chatChannel = window.Echo.private(`order.${orderId}.chat`);
 
-            chatChannel.subscribed(() => {
-                console.log('✅ SUBSCRIBED to order.' + orderId + '.chat');
-            });
-
-            chatChannel.error((err) => {
-                console.error('❌ Subscription error:', err);
-            });
-
             chatChannel.listen('.message.sent', (e) => {
-                console.log('🔥 MESSAGE RECEIVED:', e);
-
-                if (e.sender_id === this.currentUserId) {
-                    console.log('⏭️ Skipping own message');
-                    return;
-                }
+                if (e.sender_id === this.currentUserId) return;
 
                 e.status = 'received';
                 this.messages.push(e);
-                console.log('✅ Pushed. Total:', this.messages.length);
 
                 if (!this.isOpen || !this.isAtBottom) {
                     this.unread++;
+                    this.playBeep();
                 } else {
                     this.markAsRead();
                 }
@@ -948,41 +949,42 @@ function chatBox(orderId) {
             });
 
             chatChannel.listen('.user.typing', (e) => {
-    if (e.user_id === this.currentUserId) return;
+                if (e.user_id === this.currentUserId) return;
 
-    const wasTyping = this.typingName;
-    this.typingName = e.is_typing ? e.user_name : '';
+                const wasTyping = this.typingName;
+                this.typingName = e.is_typing ? e.user_name : '';
 
-    // ⭐ Auto-scroll kapag nagsimula mag-type ang kausap
-    if (e.is_typing && !wasTyping && this.isAtBottom) {
-        this.$nextTick(() => this.scrollToBottom());
-    }
-});
+                if (e.is_typing && !wasTyping && this.isAtBottom) {
+                    this.$nextTick(() => this.scrollToBottom());
+                }
+            });
 
-            chatChannel.listen('.message.sent', (e) => {
-    if (e.sender_id === this.currentUserId) return;
-
-    e.status = 'received';
-    this.messages.push(e);
-
-    // ⭐ Auto-scroll sa bawat bagong message, pero hindi kapag nag-scroll up ang user
-    if (this.isAtBottom) {
-        this.markAsRead();
-        this.$nextTick(() => this.scrollToBottom());
-    } else {
-        this.unread++;
-    }
-});
+            chatChannel.listen('.messages.read', (e) => {
+                if (e.reader_id === this.currentUserId) return;
+                this.messages.forEach(m => {
+                    if (e.message_ids.includes(m.id) && m.sender_id === this.currentUserId) {
+                        m.status = 'seen';
+                        m.read_at = e.read_at;
+                    }
+                });
+            });
 
             this.channel = chatChannel;
             this.listenerAttached = true;
-            console.log('🎯 Listener attached');
         },
 
-        statusLabel(msg) {
-            if (msg.status === 'seen') return 'Seen';
-            if (msg.status === 'delivered') return 'Delivered';
-            return 'Sending...';
+        playBeep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 900;
+                gain.gain.value = 0.15;
+                osc.start();
+                setTimeout(() => { osc.stop(); ctx.close(); }, 150);
+            } catch (e) { /* silent */ }
         },
 
         async loadMessages() {
