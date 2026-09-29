@@ -390,46 +390,46 @@
     @endauth
 
     {{-- ============================================ --}}
-    {{-- GUEST NAVIGATION --}}
-    {{-- ============================================ --}}
-    @guest
-    <nav class="bg-white dark:bg-dark-800/95 dark:backdrop-blur-md border-b border-gray-200 dark:border-dark-700 sticky top-0 z-40 transition-colors">
-        <div class="max-w-6xl mx-auto px-4">
-            <div class="flex justify-between items-center h-14">
-                @php $config = \App\Models\SystemConfig::current(); @endphp
-                <a href="{{ route('customer.restaurants') }}" class="flex items-center gap-2">
-                    @if ($config->hasLogo())
-                        <img src="{{ $config->logo_url }}"
-                             alt="{{ config('app.name', 'FoodDash') }}"
-                             class="w-auto"
-                             style="height: {{ $config->logo_height_px }}px;">
-                    @else
-                        <span class="font-semibold text-lg text-gray-900 dark:text-neutral-100">
-                            {{ config('app.name', 'FoodDash') }}
-                        </span>
-                    @endif
+{{-- GUEST NAVIGATION --}}
+{{-- ============================================ --}}
+@guest
+<nav class="bg-white dark:bg-dark-800/95 dark:backdrop-blur-md border-b border-gray-200 dark:border-dark-700 sticky top-0 z-40 transition-colors">
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="flex justify-between items-center h-14">
+            @php $config = \App\Models\SystemConfig::current(); @endphp
+            <a href="{{ route('customer.restaurants') }}" class="flex items-center gap-2 flex-shrink-0">
+                @if ($config->hasLogo())
+                    <img src="{{ $config->logo_url }}"
+                         alt="{{ config('app.name', 'FoodDash') }}"
+                         class="w-auto"
+                         style="height: {{ $config->logo_height_px }}px;">
+                @else
+                    <span class="font-semibold text-lg text-gray-900 dark:text-neutral-100">
+                        {{ config('app.name', 'FoodDash') }}
+                    </span>
+                @endif
+            </a>
+
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <a href="{{ route('customer.restaurants') }}"
+                   class="hidden sm:inline-flex whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('customer.restaurants*') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
+                    Restaurants
                 </a>
 
-                <div class="flex items-center gap-2">
-                    <a href="{{ route('customer.restaurants') }}"
-                       class="hidden sm:inline-flex px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('customer.restaurants*') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
-                        Restaurants
-                    </a>
+                <a href="{{ route('login') }}"
+                   class="whitespace-nowrap flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-dark-850 transition">
+                    Sign In
+                </a>
 
-                    <a href="{{ route('login') }}"
-                       class="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-dark-850 transition">
-                        Sign In
-                    </a>
-
-                    <a href="{{ route('register') }}"
-                       class="px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-md hover:shadow-lg transition">
-                        Sign Up
-                    </a>
-                </div>
+                <a href="{{ route('register') }}"
+                   class="whitespace-nowrap flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-md hover:shadow-lg transition">
+                    Sign Up
+                </a>
             </div>
         </div>
-    </nav>
-    @endguest
+    </div>
+</nav>
+@endguest
 
     {{-- PWA INSTALL PROMPT --}}
     <div x-data="pwaInstall()" x-init="init()" x-cloak>
