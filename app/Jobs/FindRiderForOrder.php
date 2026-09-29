@@ -15,6 +15,7 @@ class FindRiderForOrder implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $timeout = 600; // 10 minutes max
+    public int $tries = 1;
 
     public function __construct(public Order $order) {}
 

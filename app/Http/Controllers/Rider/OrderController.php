@@ -78,165 +78,146 @@ class OrderController extends Controller
     /**
      * ⭐ ACCEPT ORDER — advance booking o ready_for_pickup
      */
-    public function accept(Request $request, Order $order)
-    {
-        $rider = $request->user()->rider;
-        abort_unless($rider && $rider->is_online, 403, 'Rider not online');
+/**
+ * ⭐ ACCEPT ORDER — rider accepts offer
+ */
+public function accept(Request $request, Order $order)
+{
+    $rider = $request->user()->rider;
+    abort_unless($rider && $rider->is_online, 403, 'Rider not online');
 
-        // ⭐ Allow accept kahit confirmed pa (advance booking)
-        $allowedStatuses = ['confirmed', 'preparing', 'ready_for_pickup'];
+    // Allowed statuses: confirmed (may rider na), preparing (verified)
+    $allowedStatuses = ['confirmed', 'preparing'];
 
-        if (!in_array($order->status, $allowedStatuses)) {
-            return response()->json([
-                'ok' => false,
-                'message' => 'Hindi pa pwede i-accept ang order na ito. Status: ' . $order->status,
-            ], 422);
-        }
-
-        // ⭐ Kung may rider na — bawal
-        if ($order->rider_id) {
-            return response()->json([
-                'ok' => false,
-                'message' => 'May rider na ang order na ito.',
-            ], 422);
-        }
-
-        // ⭐ Assign rider — advance booking o ready
-        $updated = Order::where('id', $order->id)
-            ->whereNull('rider_id')
-            ->whereIn('status', $allowedStatuses)
-            ->update([
-                'rider_id' => $rider->id,
-                'status' => 'rider_assigned',
-            ]);
-
-        if ($updated === 0) {
-            return response()->json([
-                'ok' => false,
-                'message' => 'Another rider accepted first.',
-            ], 422);
-        }
-
-        cache()->put("order:{$order->id}:accepted_rider", $rider->id, 60);
-        $rider->update(['is_available' => false]);
-
-        $order->refresh();
-
-        broadcast(new RiderAssigned($order));
-
-        // Notify customer
-        $order->customer->notify(new OrderStatusNotification($order->fresh()));
-
-        // ⭐ Notify restaurant na may rider nang naka-assign
-        if ($order->restaurant && $order->restaurant->user) {
-            $order->restaurant->user->notify(new OrderStatusNotification($order->fresh()));
-        }
-
-        // ⭐ Dynamic message base sa status
-        $message = $order->restaurant_marked_ready_at
-            ? 'Order accepted! Ready na — pumunta ka na sa restaurant.'
-            : 'Order accepted! Hintayin ang notification kapag ready na ang pagkain.';
-
+    if (!in_array($order->status, $allowedStatuses)) {
         return response()->json([
-            'ok' => true,
-            'message' => $message,
-            'redirect' => route('rider.dashboard'),
-        ]);
+            'ok' => false,
+            'message' => 'Order is no longer available. Status: ' . $order->status,
+        ], 422);
     }
 
-    /**
-     * ⭐ UPDATE STATUS — picked_up, out_for_delivery, delivered
-     */
-    public function updateStatus(Request $request, Order $order)
-    {
-        $data = $request->validate([
-            'status' => 'required|in:picked_up,out_for_delivery,delivered',
+    // Kung may rider na — bawal
+    if ($order->rider_id) {
+        return response()->json([
+            'ok' => false,
+            'message' => 'Another rider already accepted this order.',
+        ], 422);
+    }
+
+    // Atomic assign
+    $updated = Order::where('id', $order->id)
+        ->whereNull('rider_id')
+        ->whereIn('status', $allowedStatuses)
+        ->update([
+            'rider_id' => $rider->id,
+            'status' => 'rider_assigned',
         ]);
 
-        $rider = $request->user()->rider;
-        abort_unless($order->rider_id === $rider->id, 403);
-
-        // ⭐ BAGO: Validation bago mag-mark as picked_up
-        if ($data['status'] === 'picked_up') {
-
-            // ⭐ Siguraduhing ready na ang restaurant bago payagan ang pickup
-            if (!$order->restaurant_marked_ready_at) {
-                return back()->with('error',
-                    'Hindi pa ready ang order. Hintayin ang notification mula sa restaurant.'
-                );
-            }
-
-            // ⭐ Siguraduhing 'rider_assigned' pa ang status
-            if ($order->status !== 'rider_assigned') {
-                return back()->with('error',
-                    'Invalid status transition. Current: ' . $order->status
-                );
-            }
-
-            // Optional: distance check
-            $distance = null;
-            if ($rider->latitude && $rider->longitude && $order->restaurant) {
-                $service = new \App\Services\RiderSearchService();
-                $distance = $service->distanceKm(
-                    (float) $rider->latitude,
-                    (float) $rider->longitude,
-                    (float) $order->restaurant->latitude,
-                    (float) $order->restaurant->longitude
-                );
-
-                // ⭐ Optional: Mag-warning kung malayo pa sa restaurant (>500m)
-                if ($distance > 0.5) {
-                    \Log::info("Rider #{$rider->id} marking picked_up from {$distance}km away");
-                }
-            }
-
-            // ⭐ Naka-set na verified_pickup_at
-            $order->update([
-                'status' => 'picked_up',
-                'verified_pickup_at' => now(),
-            ]);
-
-            // Notify restaurant na nakuha na ng rider ang order
-            if ($order->restaurant && $order->restaurant->user) {
-                $order->restaurant->user->notify(
-                    new OrderStatusNotification($order->fresh())
-                );
-            }
-        } elseif ($data['status'] === 'out_for_delivery') {
-            // ⭐ Dapat picked_up pa lang bago maging out_for_delivery
-            if ($order->status !== 'picked_up') {
-                return back()->with('error',
-                    'Order must be "picked_up" first. Current: ' . $order->status
-                );
-            }
-
-            $order->update(['status' => 'out_for_delivery']);
-
-        } elseif ($data['status'] === 'delivered') {
-            // ⭐ Dapat out_for_delivery pa lang bago maging delivered
-            if ($order->status !== 'out_for_delivery') {
-                return back()->with('error',
-                    'Order must be "out_for_delivery" first. Current: ' . $order->status
-                );
-            }
-
-            $order->update(['status' => 'delivered']);
-        }
-
-        // Notify customer
-        $order->customer->notify(new OrderStatusNotification($order->fresh()));
-
-        if ($data['status'] === 'delivered') {
-            $rider->update(['is_available' => true]);
-        }
-
-        broadcast(new OrderStatusUpdated($order->fresh()));
-
-        $label = str_replace('_', ' ', $data['status']);
-
-        return redirect()->route('rider.dashboard')
-            ->with('success', "Status updated to: " . ucfirst($label));
+    if ($updated === 0) {
+        return response()->json([
+            'ok' => false,
+            'message' => 'Another rider accepted first.',
+        ], 422);
     }
+
+    // Signal the search service
+    cache()->put("order:{$order->id}:accepted_rider", $rider->id, 120);
+
+    // Mark rider as unavailable
+    $rider->update(['is_available' => false]);
+
+    $order->refresh();
+
+broadcast(new RiderAssigned($order));
+
+// ⭐ I-broadcast din sa restaurant
+try {
+    broadcast(new \App\Events\OrderRiderAssignedForRestaurant($order));
+    \Log::info("✅ OrderRiderAssignedForRestaurant broadcast for order #{$order->id}");
+} catch (\Throwable $e) {
+    \Log::error("❌ OrderRiderAssignedForRestaurant broadcast failed: " . $e->getMessage());
+}
+
+    // Notify customer
+    $order->customer->notify(new OrderStatusNotification($order->fresh()));
+
+    // Notify restaurant
+    if ($order->restaurant && $order->restaurant->user) {
+        $order->restaurant->user->notify(new OrderStatusNotification($order->fresh()));
+    }
+
+    return response()->json([
+        'ok' => true,
+        'message' => 'Order accepted! Wait for restaurant to start preparing.',
+        'redirect' => route('rider.dashboard'),
+    ]);
+}
+
+/**
+ * ⭐ UPDATE STATUS — picked_up, out_for_delivery, delivered
+ */
+public function updateStatus(Request $request, Order $order)
+{
+    $data = $request->validate([
+        'status' => 'required|in:picked_up,out_for_delivery,delivered',
+    ]);
+
+    $rider = $request->user()->rider;
+    abort_unless($order->rider_id === $rider->id, 403);
+
+    if ($data['status'] === 'picked_up') {
+        // Must be ready_for_pickup
+        if ($order->status !== 'ready_for_pickup') {
+            return back()->with('error',
+                'Hindi pa ready ang order. Current status: ' . $order->status
+            );
+        }
+
+        $order->update([
+            'status' => 'picked_up',
+            'verified_pickup_at' => now(),
+        ]);
+
+        // Notify restaurant
+        if ($order->restaurant && $order->restaurant->user) {
+            $order->restaurant->user->notify(
+                new OrderStatusNotification($order->fresh())
+            );
+        }
+
+    } elseif ($data['status'] === 'out_for_delivery') {
+        if ($order->status !== 'picked_up') {
+            return back()->with('error',
+                'Order must be "picked_up" first. Current: ' . $order->status
+            );
+        }
+
+        $order->update(['status' => 'out_for_delivery']);
+
+    } elseif ($data['status'] === 'delivered') {
+        if ($order->status !== 'out_for_delivery') {
+            return back()->with('error',
+                'Order must be "out_for_delivery" first. Current: ' . $order->status
+            );
+        }
+
+        $order->update(['status' => 'delivered']);
+    }
+
+    // Notify customer
+    $order->customer->notify(new OrderStatusNotification($order->fresh()));
+
+    if ($data['status'] === 'delivered') {
+        $rider->update(['is_available' => true]);
+    }
+
+    broadcast(new OrderStatusUpdated($order->fresh()));
+
+    $label = str_replace('_', ' ', $data['status']);
+
+    return redirect()->route('rider.dashboard')
+        ->with('success', 'Status updated to: ' . ucfirst($label));
+}
 
     /**
      * ⭐ RECORD PAYMENT

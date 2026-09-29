@@ -76,7 +76,8 @@
 
         <form method="POST" action="{{ route('logout') }}" class="mt-3">
             @csrf
-            <button class="w-full text-xs text-gray-400 hover:text-gray-600">
+            <button onclick="localStorage.removeItem('theme'); document.documentElement.classList.remove('dark');"
+                    class="w-full text-xs text-gray-400 hover:text-gray-600">
                 Cancel and go back
             </button>
         </form>

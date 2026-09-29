@@ -1,79 +1,112 @@
 @extends('layouts.app')
 
 @section('content')
-<div x-data="orderTracker({{ $order->id }})" x-init="init()">
-    <div class="flex justify-between items-center mb-8">
+<div x-data="orderTracker({{ $order->id }})" x-init="init()" class="max-w-3xl mx-auto space-y-5">
+
+    {{-- ============================================ --}}
+    {{-- HEADER --}}
+    {{-- ============================================ --}}
+    <div class="flex justify-between items-center">
         <div>
-            <p class="text-sm text-gray-500 dark:text-neutral-400 mt-1">{{ $order->restaurant->name }}</p>
+            <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">Order #{{ $order->id }}</h1>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{{ $order->restaurant->name }}</p>
         </div>
-        
+        <a href="{{ route('customer.orders') }}"
+           class="inline-flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-orange-500 dark:hover:text-orange-500 transition group">
+            <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+        </a>
     </div>
 
-    {{-- STATUS --}}
-    <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4">
-        <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-1">Current status</p>
-        <p class="text-lg font-semibold text-gray-900 dark:text-neutral-100" x-text="statusLabel"></p>
+    {{-- ============================================ --}}
+    {{-- STATUS CARD --}}
+    {{-- ============================================ --}}
+    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
+        <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400 mb-1 font-medium">Current Status</p>
+        <p class="text-lg font-bold text-zinc-900 dark:text-white" x-text="statusLabel"></p>
 
         {{-- PROGRESS --}}
         <div class="mt-6 flex items-center">
             <template x-for="(step, i) in steps" :key="i">
                 <div class="flex items-center flex-1">
-                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0"
-                         :class="stepIndex >= i ? 'bg-orange-600 text-white' : 'bg-gray-200 dark:bg-dark-700 text-gray-500 dark:text-neutral-400'">
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                         :class="stepIndex >= i ? 'bg-orange-500 text-white' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'">
                         <span x-text="i + 1"></span>
                     </div>
                     <div class="flex-1 h-0.5 mx-1"
-                         :class="stepIndex > i ? 'bg-orange-600' : 'bg-gray-200 dark:bg-dark-700'"
+                         :class="stepIndex > i ? 'bg-orange-500' : 'bg-zinc-200 dark:bg-zinc-800'"
                          x-show="i < steps.length - 1"></div>
                 </div>
             </template>
         </div>
         <div class="flex justify-between mt-2">
             <template x-for="(step, i) in steps" :key="'lbl' + i">
-                <span class="text-xs" :class="stepIndex >= i ? 'text-gray-700 dark:text-neutral-300 font-medium' : 'text-gray-400 dark:text-neutral-500'" x-text="step"></span>
+                <span class="text-xs" :class="stepIndex >= i ? 'text-zinc-900 dark:text-white font-medium' : 'text-zinc-400 dark:text-zinc-500'" x-text="step"></span>
             </template>
         </div>
     </div>
 
+    {{-- ============================================ --}}
     {{-- REJECTION REASON --}}
+    {{-- ============================================ --}}
     @if ($order->status === 'rejected' && $order->rejection_reason)
-        <div class="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
-            <p class="text-xs uppercase tracking-wide text-red-700 dark:text-red-300 font-medium mb-1">Order rejected</p>
-            <p class="text-sm text-red-800 dark:text-red-200">Reason: {{ $order->rejection_reason }}</p>
-        </div>
-    @endif
-
-    {{-- CANCELLATION REASON --}}
-    @if ($order->status === 'cancelled' && $order->cancellation_reason)
-        <div class="bg-gray-50 dark:bg-dark-850 border border-gray-300 dark:border-dark-600 rounded-lg p-4 mb-4">
-            <p class="text-xs uppercase tracking-wide text-gray-700 dark:text-neutral-300 font-medium mb-1">
-                Order cancelled
-            </p>
-            <p class="text-sm text-gray-800 dark:text-neutral-200">
-                Reason: {{ $order->cancellation_reason }}
-            </p>
-            @if ($order->cancelled_at)
-                <p class="text-xs text-gray-500 dark:text-neutral-400 mt-2">
-                    Cancelled {{ $order->cancelled_at->diffForHumans() }}
-                </p>
-            @endif
-        </div>
-    @endif
-
-    {{-- CANCEL ORDER FORM --}}
-    @if ($order->canBeCancelledByCustomer())
-        <div class="bg-white dark:bg-dark-800 rounded-lg border border-red-200 dark:border-red-800 p-6 mb-4"
-             x-data="{ showCancel: false }">
-            <div class="flex justify-between items-center">
+        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-red-200 dark:border-red-800 p-5">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-900 dark:text-neutral-100">Need to cancel?</p>
-                    <p class="text-xs text-gray-500 dark:text-neutral-400 mt-1">
+                    <p class="text-xs uppercase tracking-wide text-red-600 dark:text-red-400 font-bold mb-1">Order Rejected</p>
+                    <p class="text-sm text-zinc-700 dark:text-zinc-300">Reason: {{ $order->rejection_reason }}</p>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- ============================================ --}}
+    {{-- CANCELLATION REASON --}}
+    {{-- ============================================ --}}
+    @if ($order->status === 'cancelled' && $order->cancellation_reason)
+        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-white dark:text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-zinc-700 dark:text-zinc-300 font-bold mb-1">Order Cancelled</p>
+                    <p class="text-sm text-zinc-700 dark:text-zinc-300">Reason: {{ $order->cancellation_reason }}</p>
+                    @if ($order->cancelled_at)
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+                            Cancelled {{ $order->cancelled_at->diffForHumans() }}
+                        </p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- ============================================ --}}
+    {{-- CANCEL ORDER FORM --}}
+    {{-- ============================================ --}}
+    @if ($order->canBeCancelledByCustomer())
+        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors"
+             x-data="{ showCancel: false }">
+            <div class="flex justify-between items-center gap-3">
+                <div>
+                    <p class="text-sm font-bold text-zinc-900 dark:text-white">Need to cancel?</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                         You can cancel this order while it's still being processed.
                     </p>
                 </div>
                 <button type="button"
                         @click="showCancel = !showCancel"
-                        class="text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/30 px-4 py-2 rounded text-sm font-medium">
+                        class="text-red-600 dark:text-red-400 bg-white dark:bg-zinc-900 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/30 px-4 py-2 rounded-lg text-sm font-medium transition">
                     Cancel Order
                 </button>
             </div>
@@ -81,7 +114,7 @@
             <div x-show="showCancel"
                  x-cloak
                  x-transition
-                 class="mt-4 pt-4 border-t border-red-100 dark:border-red-900">
+                 class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
                 <form method="POST"
                       action="{{ route('customer.orders.cancel', $order) }}"
                       class="space-y-3"
@@ -89,12 +122,12 @@
                     @csrf
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-800 dark:text-neutral-200 mb-1">
+                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
                             Reason for cancellation
                         </label>
                         <select name="cancellation_reason"
                                 required
-                                class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                class="w-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                             <option value="">Select a reason...</option>
                             <option value="Changed my mind">Changed my mind</option>
                             <option value="Ordered by mistake">Ordered by mistake</option>
@@ -107,12 +140,12 @@
 
                     <div class="flex gap-2">
                         <button type="submit"
-                                class="bg-red-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700">
+                                class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition">
                             Confirm Cancellation
                         </button>
                         <button type="button"
                                 @click="showCancel = false"
-                                class="border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-neutral-300 px-4 py-2 rounded text-sm hover:bg-gray-50 dark:hover:bg-dark-850">
+                                class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition">
                             Keep Order
                         </button>
                     </div>
@@ -122,31 +155,36 @@
     @endif
 
     {{-- ============================================ --}}
-    {{-- REVIEW SECTION — para sa delivered orders --}}
+    {{-- REVIEW SECTION --}}
     {{-- ============================================ --}}
     @if ($order->status === 'delivered' && $order->canBeReviewed())
         <div x-data="reviewForm({{ $order->id }})"
-             class="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-950/20 dark:to-orange-950/20 rounded-2xl border-2 border-orange-200 dark:border-orange-800 p-6 mb-4">
+             class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
 
-            <div class="flex items-start gap-4 mb-4">
-                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <span class="text-2xl">⭐</span>
+            <div class="flex items-start gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
                 </div>
                 <div class="flex-1">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-neutral-100">
+                    <p class="text-sm font-bold text-zinc-900 dark:text-white">
                         Rate your experience
-                    </h3>
-                    <p class="text-sm text-gray-600 dark:text-neutral-400">
-                        Tulungan mo ang ibang customers sa review mo para sa
-                        <strong>{{ $order->restaurant->name }}</strong>.
+                    </p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        Help other customers by sharing your review for
+                        <strong class="text-zinc-700 dark:text-zinc-300">{{ $order->restaurant->name }}</strong>.
                     </p>
                 </div>
             </div>
 
             <button type="button"
                     @click="showModal = true"
-                    class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-bold shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg transition">
-                ⭐ Write a Review
+                    class="w-full bg-orange-500 text-white py-3 rounded-lg font-medium text-sm hover:bg-orange-600 transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                Write a Review
             </button>
 
             {{-- Review Modal --}}
@@ -155,25 +193,24 @@
                  x-transition.opacity
                  @keydown.escape.window="showModal = false"
                  @click.self="showModal = false"
-                 class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60"
-                 style="display: none;">
+                 class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60">
 
                 <div x-show="showModal"
                      x-transition.scale.origin.center
-                     class="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+                     class="bg-white dark:bg-zinc-900 rounded-lg shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
 
                     <div class="flex justify-between items-start mb-5">
                         <div>
-                            <h2 class="text-xl font-bold text-gray-900 dark:text-neutral-100">Rate your experience</h2>
-                            <p class="text-sm text-gray-500 dark:text-neutral-400">
+                            <h2 class="text-xl font-bold text-zinc-900 dark:text-white">Rate your experience</h2>
+                            <p class="text-sm text-zinc-500 dark:text-zinc-400">
                                 {{ $order->restaurant->name }}
                             </p>
                         </div>
                         <button type="button"
                                 @click="showModal = false"
-                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
@@ -182,8 +219,8 @@
 
                         {{-- Star Rating --}}
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 dark:text-neutral-100 mb-2">
-                                Overall Rating *
+                            <label class="block text-sm font-bold text-zinc-900 dark:text-white mb-2">
+                                Overall Rating
                             </label>
                             <div class="flex gap-2">
                                 <template x-for="i in 5" :key="i">
@@ -194,8 +231,8 @@
                                             class="transition-transform hover:scale-110">
                                         <svg class="w-10 h-10"
                                              :class="i <= (hoverRating || rating) 
-                                                ? 'text-yellow-400 fill-yellow-400' 
-                                                : 'text-gray-300 dark:text-neutral-600'"
+                                                ? 'text-orange-500 fill-orange-500' 
+                                                : 'text-zinc-300 dark:text-zinc-600'"
                                              viewBox="0 0 20 20">
                                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                         </svg>
@@ -203,53 +240,53 @@
                                 </template>
                             </div>
                             <p x-show="rating > 0"
-                               x-text="['', 'Terrible 😞', 'Poor 😕', 'Average 😐', 'Good 😊', 'Excellent 🤩'][rating]"
-                               class="text-sm font-medium text-gray-600 dark:text-neutral-400 mt-2"></p>
+                               x-text="['', 'Terrible', 'Poor', 'Average', 'Good', 'Excellent'][rating]"
+                               class="text-sm font-medium text-zinc-600 dark:text-zinc-400 mt-2"></p>
                         </div>
 
                         {{-- Title --}}
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 dark:text-neutral-100 mb-2">
-                                Title <span class="text-gray-400 font-normal">(optional)</span>
+                            <label class="block text-sm font-bold text-zinc-900 dark:text-white mb-2">
+                                Title <span class="text-zinc-400 dark:text-zinc-500 font-normal">(optional)</span>
                             </label>
                             <input type="text"
                                    x-model="title"
                                    maxlength="100"
-                                   placeholder="e.g. Best pizza in CDO!"
-                                   class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                   placeholder="e.g. Best pizza in town!"
+                                   class="w-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
                         </div>
 
                         {{-- Body --}}
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 dark:text-neutral-100 mb-2">
-                                Your Review *
+                            <label class="block text-sm font-bold text-zinc-900 dark:text-white mb-2">
+                                Your Review
                             </label>
                             <textarea x-model="body"
                                       required
                                       minlength="10"
                                       maxlength="2000"
                                       rows="5"
-                                      placeholder="Ano ang experience mo? Naging maayos ba ang pagkain at service?"
-                                      class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"></textarea>
-                            <p class="text-xs text-gray-500 dark:text-neutral-400 mt-1">
+                                      placeholder="How was your experience? Was the food and service good?"
+                                      class="w-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"></textarea>
+                            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                                 <span x-text="body.length"></span>/2000 characters (min 10)
                             </p>
                         </div>
 
                         {{-- Photos --}}
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 dark:text-neutral-100 mb-2">
-                                Add Photos <span class="text-gray-400 font-normal">(optional, max 5)</span>
+                            <label class="block text-sm font-bold text-zinc-900 dark:text-white mb-2">
+                                Add Photos <span class="text-zinc-400 dark:text-zinc-500 font-normal">(optional, max 5)</span>
                             </label>
                             <div class="flex flex-wrap gap-2">
                                 <template x-for="(preview, i) in photoPreviews" :key="i">
                                     <div class="relative w-20 h-20">
-                                        <img :src="preview" class="w-full h-full object-cover rounded-xl">
+                                        <img :src="preview" class="w-full h-full object-cover rounded-lg">
                                         <button type="button"
                                                 @click="removePhoto(i)"
                                                 class="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition">
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                             </svg>
                                         </button>
                                     </div>
@@ -258,11 +295,11 @@
                                 <button type="button"
                                         x-show="photoPreviews.length < 5"
                                         @click="$refs.photoInput.click()"
-                                        class="w-20 h-20 border-2 border-dashed border-gray-300 dark:border-dark-600 rounded-xl flex flex-col items-center justify-center text-gray-400 dark:text-neutral-500 hover:border-orange-500 hover:text-orange-500 dark:hover:border-orange-500 transition">
-                                    <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        class="w-20 h-20 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 hover:border-orange-500 hover:text-orange-500 transition">
+                                    <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
                                               d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                     <span class="text-xs">Add</span>
                                 </button>
@@ -277,13 +314,12 @@
                         </div>
 
                         {{-- Info --}}
-                        <div class="bg-blue-50 dark:bg-blue-950/30 rounded-xl p-3 flex gap-2">
-                            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3 flex gap-2">
+                            <svg class="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                                Ang review mo ay makikita ng lahat. I-base ito sa tunay na experience mo.
+                            <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                                Your review will be visible to everyone. Please base it on your genuine experience.
                             </p>
                         </div>
 
@@ -291,15 +327,15 @@
                         <div class="flex gap-2 pt-2">
                             <button type="button"
                                     @click="showModal = false"
-                                    class="flex-1 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-neutral-300 py-3 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-dark-850 transition">
+                                    class="flex-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white py-3 rounded-lg font-medium text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition">
                                 Cancel
                             </button>
                             <button type="submit"
                                     :disabled="submitting || rating === 0 || body.length < 10"
                                     :class="(submitting || rating === 0 || body.length < 10) 
                                         ? 'opacity-40 cursor-not-allowed' 
-                                        : 'hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-98'"
-                                    class="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-bold shadow-md transition transform">
+                                        : 'hover:bg-orange-600 active:scale-98'"
+                                    class="flex-1 bg-orange-500 text-white py-3 rounded-lg font-medium text-sm transition">
                                 <span x-show="!submitting">Submit Review</span>
                                 <span x-show="submitting">Submitting...</span>
                             </button>
@@ -310,62 +346,69 @@
         </div>
     @endif
 
-    {{-- SHOW EXISTING REVIEW --}}
+    {{-- ============================================ --}}
+    {{-- EXISTING REVIEW --}}
+    {{-- ============================================ --}}
     @if ($order->status === 'delivered' && $order->hasBeenReviewed())
         @php $review = $order->review; @endphp
-        <div class="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl p-6 mb-4">
+        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5">
             <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
                 <div>
-                    <p class="font-bold text-green-900 dark:text-green-300">Review submitted</p>
-                    <p class="text-xs text-green-700 dark:text-green-400">
+                    <p class="text-sm font-bold text-zinc-900 dark:text-white">Review Submitted</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
                         Thank you for your review.
                     </p>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-dark-800 rounded-xl p-4">
+            <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4">
                 <div class="flex items-center gap-1 mb-2">
                     @for ($i = 1; $i <= 5; $i++)
-                        <svg class="w-5 h-5 {{ $i <= $review->rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 dark:text-neutral-600' }}"
+                        <svg class="w-5 h-5 {{ $i <= $review->rating ? 'text-orange-500 fill-orange-500' : 'text-zinc-300 dark:text-zinc-600' }}"
                              viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                     @endfor
                 </div>
                 @if ($review->title)
-                    <p class="font-bold text-gray-900 dark:text-neutral-100 mb-1">{{ $review->title }}</p>
+                    <p class="font-bold text-zinc-900 dark:text-white mb-1 text-sm">{{ $review->title }}</p>
                 @endif
-                <p class="text-sm text-gray-700 dark:text-neutral-300">{{ $review->body }}</p>
-                <p class="text-xs text-gray-400 dark:text-neutral-500 mt-2">
+                <p class="text-sm text-zinc-700 dark:text-zinc-300">{{ $review->body }}</p>
+                <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-2">
                     Submitted {{ $review->created_at->diffForHumans() }}
                 </p>
             </div>
         </div>
     @endif
-@if ($order->verified_pickup_at)
-    <div class="p-4 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl mb-4">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-            </div>
-            <div>
-                <p class="font-bold text-green-900 dark:text-green-300">Order Picked Up ✓</p>
-                <p class="text-sm text-green-700 dark:text-green-400">
-                    Nakuha na ng rider ang order mo noong {{ $order->verified_pickup_at->format('g:i A') }}.
-                </p>
+
+    {{-- ============================================ --}}
+    {{-- ORDER PICKED UP BADGE --}}
+    {{-- ============================================ --}}
+    @if ($order->verified_pickup_at)
+        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-orange-500 p-5">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-bold text-zinc-900 dark:text-white">Order Picked Up</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                        The rider has picked up your order at {{ $order->verified_pickup_at->format('g:i A') }}.
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
-@endif
-       {{-- ============================================ --}}
-    {{-- CHAT WITH RIDER — button na magre-redirect sa chat page --}}
+    @endif
+
+    {{-- ============================================ --}}
+    {{-- CHAT WITH RIDER --}}
     {{-- ============================================ --}}
     @if ($order->canChat())
         @php
@@ -375,75 +418,73 @@
                 ->count();
         @endphp
 
-        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-4 mb-4">
-            <a href="{{ route('customer.chat.show', $order) }}"
-               class="flex items-center justify-between gap-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-4 rounded-xl font-semibold shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-98 transition transform">
+        <a href="{{ route('customer.chat.show', $order) }}"
+           class="flex items-center justify-between gap-3 bg-orange-500 hover:bg-orange-600 text-white px-5 py-4 rounded-lg transition group">
 
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                    </div>
-
-                    <div>
-                        <p class="font-bold text-sm">Chat with Rider</p>
-                        <p class="text-xs text-white/80">
-                            @if ($order->rider)
-                                {{ $order->rider->user->name }}
-                            @else
-                                Rider
-                            @endif
-                        </p>
-                    </div>
-
-                    @if ($unreadChat > 0)
-                        <span class="bg-white text-orange-600 text-xs font-bold px-2 py-0.5 rounded-full">
-                            {{ $unreadChat }} new
-                        </span>
-                    @endif
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
                 </div>
 
-                <svg class="w-5 h-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-            </a>
-        </div>
+                <div>
+                    <p class="font-bold text-sm">Chat with Rider</p>
+                    <p class="text-xs text-white/80">
+                        {{ $order->rider?->user?->name ?? 'Rider' }}
+                    </p>
+                </div>
+
+                @if ($unreadChat > 0)
+                    <span class="bg-white text-orange-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                        {{ $unreadChat }} new
+                    </span>
+                @endif
+            </div>
+
+            <svg class="w-5 h-5 text-white/80 group-hover:translate-x-0.5 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        </a>
     @endif
 
+    {{-- ============================================ --}}
     {{-- LIVE MAP --}}
-    @if ($order->rider && in_array($order->status, ['rider_assigned', 'picked_up', 'out_for_delivery']))
-        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4">
+    {{-- ============================================ --}}
+    @if ($order->rider && in_array($order->status, ['rider_assigned', 'preparing', 'ready_for_pickup', 'picked_up', 'out_for_delivery']))
+        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
             <div class="flex justify-between items-center mb-3">
-                <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500">Live Rider Location</p>
-                <p class="text-xs text-gray-500 dark:text-neutral-400" x-text="lastUpdated"></p>
+                <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400 font-bold">Live Rider Location</p>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400" x-text="lastUpdated"></p>
             </div>
-            <div id="map" class="w-full h-80 rounded-lg border border-gray-200 dark:border-dark-700 z-0"></div>
+            <div id="map" class="w-full h-80 rounded-lg border border-zinc-200 dark:border-zinc-800 z-0"></div>
 
             <div class="mt-3 grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 dark:bg-dark-850 rounded p-3">
-                    <p class="text-xs text-gray-500 dark:text-neutral-400">Distance to you</p>
-                    <p class="text-lg font-bold text-gray-900 dark:text-neutral-100" x-text="distanceText || '—'"></p>
+                <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3">
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">Distance to you</p>
+                    <p class="text-lg font-bold text-zinc-900 dark:text-white" x-text="distanceText || '—'"></p>
                 </div>
-                <div class="bg-gray-50 dark:bg-dark-850 rounded p-3">
-                    <p class="text-xs text-gray-500 dark:text-neutral-400">Estimated arrival</p>
-                    <p class="text-lg font-bold text-gray-900 dark:text-neutral-100" x-text="etaText || '—'"></p>
+                <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3">
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">Estimated arrival</p>
+                    <p class="text-lg font-bold text-zinc-900 dark:text-white" x-text="etaText || '—'"></p>
                 </div>
             </div>
         </div>
     @endif
 
+    {{-- ============================================ --}}
     {{-- DELIVERY --}}
-    <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4">
-        <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-2">Delivery address</p>
-        <p class="text-sm text-gray-700 dark:text-neutral-300">{{ $order->delivery_address }}</p>
+    {{-- ============================================ --}}
+    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
+        <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400 mb-2 font-bold">Delivery Address</p>
+        <p class="text-sm text-zinc-700 dark:text-zinc-300">{{ $order->delivery_address }}</p>
 
         @if ($order->rider)
-            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-dark-700">
-                <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-1">Your rider</p>
-                <p class="text-sm font-medium text-gray-900 dark:text-neutral-100">{{ $order->rider->user->name }}</p>
+            <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400 mb-1 font-bold">Your Rider</p>
+                <p class="text-sm font-bold text-zinc-900 dark:text-white">{{ $order->rider->user->name }}</p>
                 @if ($order->rider->vehicle_type)
-                    <p class="text-xs text-gray-500 dark:text-neutral-400 mt-1">
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                         {{ $order->rider->vehicle_type }}
                         @if ($order->rider->vehicle_plate)
                             · {{ $order->rider->vehicle_plate }}
@@ -454,137 +495,47 @@
         @endif
     </div>
 
+    {{-- ============================================ --}}
     {{-- ITEMS --}}
-    <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4">
-        <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-4">Order summary</p>
+    {{-- ============================================ --}}
+    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
+        <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400 mb-4 font-bold">Order Summary</p>
 
         <div class="space-y-2">
             @foreach ($order->items as $item)
                 <div class="flex justify-between text-sm">
-                    <span class="text-gray-700 dark:text-neutral-300">{{ $item->quantity }}× {{ $item->name }}</span>
-                    <span class="text-gray-900 dark:text-neutral-100">₱{{ number_format($item->price * $item->quantity, 2) }}</span>
+                    <span class="text-zinc-700 dark:text-zinc-300">{{ $item->quantity }}× {{ $item->name }}</span>
+                    <span class="font-medium text-zinc-900 dark:text-white">₱{{ number_format($item->price * $item->quantity, 2) }}</span>
                 </div>
             @endforeach
         </div>
 
-        <div class="mt-4 pt-4 border-t border-gray-100 dark:border-dark-700 space-y-1.5 text-sm">
-            <div class="flex justify-between text-gray-500 dark:text-neutral-400">
+        <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-1.5 text-sm">
+            <div class="flex justify-between text-zinc-500 dark:text-zinc-400">
                 <span>Food cost</span>
                 <span>₱{{ number_format($order->food_cost, 2) }}</span>
             </div>
-            <div class="flex justify-between text-gray-500 dark:text-neutral-400">
+            <div class="flex justify-between text-zinc-500 dark:text-zinc-400">
                 <span>Delivery fee</span>
                 <span>₱{{ number_format($order->delivery_fee, 2) }}</span>
             </div>
-            <div class="flex justify-between font-semibold text-gray-900 dark:text-neutral-100 pt-2 border-t border-gray-100 dark:border-dark-700">
+            <div class="flex justify-between font-bold text-zinc-900 dark:text-white pt-2 border-t border-zinc-200 dark:border-zinc-800">
                 <span>Total</span>
-                <span>₱{{ number_format($order->total_amount, 2) }}</span>
+                <span class="text-orange-500">₱{{ number_format($order->total_amount, 2) }}</span>
             </div>
         </div>
     </div>
 
-    {{-- RATING FORM (OLD — Restaurant & Rider stars only) --}}
-    @if ($order->status === 'delivered' && !$order->restaurant_rating)
-        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6 mb-4">
-            <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-4">Quick Rating</p>
-            <form method="POST" action="{{ route('customer.orders.rate', $order) }}" class="space-y-5">
-                @csrf
-
-                <div>
-                    <label class="block text-sm text-gray-700 dark:text-neutral-300 mb-2">Restaurant</label>
-                    <div class="flex gap-1">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <label class="cursor-pointer">
-                                <input type="radio" name="restaurant_rating" value="{{ $i }}" class="peer sr-only" required>
-                                <span class="block text-3xl text-gray-300 dark:text-neutral-600 peer-checked:text-orange-500 hover:text-orange-400 transition">★</span>
-                            </label>
-                        @endfor
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm text-gray-700 dark:text-neutral-300 mb-2">Rider</label>
-                    <div class="flex gap-1">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <label class="cursor-pointer">
-                                <input type="radio" name="rider_rating" value="{{ $i }}" class="peer sr-only" required>
-                                <span class="block text-3xl text-gray-300 dark:text-neutral-600 peer-checked:text-orange-500 hover:text-orange-400 transition">★</span>
-                            </label>
-                        @endfor
-                    </div>
-                </div>
-
-                <button class="w-full bg-orange-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-orange-700">
-                    Submit
-                </button>
-            </form>
-        </div>
-    @endif
-
-    {{-- SHOW RATINGS --}}
-    @if ($order->status === 'delivered' && $order->restaurant_rating)
-        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 p-6">
-            <p class="text-xs uppercase tracking-wide text-gray-400 dark:text-neutral-500 mb-4">Your ratings</p>
-            <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm text-gray-700 dark:text-neutral-300">Restaurant</span>
-                    <div class="flex gap-0.5">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <span class="text-xl {{ $i <= $order->restaurant_rating ? 'text-orange-500' : 'text-gray-300 dark:text-neutral-600' }}">★</span>
-                        @endfor
-                    </div>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-sm text-gray-700 dark:text-neutral-300">Rider</span>
-                    <div class="flex gap-0.5">
-                        @for ($i = 1; $i <= 5; $i++)
-                            <span class="text-xl {{ $i <= $order->rider_rating ? 'text-orange-500' : 'text-gray-300 dark:text-neutral-600' }}">★</span>
-                        @endfor
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
 </div>
 @endsection
 
 @push('scripts')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>
-    /* Completely hide scrollbar (pero scrollable pa rin) */
-    .chat-scroll::-webkit-scrollbar {
-        display: none;
-        width: 0;
-        height: 0;
-    }
-    .chat-scroll {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-
-    .chat-message {
-        animation: slideIn 0.25s ease-out;
-    }
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .typing-dot {
-        display: inline-block;
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background-color: #9ca3af;
-        animation: bounceDot 1.4s infinite ease-in-out both;
-    }
-    @keyframes bounceDot {
-        0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
-        40% { transform: scale(1); opacity: 1; }
-    }
-    .scroll-smooth { scroll-behavior: smooth; }
-</style>
 <script>
+// ============================================
+// ORDER TRACKER (with LIVE MAP)
+// ============================================
 function orderTracker(orderId) {
     return {
         status: '{{ $order->status }}',
@@ -611,7 +562,7 @@ function orderTracker(orderId) {
                     this.updateRiderLocation(e.latitude, e.longitude);
                 });
 
-            @if ($order->rider && in_array($order->status, ['rider_assigned', 'picked_up', 'out_for_delivery']))
+            @if ($order->rider && in_array($order->status, ['rider_assigned', 'preparing', 'ready_for_pickup', 'picked_up', 'out_for_delivery']))
                 this.$nextTick(() => { this.initMap(); });
             @endif
         },
@@ -641,153 +592,85 @@ function orderTracker(orderId) {
             }).addTo(this.map);
 
             @php
-                $restaurantProfileUrl = $order->restaurant->profile_image_url;
-                $restaurantInitial = strtoupper(substr($order->restaurant->name, 0, 1));
+                $trackingRestaurantUrl = $order->restaurant->profile_image_url ?? '';
+                $trackingRestaurantInitial = strtoupper(substr($order->restaurant->name, 0, 1));
             @endphp
 
-            const restaurantProfileUrl = '{{ $restaurantProfileUrl }}';
-            const restaurantInitial = '{{ $restaurantInitial }}';
+            const trackingRestaurantUrl = '{{ $trackingRestaurantUrl }}';
+            const trackingRestaurantInitial = '{{ $trackingRestaurantInitial }}';
+
+            const restaurantIcon = L.divIcon({
+                html: trackingRestaurantUrl ? `
+                    <div style="position:relative;width:52px;height:52px;">
+                        <div style="width:52px;height:52px;border-radius:50%;overflow:hidden;border:3px solid #f97316;box-shadow:0 3px 8px rgba(249,115,22,0.5);background:white;">
+                            <img src="${trackingRestaurantUrl}" style="width:100%;height:100%;object-fit:cover;" alt="Restaurant">
+                        </div>
+                        <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:#f97316;color:white;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:bold;border:2px solid white;white-space:nowrap;">STORE</div>
+                    </div>
+                ` : `
+                    <div style="position:relative;width:52px;height:52px;">
+                        <div style="background:#f97316;color:white;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;border:3px solid white;box-shadow:0 3px 8px rgba(0,0,0,0.4);">${trackingRestaurantInitial}</div>
+                        <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:#f97316;color:white;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:bold;border:2px solid white;white-space:nowrap;">STORE</div>
+                    </div>
+                `,
+                className: '',
+                iconSize: [52, 60],
+                iconAnchor: [26, 30],
+            });
 
             @php
-    $trackingRestaurantUrl = $order->restaurant->profile_image_url ?? '';
-    $trackingRestaurantInitial = strtoupper(substr($order->restaurant->name, 0, 1));
-@endphp
+                $trackingCustomerIcon = auth()->user()->gender === 'female'
+                    ? '/images/customergirl.png'
+                    : '/images/customerman.png';
+            @endphp
 
-const trackingRestaurantUrl = '{{ $trackingRestaurantUrl }}';
-const trackingRestaurantInitial = '{{ $trackingRestaurantInitial }}';
-
-const restaurantIcon = L.divIcon({
-    html: trackingRestaurantUrl ? `
-        <div style="position:relative;width:52px;height:52px;">
-            <div style="
-                width:52px;
-                height:52px;
-                border-radius:50%;
-                overflow:hidden;
-                border:3px solid #ef4444;
-                box-shadow:0 3px 8px rgba(239,68,68,0.5), 0 2px 4px rgba(0,0,0,0.3);
-                background:white;
-            ">
-                <img src="${trackingRestaurantUrl}"
-                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;width:100%;height:100%;background:#ef4444;color:white;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;&quot;>${trackingRestaurantInitial}</div>';"
-                     style="width:100%;height:100%;object-fit:cover;"
-                     alt="Restaurant">
-            </div>
-            <div style="
-                position:absolute;
-                bottom:-4px;
-                left:50%;
-                transform:translateX(-50%);
-                background:#ef4444;
-                color:white;
-                padding:1px 6px;
-                border-radius:8px;
-                font-size:9px;
-                font-weight:bold;
-                border:2px solid white;
-                box-shadow:0 2px 4px rgba(0,0,0,0.3);
-                white-space:nowrap;
-            ">STORE</div>
-        </div>
-    ` : `
-        <div style="position:relative;width:52px;height:52px;">
-            <div style="
-                background:#ef4444;
-                color:white;
-                width:52px;
-                height:52px;
-                border-radius:50%;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-size:22px;
-                font-weight:bold;
-                border:3px solid white;
-                box-shadow:0 3px 8px rgba(0,0,0,0.4);
-            ">${trackingRestaurantInitial}</div>
-            <div style="
-                position:absolute;
-                bottom:-4px;
-                left:50%;
-                transform:translateX(-50%);
-                background:#ef4444;
-                color:white;
-                padding:1px 6px;
-                border-radius:8px;
-                font-size:9px;
-                font-weight:bold;
-                border:2px solid white;
-                box-shadow:0 2px 4px rgba(0,0,0,0.3);
-                white-space:nowrap;
-            ">STORE</div>
-        </div>
-    `,
-    className: '',
-    iconSize: [52, 60],
-    iconAnchor: [26, 30],
-});
-            @php
-    $trackingCustomerIcon = auth()->user()->gender === 'female'
-        ? '/images/customergirl.png'
-        : '/images/customerman.png';
-@endphp
-
-const deliveryIcon = L.divIcon({
-    html: `
-        <div style="position:relative;width:48px;height:48px;">
-            <img src="{{ $trackingCustomerIcon }}"
-                 style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4));"
-                 alt="You">
-        </div>
-    `,
-    className: '',
-    iconSize: [48, 48],
-    iconAnchor: [24, 24],
-});
+            const deliveryIcon = L.divIcon({
+                html: `
+                    <div style="position:relative;width:48px;height:48px;">
+                        <img src="{{ $trackingCustomerIcon }}" style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4));" alt="You">
+                    </div>
+                `,
+                className: '',
+                iconSize: [48, 48],
+                iconAnchor: [24, 24],
+            });
 
             const riderIcon = L.divIcon({
-    html: `
-        <div style="position:relative;width:56px;height:56px;">
-            <img src="/images/rider.png"
-                 style="width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5));"
-                 alt="Rider">
-        </div>
-    `,
-    className: '',
-    iconSize: [56, 56],
-    iconAnchor: [28, 28],
-});
+                html: `
+                    <div style="position:relative;width:56px;height:56px;">
+                        <img src="/images/rider.png" style="width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.5));" alt="Rider">
+                    </div>
+                `,
+                className: '',
+                iconSize: [56, 56],
+                iconAnchor: [28, 28],
+            });
 
             this.restaurantMarker = L.marker([restaurantLat, restaurantLng], { icon: restaurantIcon })
                 .addTo(this.map)
-                .bindPopup('🏪 {{ $order->restaurant->name }}');
+                .bindPopup('{{ $order->restaurant->name }}');
 
             this.deliveryMarker = L.marker([deliveryLat, deliveryLng], { icon: deliveryIcon })
                 .addTo(this.map)
-                .bindPopup('🏠 Your Address');
+                .bindPopup('Your Address');
 
             @if ($order->rider)
                 this.riderMarker = L.marker([riderLat, riderLng], { icon: riderIcon })
                     .addTo(this.map)
-                    .bindPopup('🛵 {{ $order->rider->user->name }}');
+                    .bindPopup('{{ $order->rider->user->name }}');
             @endif
 
             this.drawRoute(restaurantLat, restaurantLng, deliveryLat, deliveryLng);
-
             this.mapInitialized = true;
-            console.log('✅ Map initialized');
         },
 
         async drawRoute(fromLat, fromLng, toLat, toLng) {
-            console.log('🛣️ Fetching road route...');
-
             try {
                 const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
                 const res = await fetch(url);
                 const data = await res.json();
 
                 if (!data.routes || data.routes.length === 0) {
-                    console.warn('⚠️ No route, falling back');
                     this.drawStraightLine(fromLat, fromLng, toLat, toLng);
                     return;
                 }
@@ -804,8 +687,6 @@ const deliveryIcon = L.divIcon({
                     lineCap: 'round',
                 }).addTo(this.map);
 
-                console.log('✅ Road route drawn:', latlngs.length, 'points');
-
                 const distanceKm = route.distance / 1000;
                 const durationMin = Math.round(route.duration / 60);
 
@@ -820,13 +701,11 @@ const deliveryIcon = L.divIcon({
                     this.map.fitBounds(bounds, { padding: [50, 50] });
                 }
             } catch (err) {
-                console.error('❌ Route fetch failed:', err);
                 this.drawStraightLine(fromLat, fromLng, toLat, toLng);
             }
         },
 
         drawStraightLine(fromLat, fromLng, toLat, toLng) {
-            console.log('📏 Drawing straight fallback');
             this.routeLine = L.polyline([
                 [fromLat, fromLng],
                 [toLat, toLng],
@@ -841,7 +720,7 @@ const deliveryIcon = L.divIcon({
         updateRiderLocation(lat, lng) {
             if (!this.riderMarker) return;
             this.riderMarker.setLatLng([lat, lng]);
-            this.lastUpdated = 'Updated: ' + new Date().toLocaleTimeString();
+            this.lastUpdated = 'Updated: ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
             const deliveryLat = {{ $order->delivery_lat }};
             const deliveryLng = {{ $order->delivery_lng }};
@@ -896,7 +775,7 @@ const deliveryIcon = L.divIcon({
                 'confirmed': 'Restaurant confirmed your order',
                 'preparing': 'Preparing your food',
                 'finding_rider': 'Finding a rider',
-                'rider_assigned': 'Rider on the way to restaurant',
+                'rider_assigned': 'Rider assigned — waiting for restaurant to prepare',
                 'picked_up': 'Rider picked up your order',
                 'out_for_delivery': 'Order is on the way',
                 'delivered': 'Order delivered',
@@ -919,272 +798,9 @@ const deliveryIcon = L.divIcon({
     }
 }
 
-function chatBox(orderId) {
-    return {
-        isOpen: true,
-        loading: true,
-        sending: false,
-        messages: [],
-        newMessage: '',
-        unread: 0,
-        currentUserId: {{ auth()->id() }},
-        currentUserName: '{{ auth()->user()->name }}',
-        currentUserAvatar: '{{ auth()->user()->avatar_url }}',
-        currentUserInitials: '{{ auth()->user()->initials }}',
-        currentUserAvatarColor: '{{ auth()->user()->avatar_color }}',
-        channel: null,
-        typingName: '',
-        typingTimeout: null,
-        isTypingSent: false,
-        isAtBottom: true,
-        listenerAttached: false,
-
-        init() {
-            console.log('💬 chatBox.init() for order:', orderId);
-
-            if (window.Echo) {
-                window.Echo.leave(`order.${orderId}.chat`);
-                console.log('🚪 Left old channel');
-            }
-
-            this.loadMessages();
-
-            setTimeout(() => {
-                this.subscribeToChat(orderId);
-            }, 300);
-        },
-
-        subscribeToChat(orderId) {
-            if (this.listenerAttached) return;
-
-            if (typeof window.Echo === 'undefined') {
-                console.error('❌ Echo not available');
-                return;
-            }
-
-            console.log('🔌 Subscribing to order.' + orderId + '.chat');
-
-            const chatChannel = window.Echo.private(`order.${orderId}.chat`);
-
-            chatChannel.subscribed(() => {
-                console.log('✅ SUBSCRIBED to order.' + orderId + '.chat');
-            });
-
-            chatChannel.error((err) => {
-                console.error('❌ Subscription error:', err);
-            });
-
-            chatChannel.listen('.message.sent', (e) => {
-                console.log('🔥 MESSAGE RECEIVED:', e);
-
-                if (e.sender_id === this.currentUserId) {
-                    console.log('⏭️ Skipping own message');
-                    return;
-                }
-
-                e.status = 'received';
-                this.messages.push(e);
-                console.log('✅ Pushed. Total:', this.messages.length);
-
-                if (!this.isOpen || !this.isAtBottom) {
-                    this.unread++;
-                } else {
-                    this.markAsRead();
-                }
-
-                if (this.isAtBottom) {
-                    this.$nextTick(() => this.scrollToBottom());
-                }
-            });
-
-            chatChannel.listen('.user.typing', (e) => {
-                if (e.user_id === this.currentUserId) return;
-
-                const wasTyping = this.typingName;
-                this.typingName = e.is_typing ? e.user_name : '';
-
-                if (e.is_typing && !wasTyping && this.isAtBottom) {
-                    this.$nextTick(() => this.scrollToBottom());
-                }
-            });
-
-            chatChannel.listen('.messages.read', (e) => {
-                if (e.reader_id === this.currentUserId) return;
-                this.messages.forEach(m => {
-                    if (e.message_ids.includes(m.id) && m.sender_id === this.currentUserId) {
-                        m.status = 'seen';
-                        m.read_at = e.read_at;
-                    }
-                });
-            });
-
-            this.channel = chatChannel;
-            this.listenerAttached = true;
-            console.log('🎯 Listener attached');
-        },
-
-        statusLabel(msg) {
-            if (msg.status === 'seen') return 'Seen';
-            if (msg.status === 'delivered') return 'Delivered';
-            return 'Sending...';
-        },
-
-        async loadMessages() {
-            try {
-                const res = await fetch('{{ route('customer.chat.index', $order) }}', {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    }
-                });
-                const data = await res.json();
-
-                this.messages = (data.messages || []).map(m => ({
-                    ...m,
-                    status: m.sender_id === this.currentUserId
-                        ? (m.read_at ? 'seen' : (m.delivered_at ? 'delivered' : 'sent'))
-                        : 'received',
-                }));
-
-                this.unread = 0;
-                this.loading = false;
-                this.$nextTick(() => this.scrollToBottom());
-            } catch (err) {
-                console.error('Failed to load messages', err);
-                this.loading = false;
-            }
-        },
-
-        async sendMessage() {
-            if (!this.newMessage.trim() || this.sending) return;
-
-            this.sending = true;
-            const body = this.newMessage.trim();
-            this.newMessage = '';
-            this.stopTyping();
-
-            const optimisticId = 'temp-' + Date.now();
-            const optimisticMsg = {
-                id: optimisticId,
-                sender_id: this.currentUserId,
-                sender_name: this.currentUserName,
-                sender_avatar_url: this.currentUserAvatar,
-                sender_initials: this.currentUserInitials,
-                sender_avatar_color: this.currentUserAvatarColor,
-                body: body,
-                created_at: new Date().toISOString(),
-                created_at_human: 'just now',
-                status: 'sent',
-            };
-            this.messages.push(optimisticMsg);
-            this.scrollToBottom();
-
-            try {
-                const res = await fetch('{{ route('customer.chat.store', $order) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    },
-                    body: JSON.stringify({ body })
-                });
-
-                const data = await res.json();
-
-                const idx = this.messages.findIndex(m => m.id === optimisticId);
-                if (idx !== -1) {
-                    this.messages[idx] = {
-                        ...data.message,
-                        status: 'delivered',
-                    };
-                }
-            } catch (err) {
-                console.error('Failed to send message', err);
-                const idx = this.messages.findIndex(m => m.id === optimisticId);
-                if (idx !== -1) this.messages.splice(idx, 1);
-                this.newMessage = body;
-            }
-
-            this.sending = false;
-        },
-
-        onTypingInput() {
-            if (!this.isTypingSent && this.newMessage.trim()) {
-                this.sendTyping(true);
-                this.isTypingSent = true;
-            }
-
-            clearTimeout(this.typingTimeout);
-            this.typingTimeout = setTimeout(() => {
-                this.stopTyping();
-            }, 2000);
-        },
-
-        stopTyping() {
-            if (this.isTypingSent) {
-                this.sendTyping(false);
-                this.isTypingSent = false;
-            }
-            clearTimeout(this.typingTimeout);
-        },
-
-        async sendTyping(isTyping) {
-            try {
-                await fetch('{{ route('customer.chat.typing', $order) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    },
-                    body: JSON.stringify({ is_typing: isTyping })
-                });
-            } catch (err) {
-                // Silent fail
-            }
-        },
-
-        async markAsRead() {
-            try {
-                await fetch('{{ route('customer.chat.mark-read', $order) }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    }
-                });
-                this.unread = 0;
-            } catch (err) {
-                // Silent fail
-            }
-        },
-
-        onScroll() {
-            const el = this.$refs.messagesContainer;
-            if (!el) return;
-
-            this.isAtBottom = (el.scrollHeight - el.scrollTop - el.clientHeight) < 50;
-
-            if (this.isAtBottom && this.unread > 0) {
-                this.markAsRead();
-            }
-        },
-
-        scrollToBottom() {
-            this.$nextTick(() => {
-                const el = this.$refs.messagesContainer;
-                if (el) {
-                    el.scrollTop = el.scrollHeight;
-                    this.isAtBottom = true;
-                }
-            });
-        }
-    }
-}
-
-// ⭐ Review Form Function
+// ============================================
+// REVIEW FORM
+// ============================================
 function reviewForm(orderId) {
     return {
         showModal: false,

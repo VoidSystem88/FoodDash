@@ -78,6 +78,7 @@
                     <form method="POST" action="{{ route('logout') }}" class="flex-1">
                         @csrf
                         <button type="submit"
+                                onclick="clearThemeBeforeLogout()"
                                 class="w-full bg-red-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-red-700 shadow-md hover:shadow-lg active:scale-95 transition transform">
                             Yes, Logout
                         </button>
@@ -529,5 +530,9 @@
             fallback: initialValue,
         }
     }
+    function clearThemeBeforeLogout() {
+    localStorage.removeItem('theme');
+    document.documentElement.classList.remove('dark');
+}
 </script>
 @endpush

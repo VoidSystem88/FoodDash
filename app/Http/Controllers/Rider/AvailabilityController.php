@@ -14,10 +14,18 @@ public function dashboard()
 {
     $rider = auth()->user()->rider;
 
-    // ⭐ I-load ang current active order — dapat latest
+    // ⭐ I-load ang current active order — kasama na ang LAHAT ng active statuses
+    $activeStatuses = [
+        'rider_assigned',      // Naka-assign, hinihintay mag-prepare ang restaurant
+        'preparing',           // ⭐ BAGO — Restaurant nag-start mag-prepare (VERIFIED na)
+        'ready_for_pickup',    // ⭐ BAGO — Ready na ang food
+        'picked_up',           // Nakuha na ng rider
+        'out_for_delivery',    // On the way
+    ];
+
     $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
         ->where('rider_id', $rider->id)
-        ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
+        ->whereIn('status', $activeStatuses)
         ->latest()
         ->first();
 
@@ -86,15 +94,21 @@ public function dashboard()
     }
 
     $query = Order::with(['restaurant', 'customer', 'items'])
-        ->where('rider_id', $rider->id)
-        ->where(function ($q) {
-            // May existing messages
-            $q->whereHas('messages')
-              // O active order (para lumabas agad ang chat kahit walang messages)
-              ->orWhere(function ($sub) {
-                  $sub->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery']);
-              });
-        });
+    ->where('rider_id', $rider->id)
+    ->where(function ($q) {
+        // May existing messages
+        $q->whereHas('messages')
+          // O active order (para lumabas agad ang chat kahit walang messages)
+          ->orWhere(function ($sub) {
+              $sub->whereIn('status', [
+                  'rider_assigned',
+                  'preparing',           // ⭐ BAGO
+                  'ready_for_pickup',    // ⭐ BAGO
+                  'picked_up',
+                  'out_for_delivery',
+              ]);
+          });
+    });
 
         // Filter: kung hindi show_hidden, hindi ipakita ang hidden (o may bagong message)
         if (!$showHidden) {
@@ -393,29 +407,35 @@ public function dashboard()
         /**
      * Chat page para sa active order.
      */
-        public function chat()
-    {
-        $rider = auth()->user()->rider;
+public function chat()
+{
+    $rider = auth()->user()->rider;
 
-        // Priority: active order
+    // ⭐ Priority: active order — kasama na ang LAHAT ng active statuses
+    $activeStatuses = [
+        'rider_assigned',      // Naka-assign, hinihintay mag-prepare ang restaurant
+        'preparing',           // ⭐ BAGO — Restaurant nag-start mag-prepare
+        'ready_for_pickup',    // ⭐ BAGO — Ready na ang food
+        'picked_up',           // Nakuha na ng rider
+        'out_for_delivery',    // On the way
+    ];
+
+    $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
+        ->where('rider_id', $rider->id)
+        ->whereIn('status', $activeStatuses)
+        ->latest()
+        ->first();
+
+    // Fallback: latest delivered order na may messages (para makita ang history)
+    if (!$currentOrder) {
         $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
             ->where('rider_id', $rider->id)
-            ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
+            ->where('status', 'delivered')
+            ->whereHas('messages')
             ->latest()
             ->first();
-
-        // Fallback: latest delivered order na may messages (para makita ang history)
-        if (!$currentOrder) {
-            $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
-                ->where('rider_id', $rider->id)
-                ->where('status', 'delivered')
-                ->whereHas('messages')
-                ->latest()
-                ->first();
-        }
-
-        // Walang redirect — hayaan pumasok sa chat page
-        // Kung walang $currentOrder, magpapakita ng "No active chats" sa view
-        return view('rider.chat', compact('currentOrder'));
     }
+
+    return view('rider.chat', compact('currentOrder'));
+}
 }

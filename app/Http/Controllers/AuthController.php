@@ -75,18 +75,20 @@ class AuthController extends Controller
     }
 
     public function register(Request $request)
-    {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:8|confirmed',
-            'role' => 'required|in:customer,restaurant,rider',
-            'phone' => 'nullable|string',
-            'restaurant_name' => 'required_if:role,restaurant|string|max:255',
-            'restaurant_address' => 'required_if:role,restaurant|string',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-        ]);
+{
+    $data = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:8|confirmed',
+        'role' => 'required|in:customer,restaurant,rider',
+        'phone' => 'nullable|string|max:20',
+
+        // ⭐ Restaurant fields — nullable kung hindi restaurant
+        'restaurant_name' => 'nullable|required_if:role,restaurant|string|max:255',
+        'restaurant_address' => 'nullable|required_if:role,restaurant|string',
+        'latitude' => 'nullable|numeric',
+        'longitude' => 'nullable|numeric',
+    ]);
 
         $user = DB::transaction(function () use ($data) {
             $user = User::create([

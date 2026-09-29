@@ -13,25 +13,31 @@ use Illuminate\Support\Facades\Log;
 
 class RiderSearchService
 {
+    /**
+     * Multi-batch radius expansion.
+     * 
+     * Batch 1: Radius 1km → wait 50s
+     * Batch 2: Radius 2km → wait 50s
+     * ...
+     * Hanggang max radius o may mag-accept.
+     */
     public function findRider(Order $order): void
     {
+        Log::info("=== FIND RIDER START ===", [
+            'order_id' => $order->id,
+            'status' => $order->status,
+        ]);
+
         if ($order->rider_id) {
-            Log::info("Order #{$order->id} already has a rider, skipping search.");
+            Log::info("Order #{$order->id} already has a rider, skipping.");
             return;
         }
 
-        // ⭐ Allow 'confirmed', 'preparing', at 'ready_for_pickup'
-        // para sa advance booking flow
-        $allowedStatuses = ['confirmed', 'preparing', 'ready_for_pickup', 'finding_rider'];
+        // Only search for confirmed/preparing orders
+        $allowedStatuses = ['confirmed', 'preparing'];
 
         if (!in_array($order->status, $allowedStatuses)) {
-            Log::info("Order #{$order->id} is not in a searchable status (status: {$order->status}). Skipping search.");
-            return;
-        }
-
-        // Guard: Huwag mag-search kung finalized na ang status
-        if (in_array($order->status, ['delivered', 'cancelled', 'rejected', 'no_rider'])) {
-            Log::info("Order #{$order->id} is already {$order->status}, skipping search.");
+            Log::info("Order #{$order->id} not searchable (status: {$order->status}). Skipping.");
             return;
         }
 
@@ -41,10 +47,6 @@ class RiderSearchService
         $restLat = (float) $order->restaurant->latitude;
         $restLng = (float) $order->restaurant->longitude;
 
-        // ⭐ HUWAG i-override ang status — i-keep ang 'confirmed' o 'preparing'
-        // 'finding_rider' status ay legacy na at hindi na ginagamit sa bagong flow
-        // Ang rider search ay pwedeng mag-run nang hindi binabago ang order status
-
         $candidates = Rider::query()
             ->where('is_online', true)
             ->where('is_available', true)
@@ -53,65 +55,100 @@ class RiderSearchService
             ->whereHas('user', fn($q) => $q->where('status', 'approved'))
             ->get();
 
-        Log::info("Searching riders for order #{$order->id}", [
-            'max_radius' => $maxRadius,
+        Log::info("Rider candidates for order #{$order->id}", [
             'total_candidates' => $candidates->count(),
-            'order_status' => $order->status,
+            'max_radius' => $maxRadius,
+            'candidate_ids' => $candidates->pluck('id')->toArray(),
         ]);
 
+        // Track riders who already received an offer
+        $alreadyOfferedRiderIds = [];
+
         for ($radius = 1; $radius <= $maxRadius; $radius++) {
+            // Refresh order to check if someone accepted
+            $order->refresh();
+
+            if ($order->rider_id) {
+                Log::info("Order #{$order->id} accepted by rider #{$order->rider_id}. Stopping search.");
+                return;
+            }
+
+            // Check if order was cancelled
+            if (in_array($order->status, ['cancelled', 'rejected'])) {
+                Log::info("Order #{$order->id} was {$order->status}. Stopping search.");
+                return;
+            }
+
             $inner = $radius - 1;
 
-            $eligible = $candidates->filter(function ($rider) use ($restLat, $restLng, $inner, $radius) {
+            $eligible = $candidates->filter(function ($rider) use (
+                $restLat, $restLng, $inner, $radius, $alreadyOfferedRiderIds
+            ) {
+                // Skip kung na-offeran na sa previous batch
+                if (in_array($rider->id, $alreadyOfferedRiderIds)) {
+                    return false;
+                }
+
                 $d = $this->distanceKm(
-                    $restLat,
-                    $restLng,
-                    (float) $rider->latitude,
-                    (float) $rider->longitude
+                    $restLat, $restLng,
+                    (float) $rider->latitude, (float) $rider->longitude
                 );
+
                 return $d > $inner && $d <= $radius;
             });
 
-            Log::info("Radius {$radius}km: {$eligible->count()} eligible riders");
+            Log::info("Batch {$radius}km for order #{$order->id}: {$eligible->count()} eligible riders", [
+                'rider_ids' => $eligible->pluck('id')->toArray(),
+            ]);
 
             if ($eligible->isEmpty()) {
                 continue;
             }
 
+            // Mark as offered
+            foreach ($eligible as $rider) {
+                $alreadyOfferedRiderIds[] = $rider->id;
+            }
+
+            // Offer to this batch
             $accepted = $this->offerToRiders($order, $eligible, $radius);
+
             if ($accepted) {
+                Log::info("✅ Rider accepted for order #{$order->id} at radius {$radius}km");
+                return;
+            }
+
+            // Check kung may nag-accept during the wait
+            $order->refresh();
+            if ($order->rider_id) {
+                Log::info("Order #{$order->id} accepted during batch {$radius}. Stopping.");
                 return;
             }
         }
 
-        // ⭐ HUWAG i-set sa 'no_rider' — i-keep ang original status
-        // para pwedeng mag-retry sa susunod na restaurant action
-        // Ang 'no_rider' ay dapat i-set lang kapag terminal state na
+        // No rider found
+        Log::warning("❌ No rider found for order #{$order->id} after all batches.");
 
-        // ⭐ I-notify ang customer pero hindi babaguhin ang status
-        $order->customer->notify(new NoRiderNotification($order->fresh()));
+        $order->update(['status' => 'no_rider']);
 
-        Log::warning("No rider found for order #{$order->id}. Keeping status: {$order->status}");
+        broadcast(new NoRiderAvailable($order->fresh()));
+
+        try {
+            $order->customer->notify(new NoRiderNotification($order->fresh()));
+        } catch (\Throwable $e) {
+            Log::error('NoRider notification failed: ' . $e->getMessage());
+        }
     }
 
+    /**
+     * Offer to a batch of riders, wait for acceptance.
+     */
     protected function offerToRiders(Order $order, $riders, int $radiusKm): bool
     {
-        $timeout = 60;
+        $timeout = 50; // 50 seconds per batch
         $now = now();
 
-        // I-check kung may existing pending offers
-        $existingOffers = DeliveryOffer::where('order_id', $order->id)
-            ->whereIn('rider_id', $riders->pluck('id'))
-            ->where('status', 'pending')
-            ->where('expires_at', '>', $now)
-            ->exists();
-
-        if ($existingOffers) {
-            Log::info("Existing pending offers found for order #{$order->id}, skipping duplicate insert.");
-            return false;
-        }
-
-        // Filter out riders na may existing record na
+        // Filter out riders who already have an offer for this order
         $existingRiderIds = DeliveryOffer::where('order_id', $order->id)
             ->pluck('rider_id')
             ->toArray();
@@ -119,10 +156,11 @@ class RiderSearchService
         $newRiders = $riders->filter(fn($r) => !in_array($r->id, $existingRiderIds));
 
         if ($newRiders->isEmpty()) {
-            Log::info("All riders already have offers for order #{$order->id}");
+            Log::info("All riders in this batch already have offers for order #{$order->id}");
             return false;
         }
 
+        // Create offers
         $offerRows = $newRiders->map(fn($r) => [
             'order_id' => $order->id,
             'rider_id' => $r->id,
@@ -135,13 +173,22 @@ class RiderSearchService
 
         DeliveryOffer::insert($offerRows);
 
+        // Broadcast to each rider
         foreach ($newRiders as $rider) {
-            broadcast(new DeliveryOfferSent($order, $rider, $radiusKm, $timeout));
+            try {
+                broadcast(new DeliveryOfferSent($order, $rider, $radiusKm, $timeout));
+            } catch (\Throwable $e) {
+                Log::error("Broadcast failed for rider #{$rider->id}: " . $e->getMessage());
+            }
         }
 
+        Log::info("Batch {$radiusKm}km offers sent to " . count($offerRows) . " riders");
+
+        // Wait for acceptance
         $acceptedRiderId = $this->waitForAcceptance($order->id, $timeout);
 
         if ($acceptedRiderId) {
+            // Expire other offers
             DeliveryOffer::where('order_id', $order->id)
                 ->where('rider_id', '!=', $acceptedRiderId)
                 ->update(['status' => 'expired']);
@@ -150,11 +197,10 @@ class RiderSearchService
                 ->where('rider_id', $acceptedRiderId)
                 ->update(['status' => 'accepted']);
 
-            Rider::where('id', $acceptedRiderId)->update(['is_available' => false]);
-
             return true;
         }
 
+        // Expire all pending offers for this batch
         DeliveryOffer::where('order_id', $order->id)
             ->where('status', 'pending')
             ->update(['status' => 'expired']);
@@ -162,6 +208,9 @@ class RiderSearchService
         return false;
     }
 
+    /**
+     * Wait for a rider to accept. Check cache every 0.3s.
+     */
     protected function waitForAcceptance(int $orderId, int $timeoutSec): ?int
     {
         $key = "order:{$orderId}:accepted_rider";
@@ -171,14 +220,18 @@ class RiderSearchService
             $riderId = cache()->get($key);
             if ($riderId) {
                 cache()->forget($key);
+                Log::info("Rider #{$riderId} accepted order #{$orderId}");
                 return (int) $riderId;
             }
-            usleep(300_000);   // check every 0.3s
+            usleep(300_000); // 0.3s
         }
 
         return null;
     }
 
+    /**
+     * Haversine distance in km.
+     */
     public function distanceKm(float $lat1, float $lng1, float $lat2, float $lng2): float
     {
         $R = 6371;

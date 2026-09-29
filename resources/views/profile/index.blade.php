@@ -319,9 +319,10 @@
                             Cancel
                         </button>
 
-                        <form method="POST" action="{{ route('logout') }}" class="flex-1">
+                        <form method="POST" action="{{ route('logout') }}" class="flex-1" id="logout-form">
                             @csrf
                             <button type="submit"
+                                    onclick="clearThemeBeforeLogout()"
                                     class="w-full bg-red-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition">
                                 Yes, Logout
                             </button>
@@ -336,6 +337,7 @@
 @endsection
 
 @push('scripts')
+
 <script>
 function profileAvatar() {
     return {
@@ -388,6 +390,10 @@ function themeToggle() {
             }
         }
     }
+}
+function clearThemeBeforeLogout() {
+    localStorage.removeItem('theme');
+    document.documentElement.classList.remove('dark');
 }
 </script>
 @endpush

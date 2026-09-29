@@ -10,7 +10,10 @@ use App\Notifications\OrderStatusNotification;
 use App\Events\OrderStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use App\Events\OrderReadyForRider;
+use App\Events\OrderVerifiedForRider;
+use App\Notifications\OrderReadyForRiderNotification;
+use App\Notifications\OrderVerifiedForRiderNotification;
 class OrderController extends Controller
 {
     // ============================================
@@ -85,22 +88,139 @@ class OrderController extends Controller
     // ============================================
     // CONFIRM ORDER — 'received' → 'confirmed'
     // ============================================
-    public function confirm(Request $request, Order $order)
-    {
-        $restaurant = auth()->user()->restaurant;
-        abort_unless($order->restaurant_id === $restaurant->id, 403);
-        abort_unless($order->status === 'received', 422, 'Order already processed');
+// ============================================
+// CONFIRM ORDER — 'received' → 'confirmed'
+// ⭐ IMMEDIATELY dispatch rider search
+// ============================================
+public function confirm(Request $request, Order $order)
+{
+    $restaurant = auth()->user()->restaurant;
+    abort_unless($order->restaurant_id === $restaurant->id, 403);
+    abort_unless($order->status === 'received', 422, 'Order already processed');
 
-        $order->update(['status' => 'confirmed']);
+    $order->update(['status' => 'confirmed']);
 
-        // Notify customer
-        $order->customer->notify(new OrderStatusNotification($order->fresh()));
+    // Notify customer
+    $order->customer->notify(new OrderStatusNotification($order->fresh()));
 
-        // ⭐ Dispatch rider search — advance booking
-        FindRiderForOrder::dispatch($order);
+    // ⭐ CRITICAL: Dispatch rider search IMMEDIATELY
+    \App\Jobs\FindRiderForOrder::dispatch($order->fresh());
 
-        return back()->with('success', 'Order confirmed. Searching for rider...');
+    return back()->with('success', 'Order confirmed. Searching for rider...');
+}
+
+// ============================================
+// START PREPARING — 'confirmed' → 'preparing'
+// ⭐ This is the VERIFICATION trigger for the rider
+// ============================================
+public function ready(Request $request, Order $order)
+{
+    $restaurant = auth()->user()->restaurant;
+    abort_unless($order->restaurant_id === $restaurant->id, 403);
+
+    // ⭐ Accept both 'confirmed' AND 'rider_assigned'
+    // Dahil sa bagong flow, ang rider ay pwedeng mag-accept bago mag-start preparing ang restaurant
+    $allowedStatuses = ['confirmed', 'rider_assigned'];
+
+    if (!in_array($order->status, $allowedStatuses)) {
+        return back()->with('error',
+            'Order must be "confirmed" or "rider_assigned" first. Current: ' . $order->status
+        );
     }
+
+    $order->update([
+        'status' => 'preparing',
+        'restaurant_started_preparing_at' => now(),
+    ]);
+
+    // Notify customer
+    $order->customer->notify(new OrderStatusNotification($order->fresh()));
+
+    // ⭐ Notify rider (kung may naka-assign na) na verified na
+    if ($order->rider && $order->rider->user) {
+    $order->rider->user->notify(
+        new \App\Notifications\OrderReadyForRiderNotification($order->fresh())
+    );
+
+    // ⭐ Broadcast sa order channel (existing)
+    try {
+        broadcast(new \App\Events\OrderReadyForRider($order->fresh()));
+    } catch (\Throwable $e) {
+        \Log::warning('OrderReadyForRider broadcast failed: ' . $e->getMessage());
+    }
+
+    // ⭐ BAGO: Broadcast din sa rider channel
+    try {
+        broadcast(new \App\Events\OrderReadyForRiderBroadcast($order->fresh()));
+        \Log::info("✅ OrderReadyForRiderBroadcast sent for order #{$order->id} to rider #{$order->rider_id}");
+    } catch (\Throwable $e) {
+        \Log::error("❌ OrderReadyForRiderBroadcast failed: " . $e->getMessage());
+    }
+} else {
+        // Kung wala pang rider, i-dispatch ulit ang search
+        \App\Jobs\FindRiderForOrder::dispatch($order->fresh());
+    }
+
+    try {
+        broadcast(new OrderStatusUpdated($order->fresh()));
+    } catch (\Throwable $e) {
+        \Log::warning('OrderStatusUpdated broadcast failed: ' . $e->getMessage());
+    }
+
+    return back()->with('success', 'Order marked as preparing. Rider notified!');
+}
+
+// ============================================
+// ⭐ MARK AS READY — 'preparing' → 'ready_for_pickup'
+// Notify rider na ready na ang food
+// ============================================
+public function markReady(Order $order)
+{
+    $restaurant = auth()->user()->restaurant;
+    abort_unless($order->restaurant_id === $restaurant->id, 403);
+
+    // ⭐ Accept both 'preparing' AND 'rider_assigned'
+    $allowedStatuses = ['preparing', 'rider_assigned'];
+
+    if (!in_array($order->status, $allowedStatuses)) {
+        return back()->with('error',
+            'Order must be "preparing" first. Current: ' . $order->status
+        );
+    }
+
+    // ⭐ ALWAYS set to 'ready_for_pickup' (hindi 'rider_assigned')
+    $order->update([
+        'status' => 'ready_for_pickup',
+        'restaurant_marked_ready_at' => now(),
+    ]);
+
+    // Notify customer
+    $order->customer->notify(new OrderStatusNotification($order->fresh()));
+
+    // ⭐ Notify rider (kung may naka-assign na) na ready na ang food
+    if ($order->rider && $order->rider->user) {
+        $order->rider->user->notify(
+            new \App\Notifications\OrderReadyForRiderNotification($order->fresh())
+        );
+
+        try {
+            broadcast(new \App\Events\OrderReadyForRider($order->fresh()));
+        } catch (\Throwable $e) {
+            \Log::warning('OrderReadyForRider broadcast failed: ' . $e->getMessage());
+        }
+    } else {
+        // Kung wala pang rider, i-dispatch ulit ang search
+        \App\Jobs\FindRiderForOrder::dispatch($order->fresh());
+    }
+
+    try {
+        broadcast(new OrderStatusUpdated($order->fresh()));
+    } catch (\Throwable $e) {
+        \Log::warning('OrderStatusUpdated broadcast failed: ' . $e->getMessage());
+    }
+
+    return back()->with('success', 'Order ready! Rider notified.');
+}
 
     // ============================================
     // REJECT ORDER
@@ -128,71 +248,8 @@ class OrderController extends Controller
     // ============================================
     // ⭐ START PREPARING — 'confirmed' → 'preparing'
     // ============================================
-    public function ready(Request $request, Order $order)
-    {
-        $restaurant = auth()->user()->restaurant;
-        abort_unless($order->restaurant_id === $restaurant->id, 403);
-        abort_unless($order->status === 'confirmed', 422, 'Order must be confirmed first.');
+    
 
-        $order->update([
-            'status' => 'preparing',
-            'restaurant_started_preparing_at' => now(),
-        ]);
-
-        // Notify customer
-        $order->customer->notify(new OrderStatusNotification($order->fresh()));
-
-        // ⭐ BAGO: I-dispatch ang rider search kahit wala pang rider
-        // (para makapag-advance booking ang riders)
-        if (!$order->rider_id) {
-            FindRiderForOrder::dispatch($order);
-        }
-
-        // Kung may rider na naka-assign (advance booking), notify na nag-start na magluto
-        if ($order->rider && $order->rider->user) {
-            $order->rider->user->notify(new OrderStatusNotification($order->fresh()));
-        }
-
-        broadcast(new OrderStatusUpdated($order->fresh()));
-
-        return back()->with('success', 'Order marked as preparing. Searching for riders...');
-    }
-
-    // ============================================
-    // ⭐ MARK AS READY — 'preparing' → 'ready_for_pickup' / 'rider_assigned'
-    // ============================================
-    public function markReady(Order $order)
-    {
-        $restaurant = auth()->user()->restaurant;
-        abort_unless($order->restaurant_id === $restaurant->id, 403);
-
-        if (!in_array($order->status, ['preparing', 'rider_assigned'])) {
-            return back()->with('error', 'Order must be "preparing" first.');
-        }
-
-        // ⭐ DIFFERENTIATE: Kung may rider na o wala
-        $newStatus = $order->rider_id ? 'rider_assigned' : 'ready_for_pickup';
-
-        $order->update([
-            'status' => $newStatus,
-            'restaurant_marked_ready_at' => now(),
-        ]);
-
-        // Notify rider kung may naka-assign
-        if ($order->rider && $order->rider->user) {
-            $order->rider->user->notify(
-                new \App\Notifications\OrderReadyForPickupNotification($order)
-            );
-        } else {
-            // ⭐ BAGO: I-dispatch ang rider search para makakuha ng offer
-            // (imbes na notifyNearbyRiders() na hindi gumagawa ng DeliveryOffer)
-            FindRiderForOrder::dispatch($order);
-        }
-
-        broadcast(new OrderStatusUpdated($order->fresh()));
-
-        return back()->with('success', 'Order ready! Notifying rider...');
-    }
 
     // ============================================
     // EXTERNAL ORDER

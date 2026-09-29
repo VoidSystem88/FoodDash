@@ -53,7 +53,90 @@ class Order extends Model
         'hidden_for_rider_at' => 'datetime',     
         'hidden_for_customer_at' => 'datetime',
     ];
+// ============================================
+// RIDER STATE HELPERS
+// ============================================
 
+/**
+ * Check kung verified na ang order para sa rider.
+ * Verified = restaurant nag-start ng preparing.
+ */
+public function isVerifiedForRider(): bool
+{
+    return $this->restaurant_started_preparing_at !== null;
+}
+
+/**
+ * Check kung ready na ang food para i-pickup.
+ */
+public function isReadyForPickup(): bool
+{
+    return $this->restaurant_marked_ready_at !== null;
+}
+
+/**
+ * Get rider-facing state.
+ */
+public function getRiderStateAttribute(): string
+{
+    return match ($this->status) {
+        'rider_assigned' => $this->isVerifiedForRider() ? 'verified' : 'waiting',
+        'preparing' => 'verified',
+        'ready_for_pickup' => 'ready',
+        'picked_up' => 'picked_up',
+        'out_for_delivery' => 'delivering',
+        'delivered' => 'done',
+        'cancelled' => 'cancelled',
+        'rejected' => 'rejected',
+        'no_rider' => 'no_rider',
+        default => 'unknown',
+    };
+}
+
+/**
+ * Get rider-facing state label.
+ */
+public function getRiderStateLabelAttribute(): string
+{
+    return match ($this->rider_state) {
+        'waiting' => 'Waiting for restaurant to start preparing',
+        'verified' => 'Verified — proceed to restaurant',
+        'ready' => 'Food ready — pickup now',
+        'picked_up' => 'Picked up — on the way',
+        'delivering' => 'Delivering to customer',
+        'done' => 'Delivered',
+        'cancelled' => 'Cancelled by customer',
+        'rejected' => 'Rejected by restaurant',
+        'no_rider' => 'No rider available',
+        default => 'Processing',
+    };
+}
+
+/**
+ * Check kung pwede nang mag-pickup ang rider.
+ */
+public function canBePickedUpByRider(): bool
+{
+    return $this->status === 'ready_for_pickup'
+        && $this->rider_id !== null;
+}
+
+/**
+ * Check kung pwede pang mag-cancel ang customer.
+ */
+public function canBeCancelledByCustomer(): bool
+{
+    return in_array($this->status, ['received', 'confirmed', 'rider_assigned']);
+}
+
+/**
+ * Check kung may active rider na.
+ */
+public function hasActiveRider(): bool
+{
+    return $this->rider_id !== null
+        && in_array($this->status, ['rider_assigned', 'preparing', 'ready_for_pickup', 'picked_up', 'out_for_delivery']);
+}
     public function customer()
     {
         return $this->belongsTo(User::class, 'customer_id');
@@ -83,10 +166,6 @@ class Order extends Model
     {
         return $this->hasOne(Payment::class);
     }
-    public function isReadyForPickup(): bool
-    {
-        return $this->restaurant_marked_ready_at !== null;
-    }
 
     public function isPreparingByRestaurant(): bool
     {
@@ -115,15 +194,6 @@ class Order extends Model
             ]);
     }
 
-    public function canBeCancelledByCustomer(): bool
-    {
-        return in_array($this->status, [
-            'received',
-            'confirmed',
-            'preparing',
-            'finding_rider',
-        ]);
-    }
 
 public function isPreparing(): bool
 {

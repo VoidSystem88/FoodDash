@@ -6,59 +6,58 @@
     {{-- ============================================ --}}
     {{-- HERO HEADER --}}
     {{-- ============================================ --}}
-    <div class="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-500 to-orange-600 rounded-2xl shadow-xl text-white">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl opacity-10 -mr-20 -mt-20"></div>
-        <div class="absolute bottom-0 left-0 w-48 h-48 bg-yellow-300 rounded-full blur-3xl opacity-20 -ml-16 -mb-16"></div>
+    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
+        <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    @if (auth()->user()->avatar_url)
+                        <img src="{{ auth()->user()->avatar_url }}"
+                             class="w-14 h-14 rounded-full object-cover">
+                    @else
+                        <div class="w-14 h-14 rounded-full bg-orange-500 flex items-center justify-center text-white text-xl font-bold">
+                            {{ auth()->user()->initials }}
+                        </div>
+                    @endif
 
-        <div class="relative p-6">
-            <div class="flex justify-between items-start mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="relative">
-                        @if (auth()->user()->avatar_url)
-                            <img src="{{ auth()->user()->avatar_url }}"
-                                 class="w-14 h-14 rounded-full object-cover border-2 border-white/40 shadow-md">
-                        @else
-                            <div class="w-14 h-14 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white text-xl font-bold border-2 border-white/40 shadow-md">
-                                {{ auth()->user()->initials }}
-                            </div>
-                        @endif
-
-                        <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white shadow-sm"
-                              :class="online ? 'bg-green-400' : 'bg-neutral-400'"></span>
-                    </div>
-
-                    <div>
-                        <p class="text-xs text-white/80">Welcome back,</p>
-                        <h1 class="text-xl font-bold">{{ auth()->user()->name }}</h1>
-                    </div>
+                    <span class="absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white dark:border-zinc-900"
+                          :class="online ? 'bg-green-500' : 'bg-zinc-400'"></span>
                 </div>
 
-                @if ($currentOrder)
-                    <button type="button" disabled
-                            class="px-5 py-2.5 rounded-full font-semibold text-sm shadow-md opacity-70 cursor-not-allowed bg-white text-orange-600 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        <span>Online</span>
-                    </button>
-                @else
-                    <button @click="toggleOnline()"
-                            :disabled="toggling"
-                            :class="online ? 'bg-white text-orange-600' : 'bg-white/20 text-white border border-white/30'"
-                            class="px-5 py-2.5 rounded-full font-semibold text-sm shadow-md hover:scale-105 active:scale-95 transition transform disabled:opacity-50 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full" :class="online ? 'bg-green-500 animate-pulse' : 'bg-neutral-400'"></span>
-                        <span x-text="online ? 'Online' : 'Offline'"></span>
-                    </button>
-                @endif
+                <div>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">Welcome back,</p>
+                    <h1 class="text-xl font-bold text-zinc-900 dark:text-white">{{ auth()->user()->name }}</h1>
+                </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/20">
-                <div>
-                    <p class="text-xs text-white/80">Today's Deliveries</p>
-                    <p class="text-2xl font-bold">{{ $completedToday }}</p>
-                </div>
-                <div class="border-l border-white/20 pl-3">
-                    <p class="text-xs text-white/80">Today's Earnings</p>
-                    <p class="text-2xl font-bold">₱{{ number_format($earningsToday, 0) }}</p>
-                </div>
+            @if ($currentOrder)
+                <button type="button" disabled
+                        class="px-4 py-2 rounded-lg font-medium text-sm opacity-70 cursor-not-allowed bg-orange-500 text-white flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                    <span>Online</span>
+                </button>
+            @else
+                <button @click="toggleOnline()"
+                        :disabled="toggling"
+                        :class="online
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white hover:bg-zinc-50 dark:hover:bg-zinc-800'"
+                        class="px-4 py-2 rounded-lg font-medium text-sm transition disabled:opacity-50 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full" :class="online ? 'bg-white animate-pulse' : 'bg-zinc-400'"></span>
+                    <span x-text="online ? 'Online' : 'Offline'"></span>
+                </button>
+            @endif
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            <div>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">Today's Deliveries</p>
+                <p class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $completedToday }}</p>
+            </div>
+            <div class="border-l border-zinc-200 dark:border-zinc-800 pl-3">
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">Today's Earnings</p>
+                <p class="text-2xl font-bold text-orange-500">
+                    ₱{{ number_format($earningsToday, 0) }}
+                </p>
             </div>
         </div>
     </div>
@@ -67,36 +66,38 @@
     {{-- STAT CARDS --}}
     {{-- ============================================ --}}
     <div class="grid grid-cols-3 gap-3">
-        <div class="bg-white dark:bg-[#141414] rounded-xl border border-neutral-200 dark:border-[#262626] p-4 hover:shadow-md transition">
-            <div class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-[#262626] flex items-center justify-center mb-2">
-                <svg class="w-5 h-5 text-neutral-700 dark:text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
+            <div class="w-10 h-10 rounded-full bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center mb-2">
+                <svg class="w-5 h-5 text-white dark:text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400">Completed</p>
-            <p class="text-xl font-bold text-neutral-900 dark:text-white">{{ $completedToday }}</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">Completed</p>
+            <p class="text-xl font-bold text-zinc-900 dark:text-white">{{ $completedToday }}</p>
         </div>
 
-        <div class="bg-white dark:bg-[#141414] rounded-xl border border-neutral-200 dark:border-[#262626] p-4 hover:shadow-md transition">
-            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mb-2 shadow-sm">
+        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
+            <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center mb-2">
                 <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400">Earnings</p>
-            <p class="text-xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">₱{{ number_format($earningsToday, 0) }}</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">Earnings</p>
+            <p class="text-xl font-bold text-orange-500">
+                ₱{{ number_format($earningsToday, 0) }}
+            </p>
         </div>
 
-        <div class="bg-white dark:bg-[#141414] rounded-xl border border-neutral-200 dark:border-[#262626] p-4 hover:shadow-md transition">
-            <div class="w-9 h-9 rounded-lg flex items-center justify-center mb-2"
-                 :class="online ? 'bg-gradient-to-br from-orange-500 to-orange-600 shadow-sm' : 'bg-neutral-100 dark:bg-[#262626]'">
-                <svg class="w-5 h-5" :class="online ? 'text-white' : 'text-neutral-500 dark:text-neutral-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2"
+                 :class="online ? 'bg-orange-500' : 'bg-zinc-800 dark:bg-zinc-200'">
+                <svg class="w-5 h-5" :class="online ? 'text-white' : 'text-white dark:text-zinc-900'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
             </div>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400">Status</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">Status</p>
             <p class="text-sm font-bold mt-1"
-               :class="online ? 'text-orange-600 dark:text-orange-400' : 'text-neutral-500 dark:text-neutral-400'"
+               :class="online ? 'text-orange-500' : 'text-zinc-500 dark:text-zinc-400'"
                x-text="online ? 'Ready' : 'Offline'"></p>
         </div>
     </div>
@@ -106,25 +107,26 @@
     {{-- ============================================ --}}
     @if (!$currentOrder && isset($readyOrders) && $readyOrders->count() > 0)
         <div>
-            <h2 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2 mb-3">
+            <h2 class="font-semibold text-zinc-900 dark:text-white flex items-center gap-2 mb-3">
                 <span class="relative flex h-3 w-3">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
                 </span>
                 Ready for Pickup
-                <span class="text-xs bg-gradient-to-r from-green-500 to-green-600 text-white px-2.5 py-0.5 rounded-full font-bold shadow-sm">
+                <span class="text-xs bg-orange-500 text-white px-2 py-0.5 rounded-full font-bold">
                     {{ $readyOrders->count() }}
                 </span>
             </h2>
 
             <div class="space-y-3">
                 @foreach ($readyOrders as $order)
-                    <div class="bg-white dark:bg-[#141414] rounded-2xl shadow-md border-2 border-green-300 dark:border-green-800/70 overflow-hidden hover:shadow-lg transition-all">
+                    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden hover:shadow-md transition">
 
-                        <div class="px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white flex items-center justify-between">
+                        {{-- HEADER --}}
+                        <div class="px-5 py-3 bg-orange-500 text-white flex items-center justify-between">
                             <div>
                                 <p class="font-bold text-sm">{{ $order->restaurant->name }}</p>
-                                <p class="text-[10px] text-white/80 uppercase tracking-wide font-medium">Ready na — Pickup na!</p>
+                                <p class="text-[10px] text-white/80 uppercase tracking-wide font-medium">Ready — Pickup Now</p>
                             </div>
                             <div class="text-right">
                                 <p class="text-[10px] text-white/80">Order #</p>
@@ -132,51 +134,55 @@
                             </div>
                         </div>
 
-                        <div class="p-4 space-y-3">
-                            <div class="flex items-start gap-2">
-                                <div class="w-7 h-7 rounded-lg bg-neutral-900 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
-                                    <svg class="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <div class="p-5 space-y-3">
+                            {{-- PICKUP --}}
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Pickup From</p>
-                                    <p class="text-sm font-semibold text-neutral-900 dark:text-white line-clamp-1">{{ $order->restaurant->name }}</p>
-                                    <p class="text-xs text-neutral-500 dark:text-neutral-400 line-clamp-1">{{ $order->restaurant->address }}</p>
+                                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Pickup From</p>
+                                    <p class="text-sm font-semibold text-zinc-900 dark:text-white line-clamp-1">{{ $order->restaurant->name }}</p>
+                                    <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1">{{ $order->restaurant->address }}</p>
                                 </div>
                             </div>
 
-                            <div class="flex items-start gap-2">
-                                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
-                                    <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            {{-- DROPOFF --}}
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-full bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-white dark:text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Deliver To</p>
-                                    <p class="text-sm text-neutral-700 dark:text-neutral-300 line-clamp-2">{{ $order->delivery_address }}</p>
+                                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Deliver To</p>
+                                    <p class="text-sm text-zinc-700 dark:text-zinc-300 line-clamp-2">{{ $order->delivery_address }}</p>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-3 gap-2 bg-neutral-50 dark:bg-[#0a0a0a] rounded-xl p-3 text-center border border-neutral-100 dark:border-[#262626]">
+                            {{-- STATS --}}
+                            <div class="grid grid-cols-3 gap-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3 text-center">
                                 <div>
-                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Food</p>
-                                    <p class="text-sm font-bold text-neutral-900 dark:text-white">₱{{ number_format($order->food_cost, 0) }}</p>
+                                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Food</p>
+                                    <p class="text-sm font-bold text-zinc-900 dark:text-white">₱{{ number_format($order->food_cost, 0) }}</p>
                                 </div>
-                                <div class="border-x border-neutral-200 dark:border-[#262626]">
-                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Fee</p>
-                                    <p class="text-sm font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">₱{{ number_format($order->delivery_fee, 0) }}</p>
+                                <div class="border-x border-zinc-200 dark:border-zinc-700">
+                                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Fee</p>
+                                    <p class="text-sm font-bold text-orange-500">₱{{ number_format($order->delivery_fee, 0) }}</p>
                                 </div>
                                 <div>
-                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Items</p>
-                                    <p class="text-sm font-bold text-orange-600 dark:text-orange-400">{{ $order->items->count() }}</p>
+                                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Items</p>
+                                    <p class="text-sm font-bold text-zinc-900 dark:text-white">{{ $order->items->count() }}</p>
                                 </div>
                             </div>
 
+                            {{-- ACTION --}}
                             <button type="button"
                                     onclick="acceptReadyOrder({{ $order->id }}, this)"
-                                    class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-2.5 rounded-xl text-sm font-bold shadow-md hover:from-green-600 hover:to-green-700 hover:shadow-lg active:scale-98 transition transform flex items-center justify-center gap-2">
+                                    class="w-full bg-orange-500 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-orange-600 transition flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -194,26 +200,28 @@
     {{-- ============================================ --}}
     <template x-if="offers.length > 0">
         <div>
-            <h2 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2 mb-3">
+            <h2 class="font-semibold text-zinc-900 dark:text-white flex items-center gap-2 mb-3">
                 <span class="relative flex h-3 w-3">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
                 </span>
                 Available Offers
-                <span class="text-xs bg-gradient-to-r from-orange-500 to-orange-600 text-white px-2.5 py-0.5 rounded-full font-bold shadow-sm"
+                <span class="text-xs bg-orange-500 text-white px-2 py-0.5 rounded-full font-bold"
                       x-text="offers.length"></span>
             </h2>
 
             <div class="space-y-3">
                 <template x-for="offer in offers" :key="offer.order_id">
-                    <div class="bg-white dark:bg-[#141414] rounded-2xl shadow-md border-2 border-orange-300 dark:border-orange-800/70 overflow-hidden hover:shadow-lg transition-all">
+                    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden hover:shadow-md transition">
 
-                        <div class="h-1.5 bg-neutral-100 dark:bg-[#0a0a0a] overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all"
+                        {{-- COUNTDOWN --}}
+                        <div class="h-1.5 bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
+                            <div class="h-full bg-orange-500 transition-all"
                                  :style="`width: ${(offer.secondsLeft / offer.expires_in) * 100}%`"></div>
                         </div>
 
-                        <div class="px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white flex items-center justify-between">
+                        {{-- HEADER --}}
+                        <div class="px-5 py-3 bg-orange-500 text-white flex items-center justify-between">
                             <div>
                                 <p class="font-bold text-sm" x-text="offer.restaurant"></p>
                                 <p class="text-[10px] text-white/80 uppercase tracking-wide font-medium">Delivery Offer</p>
@@ -224,55 +232,59 @@
                             </div>
                         </div>
 
-                        <div class="p-4 space-y-3">
-                            <div class="flex items-start gap-2">
-                                <div class="w-7 h-7 rounded-lg bg-neutral-900 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
-                                    <svg class="w-3.5 h-3.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <div class="p-5 space-y-3">
+                            {{-- PICKUP --}}
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Pickup From</p>
-                                    <p class="text-sm font-semibold text-neutral-900 dark:text-white line-clamp-1" x-text="offer.restaurant"></p>
-                                    <p class="text-xs text-neutral-500 dark:text-neutral-400 line-clamp-1" x-text="offer.restaurant_address"></p>
+                                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Pickup From</p>
+                                    <p class="text-sm font-semibold text-zinc-900 dark:text-white line-clamp-1" x-text="offer.restaurant"></p>
+                                    <p class="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-1" x-text="offer.restaurant_address"></p>
                                 </div>
                             </div>
 
-                            <div class="flex items-start gap-2">
-                                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
-                                    <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            {{-- DROPOFF --}}
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-full bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-white dark:text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Deliver To</p>
-                                    <p class="text-sm text-neutral-700 dark:text-neutral-300 line-clamp-2" x-text="offer.delivery_address"></p>
+                                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Deliver To</p>
+                                    <p class="text-sm text-zinc-700 dark:text-zinc-300 line-clamp-2" x-text="offer.delivery_address"></p>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-3 gap-2 bg-neutral-50 dark:bg-[#0a0a0a] rounded-xl p-3 text-center border border-neutral-100 dark:border-[#262626]">
+                            {{-- STATS --}}
+                            <div class="grid grid-cols-3 gap-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3 text-center">
                                 <div>
-                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Food</p>
-                                    <p class="text-sm font-bold text-neutral-900 dark:text-white" x-text="'₱' + offer.food_cost"></p>
+                                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Food</p>
+                                    <p class="text-sm font-bold text-zinc-900 dark:text-white" x-text="'₱' + offer.food_cost"></p>
                                 </div>
-                                <div class="border-x border-neutral-200 dark:border-[#262626]">
-                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Fee</p>
-                                    <p class="text-sm font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent" x-text="'₱' + offer.delivery_fee"></p>
+                                <div class="border-x border-zinc-200 dark:border-zinc-700">
+                                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Fee</p>
+                                    <p class="text-sm font-bold text-orange-500" x-text="'₱' + offer.delivery_fee"></p>
                                 </div>
                                 <div>
-                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Items</p>
-                                    <p class="text-sm font-bold text-orange-600 dark:text-orange-400" x-text="offer.items_count"></p>
+                                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Items</p>
+                                    <p class="text-sm font-bold text-zinc-900 dark:text-white" x-text="offer.items_count"></p>
                                 </div>
                             </div>
 
+                            {{-- ACTIONS --}}
                             <div class="flex gap-2 pt-1">
                                 <button @click="declineOffer(offer.order_id)" type="button"
-                                        class="flex-1 border border-neutral-300 dark:border-[#262626] text-neutral-700 dark:text-neutral-300 py-2.5 rounded-xl text-sm font-semibold hover:bg-neutral-50 dark:hover:bg-[#0a0a0a] transition">
+                                        class="flex-1 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white py-2.5 rounded-lg text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition">
                                     Decline
                                 </button>
                                 <button @click="acceptOffer(offer.order_id)" type="button"
-                                        class="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2.5 rounded-xl text-sm font-bold shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-98 transition transform">
+                                        class="flex-1 bg-orange-500 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-orange-600 transition">
                                     Accept
                                 </button>
                             </div>
@@ -284,53 +296,77 @@
     </template>
 
     {{-- ============================================ --}}
-    {{-- CURRENT ACTIVE ORDER — ISANG WRAPPER LANG --}}
+    {{-- CURRENT ACTIVE ORDER --}}
     {{-- ============================================ --}}
     @if ($currentOrder)
-        {{-- WAITING STATE — naka-assign pero hindi pa ready --}}
-        @if ($currentOrder->status === 'rider_assigned' && !$currentOrder->isReadyForPickup())
-            <div class="p-4 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/30 dark:to-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-xl">
+        @php
+            $riderState = $currentOrder->rider_state;
+            $riderStateLabel = $currentOrder->rider_state_label;
+        @endphp
+
+        {{-- WAITING STATE --}}
+        @if ($riderState === 'waiting')
+            <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
                 <div class="flex items-start gap-3">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0 shadow-md">
-                        <svg class="w-6 h-6 text-white animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <div class="w-10 h-10 rounded-full bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-white dark:text-zinc-900 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
                     <div class="flex-1">
-                        <p class="font-bold text-amber-900 dark:text-amber-300 text-base">
-                            ⏳ Advance Booking Confirmed
+                        <p class="text-sm font-bold text-zinc-900 dark:text-white">Waiting for Restaurant</p>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                            <strong class="text-orange-500">Wait for order verification</strong>.
                         </p>
-                        <p class="text-sm text-amber-800 dark:text-amber-400 mt-1">
-                            Naka-reserve na sa iyo ang order. <strong>Hintayin ang notification</strong> kapag ready na ang pagkain.
-                        </p>
-                        <div class="mt-3 flex items-center gap-2 text-xs text-amber-700 dark:text-amber-500">
-                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                            <span>Naghihintay ng confirmation mula sa restaurant...</span>
+                        <div class="mt-3 flex items-center gap-2 text-xs text-orange-500">
+                            <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                            <span>{{ $riderStateLabel }}</span>
                         </div>
                     </div>
                 </div>
             </div>
         @endif
 
-        {{-- READY STATE — pwede nang pumunta --}}
-        @if ($currentOrder->status === 'rider_assigned' && $currentOrder->isReadyForPickup())
-            <div class="p-4 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/10 border border-green-200 dark:border-green-800 rounded-xl">
+        {{-- VERIFIED STATE --}}
+        @if ($riderState === 'verified')
+            <div class="bg-orange-500 rounded-lg p-5 text-white">
                 <div class="flex items-start gap-3">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center flex-shrink-0 shadow-md">
-                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
                     <div class="flex-1">
-                        <p class="font-bold text-green-900 dark:text-green-300 text-base">
-                            ✅ Ready for Pickup!
+                        <p class="text-sm font-bold">Verified — Proceed to Restaurant</p>
+                        <p class="text-xs text-white/90 mt-1">
+                            Restaurant has started preparing. You may proceed to pickup.
                         </p>
-                        <p class="text-sm text-green-800 dark:text-green-400 mt-1">
-                            Ready na ang order. <strong>Pumunta ka na sa restaurant</strong> para kunin ang pagkain.
+                        <div class="mt-3 flex items-center gap-2 text-xs text-white/90">
+                            <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                            <span>{{ $riderStateLabel }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- READY STATE --}}
+        @if ($riderState === 'ready')
+            <div class="bg-orange-500 rounded-lg p-5 text-white">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-bold">Food is Ready — Pickup Now</p>
+                        <p class="text-xs text-white/90 mt-1">
+                            Ready na ang food. Kunin mo na agad.
                         </p>
-                        <div class="mt-3 flex items-center gap-2 text-xs text-green-700 dark:text-green-500">
-                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <span>Verified by restaurant</span>
+                        <div class="mt-3 flex items-center gap-2 text-xs text-white/90">
+                            <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                            <span>{{ $riderStateLabel }}</span>
                         </div>
                     </div>
                 </div>
@@ -338,29 +374,31 @@
         @endif
 
         {{-- ACTIVE ORDER CARD --}}
-        <div class="bg-white dark:bg-[#141414] rounded-2xl shadow-lg overflow-hidden border border-neutral-200 dark:border-[#262626]">
+        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
 
-            <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 text-white">
+            {{-- HEADER --}}
+            <div class="px-5 py-4 bg-orange-500 text-white">
                 <div class="flex justify-between items-center">
                     <div>
                         <p class="text-xs text-white/80 uppercase tracking-wide font-medium">Active Delivery</p>
                         <h2 class="text-lg font-bold">Order #{{ $currentOrder->id }}</h2>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs px-3 py-1.5 rounded-full bg-white/20 backdrop-blur font-semibold uppercase tracking-wide border border-white/30">
+                        <span class="text-xs px-3 py-1.5 rounded-lg bg-white/20 font-medium uppercase tracking-wide">
                             {{ ucfirst(str_replace('_', ' ', $currentOrder->status)) }}
                         </span>
                         @if ($currentOrder->verified_pickup_at)
-                            <span class="text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
-                                ✓ Verified
+                            <span class="text-[10px] bg-white text-orange-600 px-2 py-0.5 rounded-lg font-bold uppercase tracking-wide">
+                                Verified
                             </span>
                         @endif
                     </div>
                 </div>
 
+                {{-- PROGRESS BAR --}}
                 <div class="flex items-center gap-1 mt-3">
                     @php
-                        $stages = ['rider_assigned', 'picked_up', 'out_for_delivery'];
+                        $stages = ['rider_assigned', 'preparing', 'ready_for_pickup', 'picked_up', 'out_for_delivery'];
                         $currentIdx = array_search($currentOrder->status, $stages);
                     @endphp
                     @foreach ($stages as $idx => $stage)
@@ -370,59 +408,32 @@
                 </div>
                 <div class="flex justify-between mt-1 text-[10px] text-white/80">
                     <span>Assigned</span>
+                    <span>Preparing</span>
+                    <span>Ready</span>
                     <span>Picked Up</span>
-                    <span>On the Way</span>
+                    <span>Delivering</span>
                 </div>
             </div>
 
-            <div class="p-6 space-y-5">
-
-                {{-- VERIFICATION STATUS --}}
-                @if ($currentOrder->status === 'rider_assigned' && !$currentOrder->verified_pickup_at)
-                    <div class="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl">
-                        <div class="flex items-start gap-2">
-                            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
-                                <strong>Status:</strong> Naka-assign ka na. Pumunta sa restaurant para kunin ang order kapag ready na.
-                                Pagdating mo, i-tap ang <strong>"Mark as Picked Up"</strong> para ma-verify.
-                            </p>
-                        </div>
-                    </div>
-                @endif
-
-                @if ($currentOrder->verified_pickup_at)
-                    <div class="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl">
-                        <div class="flex items-start gap-2">
-                            <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p class="text-xs text-green-800 dark:text-green-300 leading-relaxed">
-                                <strong>Verified:</strong> Nakuha mo na ang order noong
-                                {{ $currentOrder->verified_pickup_at->format('M d, Y · g:i A') }}.
-                            </p>
-                        </div>
-                    </div>
-                @endif
+            <div class="p-5 space-y-4">
 
                 {{-- PICKUP --}}
                 <div class="flex gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-neutral-900 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0 shadow-md">
-                        <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold mb-0.5">Pickup From</p>
-                        <p class="font-bold text-neutral-900 dark:text-white">{{ $currentOrder->restaurant->name ?? '—' }}</p>
-                        <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">{{ $currentOrder->restaurant->address ?? '' }}</p>
+                        <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold mb-0.5">Pickup From</p>
+                        <p class="font-bold text-sm text-zinc-900 dark:text-white">{{ $currentOrder->restaurant->name ?? '—' }}</p>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{{ $currentOrder->restaurant->address ?? '' }}</p>
 
-                        <div class="flex items-center gap-2 mt-2 bg-neutral-900 dark:bg-neutral-800 rounded-lg px-3 py-2">
+                        <div class="flex items-center gap-2 mt-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg px-3 py-2">
                             <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
-                            <span class="text-xs font-medium text-neutral-300">Pay restaurant:</span>
+                            <span class="text-xs text-zinc-600 dark:text-zinc-400">Pay restaurant:</span>
                             <span class="text-sm font-bold text-orange-500">₱{{ number_format($currentOrder->restaurant_earnings ?? $currentOrder->food_cost, 2) }}</span>
                         </div>
                     </div>
@@ -430,72 +441,66 @@
 
                 {{-- DROPOFF --}}
                 <div class="flex gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md">
-                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <div class="w-10 h-10 rounded-full bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-white dark:text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold mb-0.5">Deliver To</p>
-                        <p class="font-bold text-neutral-900 dark:text-white">{{ $currentOrder->customer->name ?? '—' }}</p>
-                        <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">{{ $currentOrder->delivery_address }}</p>
+                        <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold mb-0.5">Deliver To</p>
+                        <p class="font-bold text-sm text-zinc-900 dark:text-white">{{ $currentOrder->customer->name ?? '—' }}</p>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{{ $currentOrder->delivery_address }}</p>
 
-                        <div class="flex items-center gap-2 mt-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg px-3 py-2">
+                        <div class="flex items-center gap-2 mt-2 bg-orange-500 rounded-lg px-3 py-2">
                             <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
-                            <span class="text-xs font-medium text-white/90">Collect from customer:</span>
+                            <span class="text-xs text-white/90">Collect from customer:</span>
                             <span class="text-sm font-bold text-white">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
                         </div>
                     </div>
                 </div>
 
-                {{-- CHAT WITH CUSTOMER BUTTON --}}
+                {{-- CHAT BUTTON --}}
                 <a href="{{ route('rider.chat.show', $currentOrder) }}"
-                   class="flex items-center justify-between gap-3 bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl px-4 py-3 transition group">
+                   class="flex items-center justify-between gap-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-lg px-4 py-3 transition group">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                        <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
                             <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>
                         </div>
                         <div>
-                            <p class="font-bold text-sm text-white">Chat with Customer</p>
-                            <p class="text-xs text-neutral-400">
+                            <p class="font-bold text-sm text-zinc-900 dark:text-white">Chat with Customer</p>
+                            <p class="text-xs text-zinc-500 dark:text-zinc-400">
                                 {{ $currentOrder->customer->name ?? 'Customer' }}
                             </p>
                         </div>
                     </div>
-                    <svg class="w-5 h-5 text-neutral-500 group-hover:text-orange-500 group-hover:translate-x-0.5 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg class="w-5 h-5 text-zinc-400 group-hover:text-orange-500 group-hover:translate-x-0.5 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
 
                 {{-- ACTION BUTTONS --}}
                 <div class="flex flex-wrap gap-2 pt-2">
-                    @if ($currentOrder->status === 'rider_assigned' && $currentOrder->isReadyForPickup())
+                    @if ($currentOrder->status === 'ready_for_pickup')
                         <form method="POST" action="{{ route('rider.orders.status', $currentOrder) }}" class="flex-1">
                             @csrf @method('PATCH')
                             <input type="hidden" name="status" value="picked_up">
-                            <button class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3 rounded-xl font-bold text-sm shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-98 transition transform flex items-center justify-center gap-2">
+                            <button class="w-full bg-orange-500 text-white px-4 py-3 rounded-lg font-medium text-sm hover:bg-orange-600 transition flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Mark as Picked Up
                             </button>
                         </form>
-                    @elseif ($currentOrder->status === 'rider_assigned' && !$currentOrder->isReadyForPickup())
-                        <div class="w-full p-3 bg-amber-100 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 rounded-xl text-center">
-                            <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
-                                ⏳ Hintayin ang restaurant na mag-mark ng ready
-                            </p>
-                        </div>
                     @elseif ($currentOrder->status === 'picked_up')
                         <form method="POST" action="{{ route('rider.orders.status', $currentOrder) }}" class="flex-1">
                             @csrf @method('PATCH')
                             <input type="hidden" name="status" value="out_for_delivery">
-                            <button class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3 rounded-xl font-bold text-sm shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-98 transition transform flex items-center justify-center gap-2">
+                            <button class="w-full bg-orange-500 text-white px-4 py-3 rounded-lg font-medium text-sm hover:bg-orange-600 transition flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
@@ -506,61 +511,67 @@
                         <form method="POST" action="{{ route('rider.orders.status', $currentOrder) }}" class="flex-1">
                             @csrf @method('PATCH')
                             <input type="hidden" name="status" value="delivered">
-                            <button class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3 rounded-xl font-bold text-sm shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-98 transition transform flex items-center justify-center gap-2">
+                            <button class="w-full bg-orange-500 text-white px-4 py-3 rounded-lg font-medium text-sm hover:bg-orange-600 transition flex items-center justify-center gap-2">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Mark as Delivered
                             </button>
                         </form>
+                    @elseif ($currentOrder->status === 'rider_assigned')
+                        <div class="w-full p-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 rounded-lg text-center">
+                            <p class="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                                The restaurant is preparing the order
+                            </p>
+                        </div>
                     @endif
                 </div>
 
                 {{-- PAYMENT RECORDING --}}
                 @if ($currentOrder->status === 'delivered' && !$currentOrder->payment)
-                    <div class="mt-2 p-5 bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/10 rounded-xl border border-orange-200 dark:border-orange-800">
+                    <div class="p-5 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
                         <div class="flex items-center gap-3 mb-3">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md">
+                            <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center">
                                 <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
                             <div>
-                                <p class="font-bold text-orange-900 dark:text-orange-300">Record Payment</p>
-                                <p class="text-xs text-orange-700 dark:text-orange-400">Complete this to finish the order</p>
+                                <p class="font-bold text-sm text-zinc-900 dark:text-white">Record Payment</p>
+                                <p class="text-xs text-zinc-500 dark:text-zinc-400">Complete this to finish the order</p>
                             </div>
                         </div>
 
                         @if ($currentOrder->commission_amount > 0)
-                            <div class="mb-3 p-2.5 bg-black dark:bg-neutral-900 rounded-lg flex items-start gap-2">
+                            <div class="mb-3 p-2.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg flex items-start gap-2">
                                 <svg class="w-3.5 h-3.5 text-orange-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <p class="text-[11px] text-neutral-300 leading-relaxed">
+                                <p class="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed">
                                     <strong class="text-orange-500">Platform fee:</strong> ₱{{ number_format($currentOrder->commission_amount, 2) }}
                                     ({{ $currentOrder->commission_rate }}%) is deducted.
-                                    Bayaran mo sa restaurant ay <strong class="text-white">₱{{ number_format($currentOrder->restaurant_earnings, 2) }}</strong> lamang.
+                                    Pay the restaurant <strong class="text-zinc-900 dark:text-white">₱{{ number_format($currentOrder->restaurant_earnings, 2) }}</strong> only.
                                 </p>
                             </div>
                         @endif
 
-                        <div class="bg-white/60 dark:bg-[#0a0a0a]/60 rounded-lg p-3 mb-3 text-xs space-y-1 border border-orange-200/50 dark:border-orange-800/50">
+                        <div class="bg-white dark:bg-zinc-900 rounded-lg p-3 mb-3 text-xs space-y-1 border border-zinc-200 dark:border-zinc-800">
                             <div class="flex justify-between">
-                                <span class="text-neutral-600 dark:text-neutral-400">Paid to restaurant</span>
-                                <span class="font-bold text-neutral-900 dark:text-white">₱{{ number_format($currentOrder->restaurant_earnings ?? $currentOrder->food_cost, 2) }}</span>
+                                <span class="text-zinc-500 dark:text-zinc-400">Paid to restaurant</span>
+                                <span class="font-bold text-zinc-900 dark:text-white">₱{{ number_format($currentOrder->restaurant_earnings ?? $currentOrder->food_cost, 2) }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-neutral-600 dark:text-neutral-400">Collected from customer</span>
-                                <span class="font-bold text-neutral-900 dark:text-white">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
+                                <span class="text-zinc-500 dark:text-zinc-400">Collected from customer</span>
+                                <span class="font-bold text-zinc-900 dark:text-white">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
                             </div>
-                            <div class="flex justify-between pt-2 border-t border-orange-200 dark:border-orange-800">
-                                <span class="font-bold text-orange-900 dark:text-orange-300">Your earnings</span>
-                                <span class="font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">₱{{ number_format($currentOrder->delivery_fee, 2) }}</span>
+                            <div class="flex justify-between pt-2 border-t border-zinc-200 dark:border-zinc-800">
+                                <span class="font-bold text-orange-500">Your earnings</span>
+                                <span class="font-bold text-orange-500">₱{{ number_format($currentOrder->delivery_fee, 2) }}</span>
                             </div>
                         </div>
                         <form method="POST" action="{{ route('rider.orders.payment', $currentOrder) }}">
                             @csrf
-                            <button class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3 rounded-xl font-bold text-sm shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-98 transition transform">
+                            <button class="w-full bg-orange-500 text-white px-4 py-3 rounded-lg font-medium text-sm hover:bg-orange-600 transition">
                                 Record Payment
                             </button>
                         </form>
@@ -574,25 +585,25 @@
     {{-- WAITING / OFFLINE STATE --}}
     {{-- ============================================ --}}
     @if (!$currentOrder && $rider->is_online)
-        <div x-show="offers.length === 0" class="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#262626] p-10 text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-950/40 dark:to-orange-900/20 mb-4">
-                <span class="w-3 h-3 rounded-full bg-orange-500 animate-ping"></span>
+        <div x-show="offers.length === 0" class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-10 text-center transition-colors">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-500 mb-4">
+                <span class="w-3 h-3 rounded-full bg-white animate-ping"></span>
             </div>
-            <h3 class="font-bold text-neutral-900 dark:text-white mb-1">You're Online</h3>
-            <p class="text-sm text-neutral-500 dark:text-neutral-400">Waiting for delivery offers...</p>
-            <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-4">Offers will appear on this page automatically</p>
+            <h3 class="font-bold text-zinc-900 dark:text-white mb-1">You're Online</h3>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400">Waiting for delivery offers...</p>
+            <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-4">Offers will appear on this page automatically</p>
         </div>
     @elseif (!$rider->is_online)
-        <div class="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#262626] p-10 text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neutral-100 dark:bg-[#262626] mb-4">
-                <svg class="w-8 h-8 text-neutral-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-10 text-center transition-colors">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 mb-4">
+                <svg class="w-8 h-8 text-zinc-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                 </svg>
             </div>
-            <h3 class="font-bold text-neutral-900 dark:text-white mb-1">You're Offline</h3>
-            <p class="text-sm text-neutral-500 dark:text-neutral-400">Toggle online to start receiving offers</p>
+            <h3 class="font-bold text-zinc-900 dark:text-white mb-1">You're Offline</h3>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400">Toggle online to start receiving offers</p>
             <button @click="toggleOnline()"
-                    class="mt-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-95 transition transform">
+                    class="mt-4 bg-orange-500 text-white px-6 py-2.5 rounded-lg font-medium text-sm hover:bg-orange-600 transition">
                 Go Online
             </button>
         </div>
@@ -610,12 +621,12 @@
 
             <div x-show="!isMinimized"
                  x-transition.opacity
-                 class="pointer-events-auto bg-white dark:bg-[#141414] rounded-2xl shadow-2xl border border-neutral-200 dark:border-[#262626] overflow-hidden"
+                 class="pointer-events-auto bg-white dark:bg-zinc-900 rounded-lg shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden"
                  style="width: 380px; height: 480px;">
 
                 <div @mousedown="startDrag($event)"
                      @touchstart.passive="startDrag($event)"
-                     class="bg-gradient-to-r from-orange-500 to-orange-600 px-3 py-2.5 flex items-center gap-2 select-none"
+                     class="bg-orange-500 px-3 py-2.5 flex items-center gap-2 select-none"
                      :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
                      style="touch-action: none;">
 
@@ -626,7 +637,7 @@
                     </svg>
 
                     <div class="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
-                        <div class="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center flex-shrink-0">
+                        <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
                             <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                             </svg>
@@ -640,9 +651,7 @@
                     <button @pointerdown.stop.prevent="resetPosition()"
                             @click.stop.prevent="resetPosition()"
                             type="button"
-                            title="Center on screen"
-                            class="w-7 h-7 rounded-md hover:bg-white/20 active:bg-white/30 flex items-center justify-center text-white transition flex-shrink-0 cursor-pointer"
-                            style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
+                            class="w-7 h-7 rounded-lg hover:bg-white/20 active:bg-white/30 flex items-center justify-center text-white transition flex-shrink-0">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                         </svg>
@@ -651,9 +660,7 @@
                     <button @pointerdown.stop.prevent="minimizePanel()"
                             @click.stop.prevent="minimizePanel()"
                             type="button"
-                            title="Minimize"
-                            class="w-7 h-7 rounded-md hover:bg-white/20 active:bg-white/30 flex items-center justify-center text-white transition flex-shrink-0 cursor-pointer"
-                            style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
+                            class="w-7 h-7 rounded-lg hover:bg-white/20 active:bg-white/30 flex items-center justify-center text-white transition flex-shrink-0">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M20 12H4" />
                         </svg>
@@ -663,19 +670,19 @@
                 <div class="relative" style="height: 320px;">
                     <div id="riderMap" class="w-full h-full"></div>
 
-                    <div class="absolute bottom-2 left-2 right-2 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur rounded-xl p-2.5 shadow-lg border border-neutral-200 dark:border-[#262626]">
+                    <div class="absolute bottom-2 left-2 right-2 bg-white/95 dark:bg-zinc-900/95 backdrop-blur rounded-lg p-2.5 shadow-lg border border-zinc-200 dark:border-zinc-800">
                         <div class="grid grid-cols-3 gap-2 text-center">
                             <div>
-                                <p class="text-[9px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Distance</p>
-                                <p class="text-sm font-bold text-neutral-900 dark:text-white" x-text="distanceText || '—'"></p>
+                                <p class="text-[9px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Distance</p>
+                                <p class="text-sm font-bold text-zinc-900 dark:text-white" x-text="distanceText || '—'"></p>
                             </div>
-                            <div class="border-x border-neutral-200 dark:border-[#262626]">
-                                <p class="text-[9px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">ETA</p>
-                                <p class="text-sm font-bold text-orange-600 dark:text-orange-400" x-text="etaText || '—'"></p>
+                            <div class="border-x border-zinc-200 dark:border-zinc-800">
+                                <p class="text-[9px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">ETA</p>
+                                <p class="text-sm font-bold text-orange-500" x-text="etaText || '—'"></p>
                             </div>
                             <div>
-                                <p class="text-[9px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Status</p>
-                                <p class="text-sm font-bold text-neutral-900 dark:text-white" x-text="stageText"></p>
+                                <p class="text-[9px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Status</p>
+                                <p class="text-sm font-bold text-zinc-900 dark:text-white" x-text="stageText"></p>
                             </div>
                         </div>
                     </div>
@@ -688,13 +695,13 @@
                     @touchstart.stop.passive="startFabDrag($event)"
                     @click="handleFabClick()"
                     type="button"
-                    class="pointer-events-auto w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 shadow-2xl flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-transform border-2 border-white dark:border-[#141414]"
+                    class="pointer-events-auto w-14 h-14 rounded-full bg-orange-500 shadow-2xl flex items-center justify-center text-white hover:bg-orange-600 transition border-2 border-white dark:border-zinc-900"
                     :class="fabDragging ? 'cursor-grabbing scale-110' : 'cursor-grab'"
-                    style="touch-action: none; -webkit-tap-highlight-color: transparent;">
+                    style="touch-action: none;">
                 <svg class="w-6 h-6 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
-                <span class="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-white dark:border-[#141414] animate-pulse pointer-events-none"></span>
+                <span class="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-white animate-pulse pointer-events-none"></span>
             </button>
         </div>
     @endif
@@ -708,12 +715,12 @@
 <style>
     .active\:scale-98:active { transform: scale(0.98); }
     .active\:scale-95:active { transform: scale(0.95); }
-    #riderMap { background: #f3f4f6; }
-    .dark #riderMap { background: #0a0a0a; }
+    #riderMap { background: #f5f5f5; }
+    .dark #riderMap { background: #18181b; }
 </style>
 <script>
 // ============================================
-// RIDER DASHBOARD FUNCTION
+// RIDER DASHBOARD
 // ============================================
 function riderDash(riderId) {
     return {
@@ -726,9 +733,24 @@ function riderDash(riderId) {
 
         init() {
             if (typeof window.Echo !== 'undefined') {
+                console.log('🔌 Subscribing to rider.' + riderId);
+
                 window.Echo.private(`rider.${riderId}`)
                     .listen('.delivery.offer', (e) => {
+                        console.log('🔥 Delivery offer received:', e);
                         this.loadOffer(parseInt(e.order_id));
+                    })
+                    .listen('.order.ready', (e) => {
+                        console.log('🍔 Order ready for pickup:', e);
+                        this.handleOrderReady(e);
+                    })
+                    .listen('.order.verified', (e) => {
+                        console.log('✅ Order verified:', e);
+                        this.handleOrderVerified(e);
+                    })
+                    .listen('.order.cancelled', (e) => {
+                        console.log('❌ Order cancelled:', e);
+                        this.handleOrderCancelled(e);
                     });
             }
 
@@ -741,6 +763,35 @@ function riderDash(riderId) {
             if (this.online) {
                 this.startLocationSharing();
             }
+        },
+
+        handleOrderReady(e) {
+            console.log('🍔 Restaurant marked order #' + e.order_id + ' as ready');
+            console.log('   Reloading rider dashboard...');
+
+            this.playBeep();
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        },
+
+        handleOrderVerified(e) {
+            console.log('✅ Order #' + e.order_id + ' verified — reloading...');
+
+            this.playBeep();
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        },
+
+        handleOrderCancelled(e) {
+            console.log('❌ Order #' + e.order_id + ' cancelled — reloading...');
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         },
 
         async loadExistingOffers() {
@@ -901,7 +952,7 @@ function riderDash(riderId) {
 // GLOBAL: acceptReadyOrder
 // ============================================
 async function acceptReadyOrder(orderId, btn) {
-    if (!confirm('Accept this order? Pumunta ka na sa restaurant para i-pickup.')) {
+    if (!confirm('Accept this order? Proceed to the restaurant for pickup.')) {
         return;
     }
 
@@ -937,7 +988,7 @@ async function acceptReadyOrder(orderId, btn) {
 }
 
 // ============================================
-// FLOATING MAP FUNCTION
+// FLOATING MAP (existing logic — preserved)
 // ============================================
 @if ($currentOrder)
 function floatingMap(orderId) {
@@ -1290,8 +1341,6 @@ function floatingMap(orderId) {
                 doubleClickZoom: true,
                 boxZoom: true,
                 keyboard: true,
-                tap: true,
-                tapHold: true,
             }).setView([this.riderLat, this.riderLng], 14);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -1302,25 +1351,19 @@ function floatingMap(orderId) {
                 html: `
                     <div style="position:relative;width:52px;height:52px;">
                         <div style="
-                            width:52px;
-                            height:52px;
-                            border-radius:50%;
-                            overflow:hidden;
-                            border:4px solid #ea580c;
-                            box-shadow:0 4px 10px rgba(234,88,12,0.5), 0 2px 6px rgba(0,0,0,0.3);
-                            background:white;
+                            width:52px;height:52px;border-radius:50%;overflow:hidden;
+                            border:4px solid #f97316;
+                            box-shadow:0 4px 10px rgba(249,115,22,0.5), 0 2px 6px rgba(0,0,0,0.3);
+                            background:#18181b;
                         ">
                             ${this.restaurantProfileUrl
-                                ? `<img src="${this.restaurantProfileUrl}" 
-                                        style="width:100%;height:100%;object-fit:cover;" 
-                                        onerror="this.style.display='none';this.parentElement.innerHTML='<div style=&quot;width:100%;height:100%;background:#ea580c;color:white;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;&quot;>R</div>';" 
-                                        alt="Restaurant">`
-                                : `<div style="width:100%;height:100%;background:#ea580c;color:white;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;">R</div>`
+                                ? `<img src="${this.restaurantProfileUrl}" style="width:100%;height:100%;object-fit:cover;" alt="Restaurant">`
+                                : `<div style="width:100%;height:100%;background:#f97316;color:white;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;">R</div>`
                             }
                         </div>
                         <div style="
                             position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
-                            background:#ea580c;color:white;padding:1px 6px;border-radius:8px;
+                            background:#f97316;color:white;padding:1px 6px;border-radius:8px;
                             font-size:9px;font-weight:bold;border:2px solid white;
                             box-shadow:0 2px 4px rgba(0,0,0,0.3);white-space:nowrap;
                         ">STORE</div>
@@ -1335,10 +1378,8 @@ function floatingMap(orderId) {
                 html: `
                     <div style="position:relative;width:48px;height:48px;">
                         <img src="${this.customerIconPath}"
-                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
                              style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4));"
                              alt="Customer">
-                        <div style="display:none;width:48px;height:48px;background:#10b981;color:white;border-radius:50%;align-items:center;justify-content:center;font-size:22px;border:3px solid white;box-shadow:0 3px 6px rgba(0,0,0,0.4);">🏠</div>
                     </div>
                 `,
                 className: '',
@@ -1351,22 +1392,15 @@ function floatingMap(orderId) {
                     <div style="position:relative;width:56px;height:56px;">
                         <div style="
                             position:absolute;inset:0;border-radius:50%;
-                            background:rgba(234,88,12,0.3);
+                            background:rgba(249,115,22,0.3);
                             animation:pulseRider 2s ease-out infinite;
                         "></div>
                         <img src="/images/rider.png"
-                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
                              style="
                                 position:relative;width:56px;height:56px;object-fit:contain;
-                                filter:drop-shadow(0 4px 8px rgba(234,88,12,0.6));
+                                filter:drop-shadow(0 4px 8px rgba(249,115,22,0.6));
                              "
                              alt="Rider">
-                        <div style="
-                            display:none;position:relative;width:56px;height:56px;
-                            background:#ea580c;color:white;border-radius:50%;
-                            align-items:center;justify-content:center;font-size:26px;
-                            border:3px solid white;box-shadow:0 4px 8px rgba(0,0,0,0.4);
-                        ">🛵</div>
                     </div>
                     <style>
                         @keyframes pulseRider {
@@ -1382,15 +1416,15 @@ function floatingMap(orderId) {
 
             this.restaurantMarker = L.marker([this.restaurantLat, this.restaurantLng], { icon: restaurantIcon })
                 .addTo(this.map)
-                .bindPopup(`🏪 ${this.restaurantName}`);
+                .bindPopup(this.restaurantName);
 
             this.customerMarker = L.marker([this.customerLat, this.customerLng], { icon: customerIcon })
                 .addTo(this.map)
-                .bindPopup(`🏠 ${this.customerName || 'Customer'}`);
+                .bindPopup(this.customerName || 'Customer');
 
             this.riderMarker = L.marker([this.riderLat, this.riderLng], { icon: riderIcon })
                 .addTo(this.map)
-                .bindPopup(`🛵 ${this.riderName}`);
+                .bindPopup(this.riderName);
 
             this.drawRoute(
                 this.restaurantLat, this.restaurantLng,
@@ -1424,7 +1458,7 @@ function floatingMap(orderId) {
                 }
 
                 this.routeLine = L.polyline(latlngs, {
-                    color: '#ea580c',
+                    color: '#f97316',
                     weight: 5,
                     opacity: 0.8,
                     lineJoin: 'round',
@@ -1453,7 +1487,7 @@ function floatingMap(orderId) {
                 [fromLat, fromLng],
                 [toLat, toLng],
             ], {
-                color: '#ea580c',
+                color: '#f97316',
                 weight: 3,
                 opacity: 0.5,
                 dashArray: '8, 8',
@@ -1494,7 +1528,7 @@ function floatingMap(orderId) {
                 if (this.routeLine) this.map.removeLayer(this.routeLine);
 
                 this.routeLine = L.polyline(latlngs, {
-                    color: '#ea580c',
+                    color: '#f97316',
                     weight: 5,
                     opacity: 0.8,
                     lineJoin: 'round',
@@ -1517,8 +1551,10 @@ function floatingMap(orderId) {
         updateStageText() {
             @php
                 $stageMap = [
-                    'rider_assigned'   => 'Pickup',
-                    'picked_up'        => 'Pickup',
+                    'rider_assigned' => 'Pickup',
+                    'preparing' => 'Pickup',
+                    'ready_for_pickup' => 'Pickup',
+                    'picked_up' => 'Deliver',
                     'out_for_delivery' => 'Deliver',
                 ];
             @endphp

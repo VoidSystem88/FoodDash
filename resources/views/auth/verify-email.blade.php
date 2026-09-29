@@ -31,7 +31,8 @@
 
         <form method="POST" action="{{ route('logout') }}" class="mt-3">
             @csrf
-            <button class="w-full text-sm text-gray-500 hover:text-gray-700">Logout</button>
+            <button onclick="localStorage.removeItem('theme'); document.documentElement.classList.remove('dark');"
+                    class="w-full text-sm text-gray-500 hover:text-gray-700">Logout</button>
         </form>
     </div>
 </body>

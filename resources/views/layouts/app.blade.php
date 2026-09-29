@@ -53,7 +53,7 @@
                         @endif
                     </a>
 
-                                        {{-- CUSTOMER DESKTOP --}}
+                    {{-- CUSTOMER DESKTOP --}}
                     @if (auth()->user()->isCustomer())
                         <div class="hidden md:flex items-center gap-1">
                             <a href="{{ route('customer.restaurants') }}"
@@ -84,7 +84,7 @@
                         </div>
                     @endif
 
-                                        {{-- RIDER DESKTOP --}}
+                    {{-- RIDER DESKTOP --}}
                     @if (auth()->user()->isRider())
                         <div class="hidden md:flex items-center gap-1">
                             <a href="{{ route('rider.dashboard') }}"
@@ -95,20 +95,19 @@
                                class="px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('rider.earnings*') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
                                 Earnings
                             </a>
-                                            <a href="{{ route('rider.chat') }}"
-                   x-data="chatBadge()"
-                   x-init="init()"
-                   class="relative flex flex-col items-center justify-center flex-1 h-full transition {{ request()->routeIs('rider.chat*') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <span class="text-[10px] mt-0.5 font-medium">Chat</span>
-                    <span x-show="unread > 0"
-                          x-cloak
-                          class="absolute top-1 right-1/4 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1"
-                          x-text="unread > 99 ? '99+' : unread"></span>
-                </a>
+                            <a href="{{ route('rider.chat') }}"
+                               x-data="chatBadge()"
+                               x-init="init()"
+                               class="relative px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('rider.chat*') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }} inline-flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                Chat
+                                <span x-show="unread > 0"
+                                      x-cloak
+                                      class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
+                                      x-text="unread > 99 ? '99+' : unread"></span>
+                            </a>
                         </div>
                     @endif
 
@@ -168,25 +167,25 @@
                 {{-- RIGHT: BELL + SETTINGS + AVATAR --}}
                 <div class="flex items-center gap-2">
 
-                    {{-- NOTIFICATION BELL --}}
-                    <div x-data="notificationBell()" x-init="init()" class="relative">
-                        <button @click="toggle()"
+                    {{-- NOTIFICATION BELL — GAMIT ANG ALPINE STORE --}}
+                    <div x-data class="relative" x-init="$store.notifications.init()">
+                        <button @click="$store.notifications.toggle()"
                                 class="relative p-2 text-gray-600 dark:text-neutral-400 hover:text-orange-600 dark:hover:text-orange-500 transition rounded-full hover:bg-gray-100 dark:hover:bg-dark-850">
                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
 
-                            <template x-if="totalUnread > 0">
+                            <template x-if="$store.notifications.totalUnread > 0">
                                 <span class="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
-                                      x-text="totalUnread > 99 ? '99+' : totalUnread"></span>
+                                      x-text="$store.notifications.totalUnread > 99 ? '99+' : $store.notifications.totalUnread"></span>
                             </template>
                         </button>
 
                         {{-- DROPDOWN --}}
-                        <div x-show="isOpen"
+                        <div x-show="$store.notifications.isOpen"
                              x-cloak
-                             @click.outside="isOpen = false"
+                             @click.outside="$store.notifications.isOpen = false"
                              x-transition.opacity
                              class="fixed md:absolute left-4 right-4 md:left-auto md:right-0 top-[calc(3.5rem+0.5rem)] md:top-auto md:mt-2 md:w-96 bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl shadow-2xl z-50 overflow-hidden">
 
@@ -194,12 +193,12 @@
                             <div class="px-4 py-3 border-b border-gray-100 dark:border-dark-700 flex justify-between items-center bg-gray-50 dark:bg-dark-850">
                                 <span class="text-sm font-semibold text-gray-900 dark:text-neutral-100 flex items-center gap-2">
                                     Notifications
-                                    <template x-if="offers.length > 0">
+                                    <template x-if="$store.notifications.offers.length > 0">
                                         <span class="text-[10px] bg-orange-500 text-white px-1.5 py-0.5 rounded-full font-bold"
-                                              x-text="offers.length + ' offer' + (offers.length > 1 ? 's' : '')"></span>
+                                              x-text="$store.notifications.offers.length + ' offer' + ($store.notifications.offers.length > 1 ? 's' : '')"></span>
                                     </template>
                                 </span>
-                                <template x-if="unreadCount > 0">
+                                <template x-if="$store.notifications.unreadCount > 0">
                                     <form method="POST" action="{{ route('notifications.mark-all-read') }}" class="inline">
                                         @csrf
                                         <button type="submit" class="text-xs text-orange-600 dark:text-orange-400 hover:underline">
@@ -213,7 +212,7 @@
                             <div class="max-h-[70vh] overflow-y-auto">
 
                                 {{-- LIVE DELIVERY OFFERS (Rider only) --}}
-                                <template x-if="offers.length > 0">
+                                <template x-if="$store.notifications.offers.length > 0">
                                     <div>
                                         <div class="px-4 py-2 bg-orange-50 dark:bg-orange-950/30 border-b border-orange-100 dark:border-orange-900/50">
                                             <p class="text-[10px] font-bold text-orange-700 dark:text-orange-300 uppercase tracking-wider flex items-center gap-1.5">
@@ -225,8 +224,8 @@
                                             </p>
                                         </div>
 
-                                        <template x-for="offer in offers" :key="offer.order_id">
-                                            <div @click="goToOffer(offer.order_id)"
+                                        <template x-for="offer in $store.notifications.offers" :key="offer.order_id">
+                                            <div @click="$store.notifications.goToOffer(offer.order_id)"
                                                  class="cursor-pointer px-4 py-3 border-b border-gray-100 dark:border-dark-700 hover:bg-orange-50 dark:hover:bg-orange-950/20 transition group">
 
                                                 <div class="flex gap-3">
@@ -274,7 +273,7 @@
                                 </template>
 
                                 {{-- EMPTY STATE --}}
-                                <template x-if="notifications.length === 0 && offers.length === 0">
+                                <template x-if="$store.notifications.notifications.length === 0 && $store.notifications.offers.length === 0">
                                     <div class="py-12 text-center">
                                         <div class="mx-auto w-12 h-12 rounded-full bg-gray-100 dark:bg-dark-850 flex items-center justify-center mb-3">
                                             <svg class="w-6 h-6 text-gray-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -287,7 +286,7 @@
                                 </template>
 
                                 {{-- ORDER UPDATES HEADER --}}
-                                <template x-if="notifications.length > 0 && offers.length > 0">
+                                <template x-if="$store.notifications.notifications.length > 0 && $store.notifications.offers.length > 0">
                                     <div class="px-4 py-2 bg-gray-50 dark:bg-dark-850/50 border-b border-gray-100 dark:border-dark-700">
                                         <p class="text-[10px] font-bold text-gray-500 dark:text-neutral-400 uppercase tracking-wider">
                                             Order Updates
@@ -296,7 +295,7 @@
                                 </template>
 
                                 {{-- REGULAR NOTIFICATIONS --}}
-                                <template x-for="n in notifications" :key="n.id">
+                                <template x-for="n in $store.notifications.notifications" :key="n.id">
                                     <a :href="'/notifications/' + n.id + '/read'"
                                        :class="n.read ? 'bg-white dark:bg-dark-800' : 'bg-orange-50 dark:bg-orange-950/20'"
                                        class="flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-dark-700 last:border-0 hover:bg-gray-50 dark:hover:bg-dark-850 transition">
@@ -390,46 +389,46 @@
     @endauth
 
     {{-- ============================================ --}}
-{{-- GUEST NAVIGATION --}}
-{{-- ============================================ --}}
-@guest
-<nav class="bg-white dark:bg-dark-800/95 dark:backdrop-blur-md border-b border-gray-200 dark:border-dark-700 sticky top-0 z-40 transition-colors">
-    <div class="max-w-6xl mx-auto px-4">
-        <div class="flex justify-between items-center h-14">
-            @php $config = \App\Models\SystemConfig::current(); @endphp
-            <a href="{{ route('customer.restaurants') }}" class="flex items-center gap-2 flex-shrink-0">
-                @if ($config->hasLogo())
-                    <img src="{{ $config->logo_url }}"
-                         alt="{{ config('app.name', 'FoodDash') }}"
-                         class="w-auto"
-                         style="height: {{ $config->logo_height_px }}px;">
-                @else
-                    <span class="font-semibold text-lg text-gray-900 dark:text-neutral-100">
-                        {{ config('app.name', 'FoodDash') }}
-                    </span>
-                @endif
-            </a>
-
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <a href="{{ route('customer.restaurants') }}"
-                   class="hidden sm:inline-flex whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('customer.restaurants*') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
-                    Restaurants
+    {{-- GUEST NAVIGATION --}}
+    {{-- ============================================ --}}
+    @guest
+    <nav class="bg-white dark:bg-dark-800/95 dark:backdrop-blur-md border-b border-gray-200 dark:border-dark-700 sticky top-0 z-40 transition-colors">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-14">
+                @php $config = \App\Models\SystemConfig::current(); @endphp
+                <a href="{{ route('customer.restaurants') }}" class="flex items-center gap-2 flex-shrink-0">
+                    @if ($config->hasLogo())
+                        <img src="{{ $config->logo_url }}"
+                             alt="{{ config('app.name', 'FoodDash') }}"
+                             class="w-auto"
+                             style="height: {{ $config->logo_height_px }}px;">
+                    @else
+                        <span class="font-semibold text-lg text-gray-900 dark:text-neutral-100">
+                            {{ config('app.name', 'FoodDash') }}
+                        </span>
+                    @endif
                 </a>
 
-                <a href="{{ route('login') }}"
-                   class="whitespace-nowrap flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-dark-850 transition">
-                    Sign In
-                </a>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <a href="{{ route('customer.restaurants') }}"
+                       class="hidden sm:inline-flex whitespace-nowrap flex-shrink-0 px-3 py-1.5 rounded-md text-sm transition {{ request()->routeIs('customer.restaurants*') ? 'bg-gray-100 dark:bg-dark-850 text-gray-900 dark:text-neutral-100 font-medium' : 'text-gray-600 dark:text-neutral-400 hover:text-gray-900 dark:hover:text-white' }}">
+                        Restaurants
+                    </a>
 
-                <a href="{{ route('register') }}"
-                   class="whitespace-nowrap flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-md hover:shadow-lg transition">
-                    Sign Up
-                </a>
+                    <a href="{{ route('login') }}"
+                       class="whitespace-nowrap flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-dark-850 transition">
+                        Sign In
+                    </a>
+
+                    <a href="{{ route('register') }}"
+                       class="whitespace-nowrap flex-shrink-0 px-4 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-md hover:shadow-lg transition">
+                        Sign Up
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-</nav>
-@endguest
+    </nav>
+    @endguest
 
     {{-- PWA INSTALL PROMPT --}}
     <div x-data="pwaInstall()" x-init="init()" x-cloak>
@@ -483,7 +482,7 @@
     <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-dark-800/95 dark:backdrop-blur-md border-t border-gray-200 dark:border-dark-700 z-40 transition-colors">
         <div class="flex justify-around items-center h-16">
 
-                        {{-- CUSTOMER MOBILE --}}
+            {{-- CUSTOMER MOBILE --}}
             @if (auth()->user()->isCustomer())
                 <a href="{{ route('customer.restaurants') }}"
                    class="flex flex-col items-center justify-center flex-1 h-full transition {{ request()->routeIs('customer.restaurants*') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
@@ -538,7 +537,7 @@
                 </a>
             @endif
 
-                        {{-- RIDER MOBILE --}}
+            {{-- RIDER MOBILE --}}
             @if (auth()->user()->isRider())
                 <a href="{{ route('rider.dashboard') }}"
                    class="flex flex-col items-center justify-center flex-1 h-full transition {{ request()->routeIs('rider.dashboard') ? 'text-orange-600 dark:text-orange-400' : 'text-gray-500 dark:text-neutral-400' }}">
@@ -695,17 +694,15 @@
 
     {{-- ============================================ --}}
     {{-- SLIDE-DOWN NOTIFICATION BANNER (Rider only) --}}
+    {{-- Uses $store.notifications.slideDownOffers --}}
     {{-- ============================================ --}}
     @auth
         @if (auth()->user()->isRider())
-            <div x-data="notificationBell()"
-                 x-init="init()"
-                 class="fixed top-0 left-0 right-0 z-[100] pointer-events-none">
-
+            <div class="fixed top-0 left-0 right-0 z-[100] pointer-events-none" x-data>
                 <div class="space-y-2 px-3 pt-3 max-w-md mx-auto">
-                    <template x-for="(offer, index) in slideDownOffers" :key="offer.order_id">
+                    <template x-for="(offer, index) in $store.notifications.slideDownOffers" :key="offer.order_id">
                         <div class="pointer-events-auto bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-dark-700 overflow-hidden cursor-pointer"
-                             @click="goToOffer(offer.order_id)">
+                             @click="$store.notifications.goToOffer(offer.order_id)">
 
                             <div class="h-1 bg-gradient-to-r from-orange-500 to-orange-400"></div>
 
@@ -739,7 +736,7 @@
                                         </div>
                                     </div>
 
-                                    <button @click.stop="dismissOffer(offer.order_id)"
+                                    <button @click.stop="$store.notifications.dismissOffer(offer.order_id)"
                                             type="button"
                                             class="w-6 h-6 rounded-full hover:bg-gray-100 dark:hover:bg-dark-850 flex items-center justify-center flex-shrink-0 transition">
                                         <svg class="w-3.5 h-3.5 text-gray-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -766,10 +763,13 @@
     }
     </script>
 
-        {{-- ============================================ --}}
-    {{-- GLOBAL ALPINE FUNCTIONS --}}
     {{-- ============================================ --}}
-        <script>
+    {{-- GLOBAL ALPINE FUNCTIONS + STORES --}}
+    {{-- ============================================ --}}
+    <script>
+    // ============================================
+    // CHAT BADGE FUNCTIONS (pareho pa rin)
+    // ============================================
     function customerChatBadge() {
         return {
             unread: 0,
@@ -834,6 +834,9 @@
         }
     }
 
+    // ============================================
+    // PWA INSTALL
+    // ============================================
     function pwaInstall() {
         return {
             showInstall: false,
@@ -870,6 +873,9 @@
         }
     }
 
+    // ============================================
+    // THEME TOGGLE
+    // ============================================
     function themeToggle() {
         return {
             theme: 'system',
@@ -899,8 +905,12 @@
         }
     }
 
-    function notificationBell() {
-        return {
+    // ============================================
+    // NOTIFICATIONS STORE (single source of truth)
+    // ============================================
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('notifications', {
+            // State
             isOpen: false,
             notifications: [],
             unreadCount: 0,
@@ -908,23 +918,38 @@
             slideDownOffers: [],
             slideDownTimer: {},
             newOrders: [],
+
+            // Context
             restaurantId: {{ auth()->user()?->restaurant?->id ?? 'null' }},
             riderId: {{ auth()->user()?->rider?->id ?? 'null' }},
             currentUserId: {{ auth()->id() ?? 'null' }},
+
+            // Internal
             countdownInterval: null,
             beepInterval: null,
             loadNotificationsInterval: null,
             isLoading: false,
             lastLoadTime: 0,
             _savedNotificationsJSON: '',
+            initialized: false,
 
             get totalUnread() {
                 return this.unreadCount + this.offers.length + this.newOrders.length;
             },
 
             init() {
+                if (this.initialized) return;
+                this.initialized = true;
+
+                console.log('🔔 Notification store initialized', {
+                    userId: this.currentUserId,
+                    restaurantId: this.restaurantId,
+                    riderId: this.riderId,
+                });
+
                 this.loadNotifications();
 
+                // User notification channel
                 if (this.currentUserId && typeof window.Echo !== 'undefined') {
                     window.Echo.private(`user.${this.currentUserId}`)
                         .listen('.notification.new', (e) => {
@@ -943,6 +968,7 @@
                         });
                 }
 
+                // Restaurant channel
                 if (this.restaurantId && typeof window.Echo !== 'undefined') {
                     window.Echo.private(`restaurant.${this.restaurantId}`)
                         .listen('.new.order', (e) => {
@@ -950,23 +976,31 @@
                         });
                 }
 
+                // ⭐ RIDER channel — dito lumalabas ang offers
                 if (this.riderId && typeof window.Echo !== 'undefined') {
+                    console.log('🔌 Subscribing to rider.' + this.riderId);
                     window.Echo.private(`rider.${this.riderId}`)
                         .listen('.delivery.offer', (e) => {
+                            console.log('🔥 Delivery offer received:', e);
                             this.handleNewOffer(e);
                         });
+                } else if ({{ auth()->user() && auth()->user()->isRider() ? 'true' : 'false' }}) {
+                    console.error('❌ Rider has no Rider record! riderId =', this.riderId);
                 }
 
+                // Countdown ticker
                 this.countdownInterval = setInterval(() => {
                     this.tickCountdowns();
                 }, 1000);
 
+                // Beep reminder
                 this.beepInterval = setInterval(() => {
                     if (this.offers.length > 0 || this.newOrders.length > 0) {
                         this.playBeep();
                     }
                 }, 5000);
 
+                // Background refresh
                 this.loadNotificationsInterval = setInterval(() => {
                     if (this.offers.length === 0 && this.newOrders.length === 0 && !this.isOpen) {
                         this.loadNotifications();
@@ -1051,7 +1085,10 @@
 
             async handleNewOffer(e) {
                 const orderId = parseInt(e.order_id);
-                if (this.offers.find(o => o.order_id === orderId)) return;
+                if (this.offers.find(o => o.order_id === orderId)) {
+                    console.log('⏭️ Offer already in list, skipping');
+                    return;
+                }
 
                 try {
                     const res = await fetch(`/rider/offers/${orderId}/details`, {
@@ -1061,10 +1098,16 @@
                         }
                     });
 
-                    if (!res.ok) return;
+                    if (!res.ok) {
+                        console.warn('❌ Offer details fetch failed:', res.status);
+                        return;
+                    }
 
                     const data = await res.json();
-                    if (!data.ok) return;
+                    if (!data.ok) {
+                        console.warn('❌ Offer details not ok:', data.message);
+                        return;
+                    }
 
                     const expiresIn = Math.floor(parseInt(data.offer.expires_in) || 180);
 
@@ -1085,6 +1128,8 @@
 
                     this.offers.push(offer);
                     this.slideDownOffers.push(offer);
+
+                    console.log('✅ Offer added to store. Total offers:', this.offers.length);
 
                     this.slideDownTimer[orderId] = setTimeout(() => {
                         this.dismissSlideDown(orderId);
@@ -1176,14 +1221,28 @@
                     requireInteraction: true,
                 });
             }
-        }
-    }
+        });
+    });
     </script>
 
     {{-- ============================================ --}}
     {{-- ALPINE.JS (LOADED FIRST) --}}
     {{-- ============================================ --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+
+        {{-- ============================================ --}}
+    {{-- AUTO-CLEAR THEME ON LOGOUT --}}
+    {{-- ============================================ --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('form[action*="logout"]').forEach(form => {
+                form.addEventListener('submit', function() {
+                    localStorage.removeItem('theme');
+                    document.documentElement.classList.remove('dark');
+                });
+            });
+        });
+    </script>
 
     {{-- ============================================ --}}
     {{-- PAGE-SPECIFIC SCRIPTS (AFTER Alpine!) --}}
