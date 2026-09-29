@@ -10,28 +10,62 @@ use Illuminate\Http\Request;
 class AvailabilityController extends Controller
 {
     
-    public function dashboard()
-    {
-        $rider = auth()->user()->rider;
+public function dashboard()
+{
+    $rider = auth()->user()->rider;
 
-        $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
-            ->where('rider_id', $rider->id)
-            ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
-            ->latest()
-            ->first();
+    // ⭐ I-load ang current active order — dapat latest
+    $currentOrder = Order::with(['restaurant', 'customer', 'items', 'payment'])
+        ->where('rider_id', $rider->id)
+        ->whereIn('status', ['rider_assigned', 'picked_up', 'out_for_delivery'])
+        ->latest()
+        ->first();
 
-        $completedToday = Order::where('rider_id', $rider->id)
-            ->where('status', 'delivered')
-            ->whereDate('updated_at', today())
-            ->count();
+    // ⭐ Ready orders — para sa mga bagong order na available
+    $readyOrders = collect();
+    if (!$currentOrder) {
+        $config = \App\Models\SystemConfig::current();
+        $radiusKm = $config->service_radius_km;
 
-        $earningsToday = Order::where('rider_id', $rider->id)
-            ->where('status', 'delivered')
-            ->whereDate('updated_at', today())
-            ->sum('delivery_fee');
-
-        return view('rider.dashboard', compact('rider', 'currentOrder', 'completedToday', 'earningsToday'));
+        if ($rider->latitude && $rider->longitude) {
+            $readyOrders = Order::with(['restaurant', 'customer', 'items'])
+                ->where('status', 'ready_for_pickup')
+                ->whereNull('rider_id')
+                ->latest()
+                ->limit(20)
+                ->get()
+                ->filter(function ($order) use ($rider, $radiusKm) {
+                    $service = new \App\Services\RiderSearchService();
+                    $distance = $service->distanceKm(
+                        (float) $order->restaurant->latitude,
+                        (float) $order->restaurant->longitude,
+                        (float) $rider->latitude,
+                        (float) $rider->longitude
+                    );
+                    return $distance <= $radiusKm;
+                })
+                ->values();
+        }
     }
+
+    $completedToday = Order::where('rider_id', $rider->id)
+        ->where('status', 'delivered')
+        ->whereDate('updated_at', today())
+        ->count();
+
+    $earningsToday = Order::where('rider_id', $rider->id)
+        ->where('status', 'delivered')
+        ->whereDate('updated_at', today())
+        ->sum('delivery_fee');
+
+    return view('rider.dashboard', compact(
+        'rider',
+        'currentOrder',
+        'readyOrders',
+        'completedToday',
+        'earningsToday'
+    ));
+}
     /**
      * Get unread chat count for active order.
      */

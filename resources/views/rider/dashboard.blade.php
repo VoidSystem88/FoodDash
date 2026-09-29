@@ -102,6 +102,94 @@
     </div>
 
     {{-- ============================================ --}}
+    {{-- READY FOR PICKUP ORDERS --}}
+    {{-- ============================================ --}}
+    @if (!$currentOrder && isset($readyOrders) && $readyOrders->count() > 0)
+        <div>
+            <h2 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2 mb-3">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                Ready for Pickup
+                <span class="text-xs bg-gradient-to-r from-green-500 to-green-600 text-white px-2.5 py-0.5 rounded-full font-bold shadow-sm">
+                    {{ $readyOrders->count() }}
+                </span>
+            </h2>
+
+            <div class="space-y-3">
+                @foreach ($readyOrders as $order)
+                    <div class="bg-white dark:bg-[#141414] rounded-2xl shadow-md border-2 border-green-300 dark:border-green-800/70 overflow-hidden hover:shadow-lg transition-all">
+
+                        <div class="px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white flex items-center justify-between">
+                            <div>
+                                <p class="font-bold text-sm">{{ $order->restaurant->name }}</p>
+                                <p class="text-[10px] text-white/80 uppercase tracking-wide font-medium">Ready na — Pickup na!</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] text-white/80">Order #</p>
+                                <p class="text-base font-bold">{{ $order->id }}</p>
+                            </div>
+                        </div>
+
+                        <div class="p-4 space-y-3">
+                            <div class="flex items-start gap-2">
+                                <div class="w-7 h-7 rounded-lg bg-neutral-900 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                                    <svg class="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Pickup From</p>
+                                    <p class="text-sm font-semibold text-neutral-900 dark:text-white line-clamp-1">{{ $order->restaurant->name }}</p>
+                                    <p class="text-xs text-neutral-500 dark:text-neutral-400 line-clamp-1">{{ $order->restaurant->address }}</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-2">
+                                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                                    <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Deliver To</p>
+                                    <p class="text-sm text-neutral-700 dark:text-neutral-300 line-clamp-2">{{ $order->delivery_address }}</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-2 bg-neutral-50 dark:bg-[#0a0a0a] rounded-xl p-3 text-center border border-neutral-100 dark:border-[#262626]">
+                                <div>
+                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Food</p>
+                                    <p class="text-sm font-bold text-neutral-900 dark:text-white">₱{{ number_format($order->food_cost, 0) }}</p>
+                                </div>
+                                <div class="border-x border-neutral-200 dark:border-[#262626]">
+                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Fee</p>
+                                    <p class="text-sm font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">₱{{ number_format($order->delivery_fee, 0) }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wide font-bold">Items</p>
+                                    <p class="text-sm font-bold text-orange-600 dark:text-orange-400">{{ $order->items->count() }}</p>
+                                </div>
+                            </div>
+
+                            <button type="button"
+                                    onclick="acceptReadyOrder({{ $order->id }}, this)"
+                                    class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-2.5 rounded-xl text-sm font-bold shadow-md hover:from-green-600 hover:to-green-700 hover:shadow-lg active:scale-98 transition transform flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Accept & Pickup
+                            </button>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- ============================================ --}}
     {{-- AVAILABLE OFFERS --}}
     {{-- ============================================ --}}
     <template x-if="offers.length > 0">
@@ -196,9 +284,60 @@
     </template>
 
     {{-- ============================================ --}}
-    {{-- CURRENT ACTIVE ORDER --}}
+    {{-- CURRENT ACTIVE ORDER — ISANG WRAPPER LANG --}}
     {{-- ============================================ --}}
     @if ($currentOrder)
+        {{-- WAITING STATE — naka-assign pero hindi pa ready --}}
+        @if ($currentOrder->status === 'rider_assigned' && !$currentOrder->isReadyForPickup())
+            <div class="p-4 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/30 dark:to-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-xl">
+                <div class="flex items-start gap-3">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                        <svg class="w-6 h-6 text-white animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-amber-900 dark:text-amber-300 text-base">
+                            ⏳ Advance Booking Confirmed
+                        </p>
+                        <p class="text-sm text-amber-800 dark:text-amber-400 mt-1">
+                            Naka-reserve na sa iyo ang order. <strong>Hintayin ang notification</strong> kapag ready na ang pagkain.
+                        </p>
+                        <div class="mt-3 flex items-center gap-2 text-xs text-amber-700 dark:text-amber-500">
+                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span>Naghihintay ng confirmation mula sa restaurant...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- READY STATE — pwede nang pumunta --}}
+        @if ($currentOrder->status === 'rider_assigned' && $currentOrder->isReadyForPickup())
+            <div class="p-4 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/10 border border-green-200 dark:border-green-800 rounded-xl">
+                <div class="flex items-start gap-3">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-green-900 dark:text-green-300 text-base">
+                            ✅ Ready for Pickup!
+                        </p>
+                        <p class="text-sm text-green-800 dark:text-green-400 mt-1">
+                            Ready na ang order. <strong>Pumunta ka na sa restaurant</strong> para kunin ang pagkain.
+                        </p>
+                        <div class="mt-3 flex items-center gap-2 text-xs text-green-700 dark:text-green-500">
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <span>Verified by restaurant</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- ACTIVE ORDER CARD --}}
         <div class="bg-white dark:bg-[#141414] rounded-2xl shadow-lg overflow-hidden border border-neutral-200 dark:border-[#262626]">
 
             <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4 text-white">
@@ -207,9 +346,16 @@
                         <p class="text-xs text-white/80 uppercase tracking-wide font-medium">Active Delivery</p>
                         <h2 class="text-lg font-bold">Order #{{ $currentOrder->id }}</h2>
                     </div>
-                    <span class="text-xs px-3 py-1.5 rounded-full bg-white/20 backdrop-blur font-semibold uppercase tracking-wide border border-white/30">
-                        {{ ucfirst(str_replace('_', ' ', $currentOrder->status)) }}
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs px-3 py-1.5 rounded-full bg-white/20 backdrop-blur font-semibold uppercase tracking-wide border border-white/30">
+                            {{ ucfirst(str_replace('_', ' ', $currentOrder->status)) }}
+                        </span>
+                        @if ($currentOrder->verified_pickup_at)
+                            <span class="text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
+                                ✓ Verified
+                            </span>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-1 mt-3">
@@ -230,6 +376,35 @@
             </div>
 
             <div class="p-6 space-y-5">
+
+                {{-- VERIFICATION STATUS --}}
+                @if ($currentOrder->status === 'rider_assigned' && !$currentOrder->verified_pickup_at)
+                    <div class="p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl">
+                        <div class="flex items-start gap-2">
+                            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-xs text-blue-800 dark:text-blue-300 leading-relaxed">
+                                <strong>Status:</strong> Naka-assign ka na. Pumunta sa restaurant para kunin ang order kapag ready na.
+                                Pagdating mo, i-tap ang <strong>"Mark as Picked Up"</strong> para ma-verify.
+                            </p>
+                        </div>
+                    </div>
+                @endif
+
+                @if ($currentOrder->verified_pickup_at)
+                    <div class="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl">
+                        <div class="flex items-start gap-2">
+                            <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-xs text-green-800 dark:text-green-300 leading-relaxed">
+                                <strong>Verified:</strong> Nakuha mo na ang order noong
+                                {{ $currentOrder->verified_pickup_at->format('M d, Y · g:i A') }}.
+                            </p>
+                        </div>
+                    </div>
+                @endif
 
                 {{-- PICKUP --}}
                 <div class="flex gap-3">
@@ -276,9 +451,30 @@
                     </div>
                 </div>
 
+                {{-- CHAT WITH CUSTOMER BUTTON --}}
+                <a href="{{ route('rider.chat.show', $currentOrder) }}"
+                   class="flex items-center justify-between gap-3 bg-neutral-900 dark:bg-neutral-800 hover:bg-neutral-800 dark:hover:bg-neutral-700 rounded-xl px-4 py-3 transition group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-white">Chat with Customer</p>
+                            <p class="text-xs text-neutral-400">
+                                {{ $currentOrder->customer->name ?? 'Customer' }}
+                            </p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-neutral-500 group-hover:text-orange-500 group-hover:translate-x-0.5 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
                 {{-- ACTION BUTTONS --}}
                 <div class="flex flex-wrap gap-2 pt-2">
-                    @if ($currentOrder->status === 'rider_assigned')
+                    @if ($currentOrder->status === 'rider_assigned' && $currentOrder->isReadyForPickup())
                         <form method="POST" action="{{ route('rider.orders.status', $currentOrder) }}" class="flex-1">
                             @csrf @method('PATCH')
                             <input type="hidden" name="status" value="picked_up">
@@ -289,6 +485,12 @@
                                 Mark as Picked Up
                             </button>
                         </form>
+                    @elseif ($currentOrder->status === 'rider_assigned' && !$currentOrder->isReadyForPickup())
+                        <div class="w-full p-3 bg-amber-100 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 rounded-xl text-center">
+                            <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                                ⏳ Hintayin ang restaurant na mag-mark ng ready
+                            </p>
+                        </div>
                     @elseif ($currentOrder->status === 'picked_up')
                         <form method="POST" action="{{ route('rider.orders.status', $currentOrder) }}" class="flex-1">
                             @csrf @method('PATCH')
@@ -397,7 +599,7 @@
     @endif
 
     {{-- ============================================ --}}
-    {{-- FLOATING MAP (Draggable, Rider Only) --}}
+    {{-- FLOATING MAP --}}
     {{-- ============================================ --}}
     @if ($currentOrder)
         <div x-data="floatingMap({{ $currentOrder->id }})"
@@ -406,27 +608,23 @@
              class="fixed z-[90] pointer-events-none"
              :style="`left: ${posX}px; top: ${posY}px;`">
 
-            {{-- MAP PANEL --}}
             <div x-show="!isMinimized"
                  x-transition.opacity
                  class="pointer-events-auto bg-white dark:bg-[#141414] rounded-2xl shadow-2xl border border-neutral-200 dark:border-[#262626] overflow-hidden"
                  style="width: 380px; height: 480px;">
 
-                {{-- MAP HEADER (Draggable) --}}
                 <div @mousedown="startDrag($event)"
                      @touchstart.passive="startDrag($event)"
                      class="bg-gradient-to-r from-orange-500 to-orange-600 px-3 py-2.5 flex items-center gap-2 select-none"
                      :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
                      style="touch-action: none;">
 
-                    {{-- Drag handle --}}
                     <svg class="w-4 h-4 text-white/70 flex-shrink-0 pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
                         <circle cx="7" cy="5" r="1.5"/><circle cx="13" cy="5" r="1.5"/>
                         <circle cx="7" cy="10" r="1.5"/><circle cx="13" cy="10" r="1.5"/>
                         <circle cx="7" cy="15" r="1.5"/><circle cx="13" cy="15" r="1.5"/>
                     </svg>
 
-                    {{-- Title --}}
                     <div class="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
                         <div class="w-6 h-6 rounded-md bg-white/20 flex items-center justify-center flex-shrink-0">
                             <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -439,7 +637,6 @@
                         </div>
                     </div>
 
-                    {{-- Reset button --}}
                     <button @pointerdown.stop.prevent="resetPosition()"
                             @click.stop.prevent="resetPosition()"
                             type="button"
@@ -451,7 +648,6 @@
                         </svg>
                     </button>
 
-                    {{-- Minimize button --}}
                     <button @pointerdown.stop.prevent="minimizePanel()"
                             @click.stop.prevent="minimizePanel()"
                             type="button"
@@ -464,11 +660,9 @@
                     </button>
                 </div>
 
-                {{-- MAP CONTAINER --}}
-                <div class="relative" style="height: 250px;">
+                <div class="relative" style="height: 320px;">
                     <div id="riderMap" class="w-full h-full"></div>
 
-                    {{-- Distance/ETA Badge --}}
                     <div class="absolute bottom-2 left-2 right-2 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur rounded-xl p-2.5 shadow-lg border border-neutral-200 dark:border-[#262626]">
                         <div class="grid grid-cols-3 gap-2 text-center">
                             <div>
@@ -486,33 +680,8 @@
                         </div>
                     </div>
                 </div>
-
-                {{-- ACTION BAR --}}
-                <div class="p-2.5 border-t border-neutral-100 dark:border-[#262626] flex gap-2">
-                    <button type="button"
-                            @click="centerOnRider()"
-                            title="Center on me"
-                            class="flex-1 bg-neutral-100 dark:bg-[#262626] hover:bg-orange-100 dark:hover:bg-orange-950/40 text-neutral-700 dark:text-neutral-300 hover:text-orange-600 dark:hover:text-orange-400 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        Center
-                    </button>
-
-                    <a :href="googleMapsUrl"
-                       target="_blank"
-                       title="Open in Google Maps"
-                       class="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 rounded-lg text-xs font-bold hover:from-orange-600 hover:to-orange-700 shadow-md transition flex items-center justify-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                        Navigate
-                    </a>
-                </div>
             </div>
 
-            {{-- MINIMIZED FAB (Draggable) --}}
             <button x-show="isMinimized"
                     x-transition
                     @mousedown.stop="startFabDrag($event)"
@@ -729,23 +898,58 @@ function riderDash(riderId) {
 }
 
 // ============================================
+// GLOBAL: acceptReadyOrder
+// ============================================
+async function acceptReadyOrder(orderId, btn) {
+    if (!confirm('Accept this order? Pumunta ka na sa restaurant para i-pickup.')) {
+        return;
+    }
+
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Processing...';
+
+    try {
+        const res = await fetch(`/rider/orders/${orderId}/accept`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            }
+        });
+
+        const data = await res.json();
+
+        if (data.ok) {
+            window.location.href = '{{ route('rider.dashboard') }}';
+        } else {
+            alert(data.message || 'Could not accept order.');
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Network error. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+    }
+}
+
+// ============================================
 // FLOATING MAP FUNCTION
 // ============================================
+@if ($currentOrder)
 function floatingMap(orderId) {
     return {
-        // Panel state
-        isMinimized: false,
+        isMinimized: true,
         isDragging: false,
-
-        // Panel drag
         posX: 0,
         posY: 0,
         dragStartX: 0,
         dragStartY: 0,
         dragStartPosX: 0,
         dragStartPosY: 0,
-
-        // FAB drag
         fabDragging: false,
         fabDragStartX: 0,
         fabDragStartY: 0,
@@ -754,20 +958,17 @@ function floatingMap(orderId) {
         fabMoved: false,
         fabDragThreshold: 8,
 
-        // Map refs
         map: null,
         riderMarker: null,
         restaurantMarker: null,
         customerMarker: null,
         routeLine: null,
 
-        // Tracking data
         distanceText: '',
         etaText: '',
         lastUpdated: '',
         stageText: '',
 
-        // Order coords (from Blade)
         orderId: {{ $currentOrder->id }},
         restaurantLat: {{ $currentOrder->restaurant->latitude }},
         restaurantLng: {{ $currentOrder->restaurant->longitude }},
@@ -779,29 +980,31 @@ function floatingMap(orderId) {
         restaurantName: @json($currentOrder->restaurant->name),
         restaurantProfileUrl: @json($currentOrder->restaurant->profile_image_url),
         riderName: @json(auth()->user()->name),
+        customerName: @json($currentOrder->customer->name ?? 'Customer'),
+
+        customerIconPath: @json(
+            ($currentOrder->customer && $currentOrder->customer->gender === 'female')
+                ? '/images/customergirl.png'
+                : '/images/customerman.png'
+        ),
 
         routeDebounce: null,
         storageKey: 'fooddash_rider_map_pos',
         fabStorageKey: 'fooddash_rider_fab_pos',
 
-        // ============================================
-        // INIT
-        // ============================================
         init() {
-            // Center panel sa screen agad
             this.$nextTick(() => {
-                this.centerOnScreen();
+                this.setFabDefaultPosition();
             });
 
-            // Set stage text
             this.updateStageText();
 
-            // Init map after DOM ready
             this.$nextTick(() => {
-                this.initMap();
+                setTimeout(() => {
+                    this.initMap();
+                }, 300);
             });
 
-            // Listen for rider location updates
             if (typeof window.Echo !== 'undefined') {
                 window.Echo.private(`order.${this.orderId}`)
                     .listen('.rider.location', (e) => {
@@ -809,7 +1012,6 @@ function floatingMap(orderId) {
                     });
             }
 
-            // Resize handler
             window.addEventListener('resize', () => {
                 if (this.isMinimized) {
                     this.clampFabPosition();
@@ -819,14 +1021,22 @@ function floatingMap(orderId) {
             });
         },
 
-        // ============================================
-        // POSITIONING
-        // ============================================
+        setFabDefaultPosition() {
+            const winW = window.innerWidth;
+            const winH = window.innerHeight;
+            const fabSize = 56;
+            const margin = 16;
+            const bottomOffset = winW < 768 ? 80 : 16;
+
+            this.posX = winW - fabSize - margin;
+            this.posY = winH - fabSize - bottomOffset - margin;
+        },
+
         centerOnScreen() {
             const winW = window.innerWidth;
             const winH = window.innerHeight;
-            const panelW = this.isMinimized ? 56 : 380;
-            const panelH = this.isMinimized ? 56 : 480;
+            const panelW = 380;
+            const panelH = 480;
 
             this.posX = Math.max(8, (winW - panelW) / 2);
             this.posY = Math.max(8, (winH - panelH) / 2);
@@ -842,8 +1052,8 @@ function floatingMap(orderId) {
             const winW = window.innerWidth;
             const winH = window.innerHeight;
             const margin = 8;
-            const panelW = this.isMinimized ? 56 : 380;
-            const panelH = this.isMinimized ? 56 : 480;
+            const panelW = 380;
+            const panelH = 480;
 
             const bottomNavOffset = winW < 768 ? 80 : 0;
             const topNavOffset = 64;
@@ -882,9 +1092,6 @@ function floatingMap(orderId) {
             }
         },
 
-        // ============================================
-        // PANEL DRAG
-        // ============================================
         startDrag(e) {
             if (e.type === 'mousedown' && e.button !== 0) return;
             this.isDragging = true;
@@ -930,9 +1137,8 @@ function floatingMap(orderId) {
             document.removeEventListener('touchmove', this.onDragMove);
             document.removeEventListener('touchend', this.onDragEnd);
 
-            // Smart snap sa edge
             const winW = window.innerWidth;
-            const panelW = this.isMinimized ? 56 : 380;
+            const panelW = 380;
             const snapThreshold = 40;
 
             if (this.posX < snapThreshold) {
@@ -947,9 +1153,6 @@ function floatingMap(orderId) {
             }));
         },
 
-        // ============================================
-        // FAB DRAG
-        // ============================================
         startFabDrag(e) {
             if (e.type === 'mousedown' && e.button !== 0) return;
 
@@ -1001,7 +1204,6 @@ function floatingMap(orderId) {
             document.removeEventListener('touchmove', this.onFabDragMove);
             document.removeEventListener('touchend', this.onFabDragEnd);
 
-            // Auto-snap sa nearest horizontal edge
             if (this.fabMoved) {
                 const winW = window.innerWidth;
                 const fabSize = 56;
@@ -1029,14 +1231,10 @@ function floatingMap(orderId) {
             this.openPanel();
         },
 
-        // ============================================
-        // PANEL MINIMIZE / OPEN
-        // ============================================
         minimizePanel() {
             this.isMinimized = true;
 
             this.$nextTick(() => {
-                // I-restore ang FAB position kung meron
                 const saved = localStorage.getItem(this.fabStorageKey);
                 if (saved) {
                     try {
@@ -1048,28 +1246,33 @@ function floatingMap(orderId) {
                     } catch (e) { /* fall through */ }
                 }
 
-                // Default: bottom-right
-                const winW = window.innerWidth;
-                const winH = window.innerHeight;
-                const fabSize = 56;
-                const margin = 16;
-                const bottomOffset = winW < 768 ? 80 : 16;
-
-                this.posX = winW - fabSize - margin;
-                this.posY = winH - fabSize - bottomOffset - margin;
+                this.setFabDefaultPosition();
             });
         },
 
         openPanel() {
             this.isMinimized = false;
+
             this.$nextTick(() => {
                 this.centerOnScreen();
+
+                setTimeout(() => {
+                    if (this.map) {
+                        this.map.invalidateSize();
+
+                        const bounds = L.latLngBounds([
+                            [this.restaurantLat, this.restaurantLng],
+                            [this.customerLat, this.customerLng],
+                        ]);
+                        if (this.riderLat && this.riderLng) {
+                            bounds.extend([this.riderLat, this.riderLng]);
+                        }
+                        this.map.fitBounds(bounds, { padding: [40, 40] });
+                    }
+                }, 350);
             });
         },
 
-        // ============================================
-        // MAP INITIALIZATION
-        // ============================================
         initMap() {
             const mapContainer = document.getElementById('riderMap');
             if (!mapContainer) return;
@@ -1081,52 +1284,89 @@ function floatingMap(orderId) {
             this.map = L.map('riderMap', {
                 zoomControl: false,
                 attributionControl: false,
+                dragging: true,
+                touchZoom: true,
+                scrollWheelZoom: true,
+                doubleClickZoom: true,
+                boxZoom: true,
+                keyboard: true,
+                tap: true,
+                tapHold: true,
             }).setView([this.riderLat, this.riderLng], 14);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
             }).addTo(this.map);
 
-            L.control.zoom({ position: 'bottomright' }).addTo(this.map);
-
-            // Restaurant icon
             const restaurantIcon = L.divIcon({
                 html: `
-                    <div style="position:relative;width:50px;height:50px;">
-                        <div style="width:50px;height:50px;border-radius:50%;overflow:hidden;border:4px solid #ea580c;box-shadow:0 4px 10px rgba(234,88,12,0.5), 0 2px 6px rgba(0,0,0,0.3);background:white;">
+                    <div style="position:relative;width:52px;height:52px;">
+                        <div style="
+                            width:52px;
+                            height:52px;
+                            border-radius:50%;
+                            overflow:hidden;
+                            border:4px solid #ea580c;
+                            box-shadow:0 4px 10px rgba(234,88,12,0.5), 0 2px 6px rgba(0,0,0,0.3);
+                            background:white;
+                        ">
                             ${this.restaurantProfileUrl
-                                ? `<img src="${this.restaurantProfileUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.innerHTML='<div style=&quot;width:100%;height:100%;background:#ea580c;color:white;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;&quot;>R</div>';" alt="R">`
-                                : `<div style="width:100%;height:100%;background:#ea580c;color:white;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;">R</div>`
+                                ? `<img src="${this.restaurantProfileUrl}" 
+                                        style="width:100%;height:100%;object-fit:cover;" 
+                                        onerror="this.style.display='none';this.parentElement.innerHTML='<div style=&quot;width:100%;height:100%;background:#ea580c;color:white;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;&quot;>R</div>';" 
+                                        alt="Restaurant">`
+                                : `<div style="width:100%;height:100%;background:#ea580c;color:white;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;">R</div>`
                             }
                         </div>
-                        <div style="position:absolute;bottom:-2px;right:-2px;background:#ea580c;color:white;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid white;box-shadow:0 2px 4px rgba(0,0,0,0.3);">🏪</div>
+                        <div style="
+                            position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+                            background:#ea580c;color:white;padding:1px 6px;border-radius:8px;
+                            font-size:9px;font-weight:bold;border:2px solid white;
+                            box-shadow:0 2px 4px rgba(0,0,0,0.3);white-space:nowrap;
+                        ">STORE</div>
                     </div>
                 `,
                 className: '',
-                iconSize: [50, 50],
-                iconAnchor: [25, 25],
+                iconSize: [52, 60],
+                iconAnchor: [26, 30],
             });
 
-            // Customer icon
             const customerIcon = L.divIcon({
                 html: `
-                    <div style="width:44px;height:44px;">
-                        <img src="/images/cusicon.png" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" style="width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4));" alt="C">
-                        <div style="display:none;width:44px;height:44px;background:#10b981;color:white;border-radius:50%;align-items:center;justify-content:center;font-size:20px;border:3px solid white;box-shadow:0 3px 6px rgba(0,0,0,0.4);">🏠</div>
+                    <div style="position:relative;width:48px;height:48px;">
+                        <img src="${this.customerIconPath}"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                             style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4));"
+                             alt="Customer">
+                        <div style="display:none;width:48px;height:48px;background:#10b981;color:white;border-radius:50%;align-items:center;justify-content:center;font-size:22px;border:3px solid white;box-shadow:0 3px 6px rgba(0,0,0,0.4);">🏠</div>
                     </div>
                 `,
                 className: '',
-                iconSize: [44, 44],
-                iconAnchor: [22, 22],
+                iconSize: [48, 48],
+                iconAnchor: [24, 24],
             });
 
-            // Rider icon (with pulse)
             const riderIcon = L.divIcon({
                 html: `
                     <div style="position:relative;width:56px;height:56px;">
-                        <div style="position:absolute;inset:0;border-radius:50%;background:rgba(234,88,12,0.3);animation:pulseRider 2s ease-out infinite;"></div>
-                        <img src="/images/ridicon.png" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" style="position:relative;width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(234,88,12,0.6));" alt="R">
-                        <div style="display:none;position:relative;width:56px;height:56px;background:#ea580c;color:white;border-radius:50%;align-items:center;justify-content:center;font-size:26px;border:3px solid white;box-shadow:0 4px 8px rgba(0,0,0,0.4);">🛵</div>
+                        <div style="
+                            position:absolute;inset:0;border-radius:50%;
+                            background:rgba(234,88,12,0.3);
+                            animation:pulseRider 2s ease-out infinite;
+                        "></div>
+                        <img src="/images/rider.png"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                             style="
+                                position:relative;width:56px;height:56px;object-fit:contain;
+                                filter:drop-shadow(0 4px 8px rgba(234,88,12,0.6));
+                             "
+                             alt="Rider">
+                        <div style="
+                            display:none;position:relative;width:56px;height:56px;
+                            background:#ea580c;color:white;border-radius:50%;
+                            align-items:center;justify-content:center;font-size:26px;
+                            border:3px solid white;box-shadow:0 4px 8px rgba(0,0,0,0.4);
+                        ">🛵</div>
                     </div>
                     <style>
                         @keyframes pulseRider {
@@ -1140,26 +1380,28 @@ function floatingMap(orderId) {
                 iconAnchor: [28, 28],
             });
 
-            // Add markers
             this.restaurantMarker = L.marker([this.restaurantLat, this.restaurantLng], { icon: restaurantIcon })
                 .addTo(this.map)
                 .bindPopup(`🏪 ${this.restaurantName}`);
 
             this.customerMarker = L.marker([this.customerLat, this.customerLng], { icon: customerIcon })
                 .addTo(this.map)
-                .bindPopup('🏠 Customer');
+                .bindPopup(`🏠 ${this.customerName || 'Customer'}`);
 
             this.riderMarker = L.marker([this.riderLat, this.riderLng], { icon: riderIcon })
                 .addTo(this.map)
                 .bindPopup(`🛵 ${this.riderName}`);
 
-            // Draw initial route
             this.drawRoute(
                 this.restaurantLat, this.restaurantLng,
                 this.customerLat, this.customerLng
             );
 
             this.lastUpdated = 'Updated just now';
+
+            setTimeout(() => {
+                if (this.map) this.map.invalidateSize();
+            }, 100);
         },
 
         async drawRoute(fromLat, fromLng, toLat, toLng) {
@@ -1188,9 +1430,6 @@ function floatingMap(orderId) {
                     lineJoin: 'round',
                     lineCap: 'round',
                 }).addTo(this.map);
-
-                const bounds = this.routeLine.getBounds();
-                this.map.fitBounds(bounds, { padding: [40, 40] });
 
                 const distanceKm = route.distance / 1000;
                 const durationMin = Math.round(route.duration / 60);
@@ -1275,12 +1514,6 @@ function floatingMap(orderId) {
             }
         },
 
-        centerOnRider() {
-            if (this.map && this.riderLat && this.riderLng) {
-                this.map.setView([this.riderLat, this.riderLng], 16, { animate: true });
-            }
-        },
-
         updateStageText() {
             @php
                 $stageMap = [
@@ -1291,11 +1524,8 @@ function floatingMap(orderId) {
             @endphp
             this.stageText = @json($stageMap[$currentOrder->status] ?? 'Active');
         },
-
-        get googleMapsUrl() {
-            return `https://www.google.com/maps/dir/?api=1&origin=${this.restaurantLat},${this.restaurantLng}&destination=${this.customerLat},${this.customerLng}&travelmode=driving`;
-        },
     }
 }
+@endif
 </script>
 @endpush

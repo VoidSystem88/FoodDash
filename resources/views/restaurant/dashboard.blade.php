@@ -59,13 +59,11 @@
                      class="absolute inset-0 w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20"></div>
             @else
-                {{-- Orange → Black gradient --}}
                 <div class="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-600 to-neutral-900"></div>
                 <div class="absolute inset-0 opacity-10"
                      style="background-image: radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 80%, white 1px, transparent 1px); background-size: 40px 40px;"></div>
             @endif
 
-            {{-- STATUS PILL --}}
             <div class="absolute top-4 right-4 flex items-center gap-2 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur rounded-full px-3 py-1.5 shadow-lg border border-white/20 dark:border-[#262626]">
                 <span class="w-2 h-2 rounded-full {{ $restaurant->is_open ? 'bg-orange-500 animate-pulse' : 'bg-neutral-400' }}"></span>
                 <span class="text-xs font-bold uppercase tracking-wide {{ $restaurant->is_open ? 'text-orange-600 dark:text-orange-400' : 'text-neutral-700 dark:text-neutral-300' }}">
@@ -77,7 +75,6 @@
         {{-- PROFILE IMAGE + NAME --}}
         <div class="relative px-6 -mt-12">
             <div class="flex items-end gap-4 mb-5">
-                {{-- PROFILE PICTURE --}}
                 <div class="w-24 h-24 rounded-2xl bg-white dark:bg-[#141414] border-4 border-white dark:border-[#141414] shadow-xl flex items-center justify-center flex-shrink-0 overflow-hidden ring-2 ring-orange-500/20">
                     @if ($restaurant->profile_image_url)
                         <img src="{{ $restaurant->profile_image_url }}"
@@ -92,7 +89,6 @@
                     @endif
                 </div>
 
-                {{-- NAME + BADGE --}}
                 <div class="flex-1 pb-1 min-w-0">
                     <p class="text-xs text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">Restaurant</p>
                     <h1 class="text-2xl font-bold text-neutral-900 dark:text-white leading-tight truncate">
@@ -106,9 +102,7 @@
                 </div>
             </div>
 
-            {{-- QUICK STATS --}}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pb-6 border-t border-neutral-100 dark:border-[#262626] pt-5">
-                {{-- PENDING --}}
                 <div>
                     <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">Pending</p>
                     <div class="flex items-center gap-2 mt-1">
@@ -122,19 +116,16 @@
                     </div>
                 </div>
 
-                {{-- TODAY'S ORDERS --}}
                 <div class="md:border-l border-neutral-100 dark:border-[#262626] md:pl-3">
                     <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">Today's Orders</p>
                     <p class="text-xl font-bold text-neutral-900 dark:text-white mt-1">{{ $ratingStats['today_orders'] ?? 0 }}</p>
                 </div>
 
-                {{-- TODAY'S SALES --}}
                 <div class="md:border-l border-neutral-100 dark:border-[#262626] md:pl-3">
                     <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">Today's Sales</p>
                     <p class="text-xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent mt-1">₱{{ number_format($ratingStats['today_sales'] ?? 0, 0) }}</p>
                 </div>
 
-                {{-- RATING --}}
                 <div class="md:border-l border-neutral-100 dark:border-[#262626] md:pl-3">
                     <p class="text-[10px] text-neutral-500 dark:text-neutral-400 uppercase tracking-wider font-medium">Rating</p>
                     <div class="flex items-center gap-1 mt-1">
@@ -183,7 +174,6 @@
     {{-- ============================================ --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
 
-        {{-- TOGGLE OPEN --}}
         <form method="POST" action="{{ route('restaurant.toggle-open') }}" class="contents">
             @csrf
             <button class="group bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#262626] rounded-xl p-4 hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-800 transition-all duration-200 text-left">
@@ -207,7 +197,6 @@
             </button>
         </form>
 
-        {{-- ORDER HISTORY --}}
         <a href="{{ route('restaurant.orders') }}"
            class="group bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#262626] rounded-xl p-4 hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-800 transition-all duration-200">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-neutral-800 to-neutral-900 dark:from-neutral-700 dark:to-neutral-800 flex items-center justify-center mb-3 group-hover:scale-110 transition shadow-md">
@@ -219,7 +208,6 @@
             <p class="text-sm font-bold text-neutral-900 dark:text-white">Order History</p>
         </a>
 
-        {{-- MANAGE MENU --}}
         <a href="{{ route('menu-items.index') }}"
            class="group bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#262626] rounded-xl p-4 hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-800 transition-all duration-200">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-neutral-800 to-neutral-900 dark:from-neutral-700 dark:to-neutral-800 flex items-center justify-center mb-3 group-hover:scale-110 transition shadow-md">
@@ -231,7 +219,6 @@
             <p class="text-sm font-bold text-neutral-900 dark:text-white">Menu Items</p>
         </a>
 
-        {{-- ANALYTICS --}}
         <a href="{{ route('restaurant.analytics') }}"
            class="group bg-white dark:bg-[#141414] border border-neutral-200 dark:border-[#262626] rounded-xl p-4 hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-800 transition-all duration-200">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mb-3 group-hover:scale-110 transition shadow-md">
@@ -296,24 +283,26 @@
                 @foreach ($orders as $order)
                     @php
                         $statusColors = [
-                            'received'         => ['bg' => 'bg-gradient-to-r from-orange-500 to-orange-600', 'text' => 'text-white', 'dot' => 'bg-white'],
-                            'confirmed'        => ['bg' => 'bg-gradient-to-r from-orange-500 to-orange-600', 'text' => 'text-white', 'dot' => 'bg-white'],
-                            'preparing'        => ['bg' => 'bg-gradient-to-r from-orange-500 to-orange-600', 'text' => 'text-white', 'dot' => 'bg-white'],
-                            'finding_rider'    => ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-orange-500', 'dot' => 'bg-orange-500'],
-                            'rider_assigned'   => ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-orange-500', 'dot' => 'bg-orange-500'],
-                            'picked_up'        => ['bg' => 'bg-gradient-to-r from-orange-500 to-orange-600', 'text' => 'text-white', 'dot' => 'bg-white'],
-                            'out_for_delivery' => ['bg' => 'bg-gradient-to-r from-orange-500 to-orange-600', 'text' => 'text-white', 'dot' => 'bg-white'],
-                            'delivered'        => ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-white', 'dot' => 'bg-white'],
-                            'rejected'         => ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-orange-500', 'dot' => 'bg-orange-500'],
-                            'cancelled'        => ['bg' => 'bg-neutral-800 dark:bg-neutral-900', 'text' => 'text-neutral-300', 'dot' => 'bg-neutral-400'],
-                            'no_rider'         => ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-orange-500', 'dot' => 'bg-orange-500'],
+                            'received'         => ['bg' => 'bg-gradient-to-r from-orange-500 to-orange-600', 'text' => 'text-white'],
+                            'confirmed'        => ['bg' => 'bg-gradient-to-r from-orange-500 to-orange-600', 'text' => 'text-white'],
+                            'preparing'        => ['bg' => 'bg-gradient-to-r from-orange-500 to-orange-600', 'text' => 'text-white'],
+                            'ready_for_pickup' => ['bg' => 'bg-gradient-to-r from-green-500 to-green-600', 'text' => 'text-white'],
+                            'finding_rider'    => ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-orange-500'],
+                            'rider_assigned'   => ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-orange-500'],
+                            'picked_up'        => ['bg' => 'bg-gradient-to-r from-orange-500 to-orange-600', 'text' => 'text-white'],
+                            'out_for_delivery' => ['bg' => 'bg-gradient-to-r from-orange-500 to-orange-600', 'text' => 'text-white'],
+                            'delivered'        => ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-white'],
+                            'rejected'         => ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-orange-500'],
+                            'cancelled'        => ['bg' => 'bg-neutral-800 dark:bg-neutral-900', 'text' => 'text-neutral-300'],
+                            'no_rider'         => ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-orange-500'],
                         ];
-                        $sc = $statusColors[$order->status] ?? ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-white', 'dot' => 'bg-white'];
+                        $sc = $statusColors[$order->status] ?? ['bg' => 'bg-black dark:bg-neutral-900', 'text' => 'text-white'];
 
                         $statusIconPath = match ($order->status) {
                             'received'         => 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9',
                             'confirmed'        => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
                             'preparing'        => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+                            'ready_for_pickup' => 'M5 13l4 4L19 7',
                             'finding_rider'    => 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
                             'rider_assigned'   => 'M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1',
                             'picked_up'        => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
@@ -397,78 +386,110 @@
                                 <p class="text-neutral-600 dark:text-neutral-400 line-clamp-2">{{ $order->delivery_address }}</p>
                             </div>
 
+                            {{-- ⭐ RIDER ASSIGNMENT INFO — ISA LANG DAPAT --}}
                             @if ($order->rider)
-                                <div class="flex items-center gap-2 mb-3 text-sm">
-                                    <div class="w-6 h-6 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
-                                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <div class="flex items-center gap-2 mb-3 p-3 bg-orange-50 dark:bg-orange-950/30 rounded-xl border border-orange-200 dark:border-orange-800">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
                                     </div>
-                                    <p class="text-orange-600 dark:text-orange-400 font-medium">Rider: {{ $order->rider->user->name }}</p>
-                                </div>
-                            @endif
-
-                            @if (in_array($order->status, ['confirmed', 'preparing']))
-                                @php
-                                    $prepTime = $restaurant->prep_time_minutes ?? 20;
-                                    $elapsed = (int) $order->created_at->diffInMinutes(now());
-                                    $remaining = $prepTime - $elapsed;
-                                @endphp
-
-                                <div class="mt-3 p-3 rounded-xl {{ $remaining > 0 ? 'bg-neutral-50 dark:bg-[#0a0a0a]' : 'bg-gradient-to-r from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/10 border border-orange-300 dark:border-orange-800' }}">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-4 h-4 {{ $remaining > 0 ? 'text-neutral-500 dark:text-neutral-400' : 'text-orange-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <span class="text-xs font-medium {{ $remaining > 0 ? 'text-neutral-600 dark:text-neutral-400' : 'text-orange-600 dark:text-orange-400' }}">Prep time</span>
-                                        </div>
-                                        <p class="text-sm font-bold {{ $remaining > 0 ? 'text-neutral-900 dark:text-white' : 'text-orange-600 dark:text-orange-400' }}">
-                                            @if ($remaining > 0)
-                                                {{ $remaining }} min left
+                                    <div>
+                                        <p class="text-sm font-bold text-orange-900 dark:text-orange-300">
+                                            Rider: {{ $order->rider->user->name }}
+                                        </p>
+                                        <p class="text-xs text-orange-700 dark:text-orange-400">
+                                            @if ($order->restaurant_marked_ready_at)
+                                                ✅ Ready for pickup — {{ $order->restaurant_marked_ready_at->diffForHumans() }}
                                             @else
-                                                {{ abs($remaining) }} min overdue
+                                                ⏳ Naghihintay na ready — hindi pa pwedeng pumunta
                                             @endif
                                         </p>
                                     </div>
-                                    <div class="mt-2 w-full bg-neutral-200 dark:bg-[#262626] rounded-full h-1.5 overflow-hidden">
-                                        <div class="h-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-full transition-all"
-                                             style="width: {{ min(100, ($elapsed / $prepTime) * 100) }}%"></div>
+                                </div>
+                            @endif
+
+                            {{-- ⭐ VERIFICATION BADGE --}}
+                            @if ($order->verified_pickup_at)
+                                <div class="flex items-center gap-2 mb-3 p-3 bg-green-50 dark:bg-green-950/30 rounded-xl border border-green-200 dark:border-green-800">
+                                    <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-green-700 dark:text-green-300 font-semibold">
+                                            Picked up by rider
+                                        </p>
+                                        <p class="text-xs text-green-600 dark:text-green-400">
+                                            {{ $order->verified_pickup_at->format('M d, Y · g:i A') }}
+                                        </p>
                                     </div>
                                 </div>
                             @endif
 
-                            @if (in_array($order->status, ['received', 'confirmed']))
+                            {{-- ACTION BUTTONS --}}
+                            @if ($order->status === 'received')
                                 <div class="mt-4 flex flex-wrap gap-2">
-                                    @if ($order->status === 'received')
-                                        <form method="POST" action="{{ route('restaurant.orders.confirm', $order) }}" class="flex-1 sm:flex-none">
-                                            @csrf
-                                            <button class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-95 transition transform flex items-center justify-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                                </svg>
-                                                Confirm Order
-                                            </button>
-                                        </form>
-                                        <button type="button"
-                                                onclick="document.getElementById('reject-{{ $order->id }}').classList.toggle('hidden')"
-                                                class="flex-1 sm:flex-none bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:bg-neutral-800 dark:hover:bg-neutral-100 hover:shadow-lg active:scale-95 transition transform">
-                                            Reject
+                                    <form method="POST" action="{{ route('restaurant.orders.confirm', $order) }}" class="flex-1 sm:flex-none">
+                                        @csrf
+                                        <button class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md">
+                                            Confirm Order
                                         </button>
-                                    @elseif ($order->status === 'confirmed')
-                                        <form method="POST" action="{{ route('restaurant.orders.ready', $order) }}" class="flex-1 sm:flex-none">
-                                            @csrf
-                                            <button class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-95 transition transform flex items-center justify-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                Mark as Preparing
-                                            </button>
-                                        </form>
-                                    @endif
+                                    </form>
+                                    <button type="button"
+                                            onclick="document.getElementById('reject-{{ $order->id }}').classList.toggle('hidden')"
+                                            class="flex-1 sm:flex-none bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-5 py-2.5 rounded-xl font-semibold text-sm">
+                                        Reject
+                                    </button>
+                                </div>
+
+                            @elseif ($order->status === 'confirmed')
+                                <div class="mt-4">
+                                    <form method="POST" action="{{ route('restaurant.orders.ready', $order) }}">
+                                        @csrf
+                                        <button class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm">
+                                            Start Preparing
+                                        </button>
+                                    </form>
+                                </div>
+
+                            @elseif ($order->status === 'preparing')
+                                <div class="mt-4">
+                                    <form method="POST" action="{{ route('restaurant.orders.mark-ready', $order) }}">
+                                        @csrf
+                                        <button class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md">
+                                            Mark as Ready — Notify Riders
+                                        </button>
+                                    </form>
+                                </div>
+
+                            @elseif ($order->status === 'rider_assigned' && !$order->restaurant_marked_ready_at)
+                                {{-- ⭐ May naka-assign na rider, hintay lang na ready --}}
+                                <div class="mt-4">
+                                    <form method="POST" action="{{ route('restaurant.orders.mark-ready', $order) }}">
+                                        @csrf
+                                        <button class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:from-green-600 hover:to-green-700">
+                                            Ready na — Notify Rider
+                                        </button>
+                                    </form>
+                                </div>
+
+                            @elseif ($order->status === 'rider_assigned' && $order->restaurant_marked_ready_at)
+                                {{-- ⭐ BAGO: Naka-mark na as ready, hintay lang rider mag-pickup --}}
+                                <div class="mt-4 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p class="text-xs text-green-800 dark:text-green-300 leading-relaxed font-medium">
+                                            <strong>Ready na!</strong> Hintayin ang rider na mag-pickup.
+                                        </p>
+                                    </div>
                                 </div>
                             @endif
 
+                            {{-- REJECTION FORM --}}
                             @if ($order->status === 'received')
                                 <div id="reject-{{ $order->id }}" class="hidden mt-3 p-4 bg-black dark:bg-neutral-900 rounded-xl border-l-4 border-orange-500">
                                     <form method="POST" action="{{ route('restaurant.orders.reject', $order) }}" class="space-y-3">
@@ -523,7 +544,6 @@
             </button>
         </div>
 
-        {{-- EXTERNAL ORDER FORM --}}
         <div x-show="showForm" x-cloak x-transition class="mt-5 pt-5 border-t border-neutral-100 dark:border-[#262626]">
             <form method="POST" action="{{ route('restaurant.orders.external') }}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @csrf
@@ -638,7 +658,6 @@ function externalOrderForm() {
         geocoding: false,
         restaurantId: {{ auth()->user()?->restaurant?->id ?? 'null' }},
 
-        // NEW ORDER STATE
         newOrderIds: [],
         highlightTimeout: {},
 

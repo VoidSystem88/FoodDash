@@ -7,30 +7,44 @@ use App\Jobs\FindRiderForOrder;
 use App\Models\Order;
 use App\Models\SystemConfig;
 use App\Notifications\OrderStatusNotification;
+use App\Events\OrderStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-        public function dashboard()
+    // ============================================
+    // DASHBOARD
+    // ============================================
+    public function dashboard()
     {
         $restaurant = auth()->user()->restaurant;
 
-        // Active orders lang — hindi kasama ang delivered, cancelled, rejected, no_rider
+        // ⭐ Active statuses — kasama na ang 'ready_for_pickup'
         $activeStatuses = [
             'received',
             'confirmed',
             'preparing',
+            'ready_for_pickup',   // ⭐ BAGO
             'finding_rider',
             'rider_assigned',
             'picked_up',
             'out_for_delivery',
         ];
 
-        $orders = Order::with(['customer', 'rider', 'items'])
+        $orders = Order::with(['customer', 'rider.user', 'items'])
             ->where('restaurant_id', $restaurant->id)
             ->whereIn('status', $activeStatuses)
-            ->orderByRaw("FIELD(status, 'received', 'confirmed', 'preparing', 'finding_rider', 'rider_assigned', 'picked_up', 'out_for_delivery')")
+            ->orderByRaw("FIELD(status, 
+                'received', 
+                'confirmed', 
+                'preparing', 
+                'ready_for_pickup', 
+                'finding_rider', 
+                'rider_assigned', 
+                'picked_up', 
+                'out_for_delivery'
+            )")
             ->latest()
             ->get();
 
@@ -68,6 +82,9 @@ class OrderController extends Controller
         return view('restaurant.dashboard', compact('restaurant', 'orders', 'ratingStats'));
     }
 
+    // ============================================
+    // CONFIRM ORDER — 'received' → 'confirmed'
+    // ============================================
     public function confirm(Request $request, Order $order)
     {
         $restaurant = auth()->user()->restaurant;
@@ -79,11 +96,15 @@ class OrderController extends Controller
         // Notify customer
         $order->customer->notify(new OrderStatusNotification($order->fresh()));
 
+        // ⭐ Dispatch rider search — advance booking
         FindRiderForOrder::dispatch($order);
 
         return back()->with('success', 'Order confirmed. Searching for rider...');
     }
 
+    // ============================================
+    // REJECT ORDER
+    // ============================================
     public function reject(Request $request, Order $order)
     {
         $restaurant = auth()->user()->restaurant;
@@ -104,42 +125,78 @@ class OrderController extends Controller
         return back()->with('success', 'Order rejected.');
     }
 
+    // ============================================
+    // ⭐ START PREPARING — 'confirmed' → 'preparing'
+    // ============================================
     public function ready(Request $request, Order $order)
-{
-    $restaurant = auth()->user()->restaurant;
-    abort_unless($order->restaurant_id === $restaurant->id, 403);
+    {
+        $restaurant = auth()->user()->restaurant;
+        abort_unless($order->restaurant_id === $restaurant->id, 403);
+        abort_unless($order->status === 'confirmed', 422, 'Order must be confirmed first.');
 
-    $order->update(['status' => 'preparing']);
+        $order->update([
+            'status' => 'preparing',
+            'restaurant_started_preparing_at' => now(),
+        ]);
 
-    // Notify customer
-    $order->customer->notify(new OrderStatusNotification($order->fresh()));
+        // Notify customer
+        $order->customer->notify(new OrderStatusNotification($order->fresh()));
 
-    // Trigger rider search kung wala pang rider
-    if (!$order->rider_id) {
-        FindRiderForOrder::dispatch($order);
+        // ⭐ BAGO: I-dispatch ang rider search kahit wala pang rider
+        // (para makapag-advance booking ang riders)
+        if (!$order->rider_id) {
+            FindRiderForOrder::dispatch($order);
+        }
+
+        // Kung may rider na naka-assign (advance booking), notify na nag-start na magluto
+        if ($order->rider && $order->rider->user) {
+            $order->rider->user->notify(new OrderStatusNotification($order->fresh()));
+        }
+
+        broadcast(new OrderStatusUpdated($order->fresh()));
+
+        return back()->with('success', 'Order marked as preparing. Searching for riders...');
     }
 
-    return back()->with('success', 'Order marked as preparing. Searching for rider...');
-}
-
+    // ============================================
+    // ⭐ MARK AS READY — 'preparing' → 'ready_for_pickup' / 'rider_assigned'
+    // ============================================
     public function markReady(Order $order)
-{
-    $restaurant = auth()->user()->restaurant;
-    abort_unless($order->restaurant_id === $restaurant->id, 403);
+    {
+        $restaurant = auth()->user()->restaurant;
+        abort_unless($order->restaurant_id === $restaurant->id, 403);
 
-    $order->update(['status' => 'preparing']);
+        if (!in_array($order->status, ['preparing', 'rider_assigned'])) {
+            return back()->with('error', 'Order must be "preparing" first.');
+        }
 
-    // Notify customer
-    $order->customer->notify(new OrderStatusNotification($order->fresh()));
+        // ⭐ DIFFERENTIATE: Kung may rider na o wala
+        $newStatus = $order->rider_id ? 'rider_assigned' : 'ready_for_pickup';
 
-    // Trigger rider search kung wala pang rider
-    if (!$order->rider_id) {
-        FindRiderForOrder::dispatch($order);
+        $order->update([
+            'status' => $newStatus,
+            'restaurant_marked_ready_at' => now(),
+        ]);
+
+        // Notify rider kung may naka-assign
+        if ($order->rider && $order->rider->user) {
+            $order->rider->user->notify(
+                new \App\Notifications\OrderReadyForPickupNotification($order)
+            );
+        } else {
+            // ⭐ BAGO: I-dispatch ang rider search para makakuha ng offer
+            // (imbes na notifyNearbyRiders() na hindi gumagawa ng DeliveryOffer)
+            FindRiderForOrder::dispatch($order);
+        }
+
+        broadcast(new OrderStatusUpdated($order->fresh()));
+
+        return back()->with('success', 'Order ready! Notifying rider...');
     }
 
-    return back()->with('success', 'Order marked as preparing. Searching for rider...');
-}
-
+    // ============================================
+    // EXTERNAL ORDER
+    // ============================================
     public function storeExternal(Request $request)
     {
         $restaurant = auth()->user()->restaurant;
@@ -152,7 +209,11 @@ class OrderController extends Controller
             'food_cost' => 'required|numeric|min:0',
         ]);
 
-        $deliveryFee = SystemConfig::current()->default_delivery_fee;
+        $config = SystemConfig::current();
+        $deliveryFee = $config->default_delivery_fee;
+        $commissionRate = $config->commission_rate;
+        $commissionAmount = round($data['food_cost'] * ($commissionRate / 100), 2);
+        $restaurantEarnings = $data['food_cost'] - $commissionAmount;
 
         $order = Order::create([
             'customer_id' => auth()->id(),
@@ -160,6 +221,9 @@ class OrderController extends Controller
             'status' => 'confirmed',
             'food_cost' => $data['food_cost'],
             'delivery_fee' => $deliveryFee,
+            'commission_rate' => $commissionRate,
+            'commission_amount' => $commissionAmount,
+            'restaurant_earnings' => $restaurantEarnings,
             'total_amount' => $data['food_cost'] + $deliveryFee,
             'delivery_address' => $data['delivery_address'],
             'delivery_lat' => $data['delivery_lat'],
@@ -172,6 +236,9 @@ class OrderController extends Controller
         return back()->with('success', 'External order added. Searching for rider...');
     }
 
+    // ============================================
+    // TOGGLE OPEN/CLOSE
+    // ============================================
     public function toggleOpen(Request $request)
     {
         $restaurant = auth()->user()->restaurant;
@@ -182,6 +249,9 @@ class OrderController extends Controller
             : 'Restaurant is now CLOSED.');
     }
 
+    // ============================================
+    // PROFILE
+    // ============================================
     public function updateProfile(Request $request)
     {
         $data = $request->validate([
@@ -191,181 +261,163 @@ class OrderController extends Controller
             'longitude' => 'required|numeric',
             'prep_time_minutes' => 'nullable|integer|min:1|max:120',
             'badge' => 'nullable|string|max:50',
-
         ]);
-        
+
         $restaurant = auth()->user()->restaurant;
         $restaurant->update($data);
 
         return back()->with('success', 'Restaurant profile updated.');
     }
-    /**
- * Upload cover image.
- */
-public function uploadCover(Request $request)
-{
-    $request->validate([
-        'cover' => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
-    ]);
 
-    $restaurant = auth()->user()->restaurant;
+    // ============================================
+    // IMAGE UPLOADS
+    // ============================================
+    public function uploadCover(Request $request)
+    {
+        $request->validate([
+            'cover' => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
+        ]);
 
-    // Delete old
-    if ($restaurant->cover_image) {
-        $old = storage_path('app/public/' . $restaurant->cover_image);
-        if (file_exists($old)) @unlink($old);
+        $restaurant = auth()->user()->restaurant;
+
+        if ($restaurant->cover_image) {
+            $old = storage_path('app/public/' . $restaurant->cover_image);
+            if (file_exists($old)) @unlink($old);
+        }
+
+        $dir = storage_path('app/public/restaurants');
+        if (!file_exists($dir)) mkdir($dir, 0755, true);
+
+        $file = $request->file('cover');
+        $filename = 'restaurants/cover_' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $file->move($dir, basename($filename));
+
+        $restaurant->cover_image = $filename;
+        $restaurant->save();
+
+        return back()->with('success', 'Cover image updated!');
     }
 
-    // Ensure directory
-    $dir = storage_path('app/public/restaurants');
-    if (!file_exists($dir)) mkdir($dir, 0755, true);
+    public function uploadProfileImage(Request $request)
+    {
+        $request->validate([
+            'profile_image' => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
+        ]);
 
-    // Save new
-    $file = $request->file('cover');
-    $filename = 'restaurants/cover_' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
-    $file->move($dir, basename($filename));
+        $restaurant = auth()->user()->restaurant;
 
-    $restaurant->cover_image = $filename;
-    $restaurant->save();
+        if ($restaurant->profile_image) {
+            $old = storage_path('app/public/' . $restaurant->profile_image);
+            if (file_exists($old)) @unlink($old);
+        }
 
-    return back()->with('success', 'Cover image updated!');
-}
+        $dir = storage_path('app/public/restaurants');
+        if (!file_exists($dir)) mkdir($dir, 0755, true);
 
-/**
- * Upload profile image.
- */
-public function uploadProfileImage(Request $request)
-{
-    $request->validate([
-        'profile_image' => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
-    ]);
+        $file = $request->file('profile_image');
+        $filename = 'restaurants/profile_' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $file->move($dir, basename($filename));
 
-    $restaurant = auth()->user()->restaurant;
+        $restaurant->profile_image = $filename;
+        $restaurant->save();
 
-    // Delete old
-    if ($restaurant->profile_image) {
-        $old = storage_path('app/public/' . $restaurant->profile_image);
-        if (file_exists($old)) @unlink($old);
+        return back()->with('success', 'Profile image updated!');
     }
 
-    // Ensure directory
-    $dir = storage_path('app/public/restaurants');
-    if (!file_exists($dir)) mkdir($dir, 0755, true);
+    public function removeCover()
+    {
+        $restaurant = auth()->user()->restaurant;
 
-    // Save new
-    $file = $request->file('profile_image');
-    $filename = 'restaurants/profile_' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
-    $file->move($dir, basename($filename));
+        if ($restaurant->cover_image) {
+            $path = storage_path('app/public/' . $restaurant->cover_image);
+            if (file_exists($path)) @unlink($path);
+        }
 
-    $restaurant->profile_image = $filename;
-    $restaurant->save();
+        $restaurant->cover_image = null;
+        $restaurant->save();
 
-    return back()->with('success', 'Profile image updated!');
-}
-
-/**
- * Remove cover image.
- */
-public function removeCover()
-{
-    $restaurant = auth()->user()->restaurant;
-
-    if ($restaurant->cover_image) {
-        $path = storage_path('app/public/' . $restaurant->cover_image);
-        if (file_exists($path)) @unlink($path);
+        return back()->with('success', 'Cover image removed.');
     }
 
-    $restaurant->cover_image = null;
-    $restaurant->save();
+    public function removeProfileImage()
+    {
+        $restaurant = auth()->user()->restaurant;
 
-    return back()->with('success', 'Cover image removed.');
-}
+        if ($restaurant->profile_image) {
+            $path = storage_path('app/public/' . $restaurant->profile_image);
+            if (file_exists($path)) @unlink($path);
+        }
 
-/**
- * Remove profile image.
- */
-public function removeProfileImage()
-{
-    $restaurant = auth()->user()->restaurant;
+        $restaurant->profile_image = null;
+        $restaurant->save();
 
-    if ($restaurant->profile_image) {
-        $path = storage_path('app/public/' . $restaurant->profile_image);
-        if (file_exists($path)) @unlink($path);
+        return back()->with('success', 'Profile image removed.');
     }
 
-    $restaurant->profile_image = null;
-    $restaurant->save();
+    // ============================================
+    // OPERATING HOURS
+    // ============================================
+    public function hours()
+    {
+        $restaurant = auth()->user()->restaurant;
+        $existing = $restaurant->hours->keyBy('day_of_week');
+        $days = [];
+        $dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-    return back()->with('success', 'Profile image removed.');
-}
-/**
- * Show operating hours editor.
- */
-public function hours()
-{
-    $restaurant = auth()->user()->restaurant;
+        for ($i = 0; $i < 7; $i++) {
+            $days[$i] = [
+                'day_of_week' => $i,
+                'day_name' => $dayNames[$i],
+                'is_open' => $existing->has($i) ? $existing[$i]->is_open : false,
+                'open_time' => $existing->has($i) ? $existing[$i]->open_time : '09:00',
+                'close_time' => $existing->has($i) ? $existing[$i]->close_time : '21:00',
+            ];
+        }
 
-    // Kunin ang existing hours
-    $existing = $restaurant->hours->keyBy('day_of_week');
-
-    // Kunin ang 7 days (0=Sunday to 6=Saturday)
-    $days = [];
-    $dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-    for ($i = 0; $i < 7; $i++) {
-        $days[$i] = [
-            'day_of_week' => $i,
-            'day_name' => $dayNames[$i],
-            'is_open' => $existing->has($i) ? $existing[$i]->is_open : false,
-            'open_time' => $existing->has($i) ? $existing[$i]->open_time : '09:00',
-            'close_time' => $existing->has($i) ? $existing[$i]->close_time : '21:00',
-        ];
+        return view('restaurant.hours', compact('restaurant', 'days'));
     }
 
-    return view('restaurant.hours', compact('restaurant', 'days'));
-}
+    public function updateHours(Request $request)
+    {
+        $restaurant = auth()->user()->restaurant;
 
-/**
- * Update operating hours.
- */
-public function updateHours(Request $request)
-{
-    $restaurant = auth()->user()->restaurant;
+        $data = $request->validate([
+            'days' => 'required|array|size:7',
+            'days.*.day_of_week' => 'required|integer|between:0,6',
+            'days.*.is_open' => 'nullable|boolean',
+            'days.*.open_time' => 'nullable|date_format:H:i',
+            'days.*.close_time' => 'nullable|date_format:H:i|after:days.*.open_time',
+        ]);
 
-    $data = $request->validate([
-        'days' => 'required|array|size:7',
-        'days.*.day_of_week' => 'required|integer|between:0,6',
-        'days.*.is_open' => 'nullable|boolean',
-        'days.*.open_time' => 'nullable|date_format:H:i',
-        'days.*.close_time' => 'nullable|date_format:H:i|after:days.*.open_time',
-    ]);
+        foreach ($data['days'] as $day) {
+            $isOpen = !empty($day['is_open']);
 
-    foreach ($data['days'] as $day) {
-        $isOpen = !empty($day['is_open']);
+            \App\Models\RestaurantHour::updateOrCreate(
+                [
+                    'restaurant_id' => $restaurant->id,
+                    'day_of_week' => $day['day_of_week'],
+                ],
+                [
+                    'is_open' => $isOpen,
+                    'open_time' => $isOpen ? ($day['open_time'] ?? '09:00') : null,
+                    'close_time' => $isOpen ? ($day['close_time'] ?? '21:00') : null,
+                ]
+            );
+        }
 
-        \App\Models\RestaurantHour::updateOrCreate(
-            [
-                'restaurant_id' => $restaurant->id,
-                'day_of_week' => $day['day_of_week'],
-            ],
-            [
-                'is_open' => $isOpen,
-                'open_time' => $isOpen ? ($day['open_time'] ?? '09:00') : null,
-                'close_time' => $isOpen ? ($day['close_time'] ?? '21:00') : null,
-            ]
-        );
+        \Artisan::call('restaurants:auto-toggle');
+
+        return back()->with('success', 'Operating hours updated successfully.');
     }
 
-    // Auto-toggle agad para maging sync
-    \Artisan::call('restaurants:auto-toggle');
-
-    return back()->with('success', 'Operating hours updated successfully.');
-}
+    // ============================================
+    // ORDERS LIST
+    // ============================================
     public function orders(Request $request)
     {
         $restaurant = auth()->user()->restaurant;
 
-        $query = Order::with(['customer', 'rider', 'items'])
+        $query = Order::with(['customer', 'rider.user', 'items'])  // ⭐ BAGO: rider.user
             ->where('restaurant_id', $restaurant->id);
 
         if ($request->filled('status')) {
@@ -403,6 +455,9 @@ public function updateHours(Request $request)
         return view('restaurant.orders', compact('orders', 'stats'));
     }
 
+    // ============================================
+    // ANALYTICS
+    // ============================================
     public function analytics(Request $request)
     {
         $restaurant = auth()->user()->restaurant;

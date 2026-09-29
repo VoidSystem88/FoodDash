@@ -15,13 +15,21 @@ class RiderSearchService
 {
     public function findRider(Order $order): void
     {
-        // I-check kung may rider na
         if ($order->rider_id) {
             Log::info("Order #{$order->id} already has a rider, skipping search.");
             return;
         }
 
-        // I-check kung finalized na ang status
+        // ⭐ Allow 'confirmed', 'preparing', at 'ready_for_pickup'
+        // para sa advance booking flow
+        $allowedStatuses = ['confirmed', 'preparing', 'ready_for_pickup', 'finding_rider'];
+
+        if (!in_array($order->status, $allowedStatuses)) {
+            Log::info("Order #{$order->id} is not in a searchable status (status: {$order->status}). Skipping search.");
+            return;
+        }
+
+        // Guard: Huwag mag-search kung finalized na ang status
         if (in_array($order->status, ['delivered', 'cancelled', 'rejected', 'no_rider'])) {
             Log::info("Order #{$order->id} is already {$order->status}, skipping search.");
             return;
@@ -30,11 +38,12 @@ class RiderSearchService
         $config = SystemConfig::current();
         $maxRadius = (int) $config->service_radius_km;
 
-        // ITO ANG KULANG KANINA:
         $restLat = (float) $order->restaurant->latitude;
         $restLng = (float) $order->restaurant->longitude;
 
-        $order->update(['status' => 'finding_rider']);
+        // ⭐ HUWAG i-override ang status — i-keep ang 'confirmed' o 'preparing'
+        // 'finding_rider' status ay legacy na at hindi na ginagamit sa bagong flow
+        // Ang rider search ay pwedeng mag-run nang hindi binabago ang order status
 
         $candidates = Rider::query()
             ->where('is_online', true)
@@ -47,6 +56,7 @@ class RiderSearchService
         Log::info("Searching riders for order #{$order->id}", [
             'max_radius' => $maxRadius,
             'total_candidates' => $candidates->count(),
+            'order_status' => $order->status,
         ]);
 
         for ($radius = 1; $radius <= $maxRadius; $radius++) {
@@ -74,13 +84,14 @@ class RiderSearchService
             }
         }
 
-        // Walang tumanggap kahit sa buong service area
-        $order->update(['status' => 'no_rider']);
-        broadcast(new NoRiderAvailable($order));
+        // ⭐ HUWAG i-set sa 'no_rider' — i-keep ang original status
+        // para pwedeng mag-retry sa susunod na restaurant action
+        // Ang 'no_rider' ay dapat i-set lang kapag terminal state na
 
+        // ⭐ I-notify ang customer pero hindi babaguhin ang status
         $order->customer->notify(new NoRiderNotification($order->fresh()));
 
-        Log::warning("No rider for order #{$order->id}");
+        Log::warning("No rider found for order #{$order->id}. Keeping status: {$order->status}");
     }
 
     protected function offerToRiders(Order $order, $riders, int $radiusKm): bool
@@ -151,7 +162,7 @@ class RiderSearchService
         return false;
     }
 
-        protected function waitForAcceptance(int $orderId, int $timeoutSec): ?int
+    protected function waitForAcceptance(int $orderId, int $timeoutSec): ?int
     {
         $key = "order:{$orderId}:accepted_rider";
         $deadline = microtime(true) + $timeoutSec;

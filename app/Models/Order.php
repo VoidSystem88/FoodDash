@@ -15,6 +15,8 @@ class Order extends Model
         'rider_id',
         'status',
         'rejection_reason',
+        'restaurant_started_preparing_at',
+        'restaurant_marked_ready_at', 
         'cancellation_reason',
         'cancelled_at',
         'hidden_for_rider_at',     
@@ -29,6 +31,7 @@ class Order extends Model
         'delivery_lat',
         'delivery_lng',
         'is_external_order',
+        'verified_pickup_at',
         'restaurant_rating',
         'rider_rating',
     ];
@@ -42,8 +45,11 @@ class Order extends Model
         'total_amount' => 'float',
         'delivery_lat' => 'float',
         'delivery_lng' => 'float',
+        'verified_pickup_at' => 'datetime',
         'is_external_order' => 'boolean',
         'cancelled_at' => 'datetime',
+        'restaurant_started_preparing_at' => 'datetime',  
+        'restaurant_marked_ready_at' => 'datetime', 
         'hidden_for_rider_at' => 'datetime',     
         'hidden_for_customer_at' => 'datetime',
     ];
@@ -57,7 +63,7 @@ class Order extends Model
     {
         return $this->belongsTo(Restaurant::class);
     }
-
+    
     public function rider()
     {
         return $this->belongsTo(Rider::class);
@@ -77,7 +83,15 @@ class Order extends Model
     {
         return $this->hasOne(Payment::class);
     }
+    public function isReadyForPickup(): bool
+    {
+        return $this->restaurant_marked_ready_at !== null;
+    }
 
+    public function isPreparingByRestaurant(): bool
+    {
+        return $this->restaurant_started_preparing_at !== null;
+    }
     public function messages()
     {
         return $this->hasMany(Message::class)->orderBy('created_at');
@@ -110,6 +124,19 @@ class Order extends Model
             'finding_rider',
         ]);
     }
+
+public function isPreparing(): bool
+{
+    return $this->status === 'preparing';
+}
+
+public function canBeAcceptedByRider(): bool
+{
+    // Rider can only accept kapag ready na ang order
+    return $this->status === 'ready_for_pickup'
+        && $this->rider_id === null;
+}
+
     // Sa relationships section
 public function review()
 {

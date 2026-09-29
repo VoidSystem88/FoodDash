@@ -21,6 +21,14 @@ class OrderController extends Controller
         $rider = $request->user()->rider;
         abort_unless($rider, 403, 'Not a rider');
 
+        // ⭐ BAGO: I-check kung valid pa ang order
+        if (!in_array($order->status, ['confirmed', 'preparing', 'ready_for_pickup'])) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Order is no longer available.',
+            ], 404);
+        }
+
         // Check kung may pending offer para sa rider na ito
         $offer = DeliveryOffer::where('order_id', $order->id)
             ->where('rider_id', $rider->id)
@@ -67,27 +75,36 @@ class OrderController extends Controller
         ]);
     }
 
+    /**
+     * ⭐ ACCEPT ORDER — advance booking o ready_for_pickup
+     */
     public function accept(Request $request, Order $order)
     {
         $rider = $request->user()->rider;
         abort_unless($rider && $rider->is_online, 403, 'Rider not online');
 
-        $offer = DeliveryOffer::where('order_id', $order->id)
-            ->where('rider_id', $rider->id)
-            ->where('status', 'pending')
-            ->where('expires_at', '>', now())
-            ->first();
+        // ⭐ Allow accept kahit confirmed pa (advance booking)
+        $allowedStatuses = ['confirmed', 'preparing', 'ready_for_pickup'];
 
-        if (!$offer) {
+        if (!in_array($order->status, $allowedStatuses)) {
             return response()->json([
                 'ok' => false,
-                'message' => 'Offer expired or not found.',
+                'message' => 'Hindi pa pwede i-accept ang order na ito. Status: ' . $order->status,
             ], 422);
         }
 
+        // ⭐ Kung may rider na — bawal
+        if ($order->rider_id) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'May rider na ang order na ito.',
+            ], 422);
+        }
+
+        // ⭐ Assign rider — advance booking o ready
         $updated = Order::where('id', $order->id)
             ->whereNull('rider_id')
-            ->whereIn('status', ['finding_rider', 'confirmed'])
+            ->whereIn('status', $allowedStatuses)
             ->update([
                 'rider_id' => $rider->id,
                 'status' => 'rider_assigned',
@@ -110,13 +127,26 @@ class OrderController extends Controller
         // Notify customer
         $order->customer->notify(new OrderStatusNotification($order->fresh()));
 
+        // ⭐ Notify restaurant na may rider nang naka-assign
+        if ($order->restaurant && $order->restaurant->user) {
+            $order->restaurant->user->notify(new OrderStatusNotification($order->fresh()));
+        }
+
+        // ⭐ Dynamic message base sa status
+        $message = $order->restaurant_marked_ready_at
+            ? 'Order accepted! Ready na — pumunta ka na sa restaurant.'
+            : 'Order accepted! Hintayin ang notification kapag ready na ang pagkain.';
+
         return response()->json([
             'ok' => true,
-            'message' => 'Order accepted! Proceed to the restaurant.',
+            'message' => $message,
             'redirect' => route('rider.dashboard'),
         ]);
     }
 
+    /**
+     * ⭐ UPDATE STATUS — picked_up, out_for_delivery, delivered
+     */
     public function updateStatus(Request $request, Order $order)
     {
         $data = $request->validate([
@@ -126,7 +156,72 @@ class OrderController extends Controller
         $rider = $request->user()->rider;
         abort_unless($order->rider_id === $rider->id, 403);
 
-        $order->update(['status' => $data['status']]);
+        // ⭐ BAGO: Validation bago mag-mark as picked_up
+        if ($data['status'] === 'picked_up') {
+
+            // ⭐ Siguraduhing ready na ang restaurant bago payagan ang pickup
+            if (!$order->restaurant_marked_ready_at) {
+                return back()->with('error',
+                    'Hindi pa ready ang order. Hintayin ang notification mula sa restaurant.'
+                );
+            }
+
+            // ⭐ Siguraduhing 'rider_assigned' pa ang status
+            if ($order->status !== 'rider_assigned') {
+                return back()->with('error',
+                    'Invalid status transition. Current: ' . $order->status
+                );
+            }
+
+            // Optional: distance check
+            $distance = null;
+            if ($rider->latitude && $rider->longitude && $order->restaurant) {
+                $service = new \App\Services\RiderSearchService();
+                $distance = $service->distanceKm(
+                    (float) $rider->latitude,
+                    (float) $rider->longitude,
+                    (float) $order->restaurant->latitude,
+                    (float) $order->restaurant->longitude
+                );
+
+                // ⭐ Optional: Mag-warning kung malayo pa sa restaurant (>500m)
+                if ($distance > 0.5) {
+                    \Log::info("Rider #{$rider->id} marking picked_up from {$distance}km away");
+                }
+            }
+
+            // ⭐ Naka-set na verified_pickup_at
+            $order->update([
+                'status' => 'picked_up',
+                'verified_pickup_at' => now(),
+            ]);
+
+            // Notify restaurant na nakuha na ng rider ang order
+            if ($order->restaurant && $order->restaurant->user) {
+                $order->restaurant->user->notify(
+                    new OrderStatusNotification($order->fresh())
+                );
+            }
+        } elseif ($data['status'] === 'out_for_delivery') {
+            // ⭐ Dapat picked_up pa lang bago maging out_for_delivery
+            if ($order->status !== 'picked_up') {
+                return back()->with('error',
+                    'Order must be "picked_up" first. Current: ' . $order->status
+                );
+            }
+
+            $order->update(['status' => 'out_for_delivery']);
+
+        } elseif ($data['status'] === 'delivered') {
+            // ⭐ Dapat out_for_delivery pa lang bago maging delivered
+            if ($order->status !== 'out_for_delivery') {
+                return back()->with('error',
+                    'Order must be "out_for_delivery" first. Current: ' . $order->status
+                );
+            }
+
+            $order->update(['status' => 'delivered']);
+        }
 
         // Notify customer
         $order->customer->notify(new OrderStatusNotification($order->fresh()));
@@ -143,10 +238,19 @@ class OrderController extends Controller
             ->with('success', "Status updated to: " . ucfirst($label));
     }
 
+    /**
+     * ⭐ RECORD PAYMENT
+     */
     public function recordPayment(Request $request, Order $order)
     {
         $rider = $request->user()->rider;
         abort_unless($order->rider_id === $rider->id, 403);
+
+        // ⭐ BAGO: Siguraduhing 'delivered' na ang order
+        if ($order->status !== 'delivered') {
+            return redirect()->route('rider.dashboard')
+                ->with('error', 'Cannot record payment — order is not yet delivered.');
+        }
 
         if ($order->payment()->exists()) {
             return redirect()->route('rider.dashboard')
@@ -176,7 +280,8 @@ class OrderController extends Controller
            + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) ** 2;
         return $R * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
-        /**
+
+    /**
      * Get all active offers for this rider
      */
     public function activeOffers(Request $request)
@@ -189,6 +294,14 @@ class OrderController extends Controller
             ->where('expires_at', '>', now())
             ->with(['order.restaurant', 'order.items'])
             ->get()
+            ->filter(function ($offer) {
+                // ⭐ BAGO: I-filter ang mga order na hindi na valid
+                return in_array($offer->order->status, [
+                    'confirmed',
+                    'preparing',
+                    'ready_for_pickup',
+                ]);
+            })
             ->map(function ($offer) use ($rider) {
                 $order = $offer->order;
 
@@ -217,7 +330,8 @@ class OrderController extends Controller
                     'items_count' => $order->items->count(),
                     'distance_km' => $distanceKm ? round($distanceKm, 2) : null,
                 ];
-            });
+            })
+            ->values();  // ⭐ Reset keys after filter
 
         return response()->json(['offers' => $offers]);
     }

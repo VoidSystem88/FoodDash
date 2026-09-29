@@ -82,15 +82,28 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
 // RESTAURANT ROUTES
 // ============================================
 Route::middleware(['auth', 'role:restaurant'])->prefix('restaurant')->group(function () {
+    // Dashboard & main pages
     Route::get('/dashboard', [RestaurantOrderController::class, 'dashboard'])->name('restaurant.dashboard');
     Route::get('/orders', [RestaurantOrderController::class, 'orders'])->name('restaurant.orders');
     Route::get('/analytics', [RestaurantOrderController::class, 'analytics'])->name('restaurant.analytics');
 
     // Order actions
-    Route::post('/orders/{order}/confirm', [RestaurantOrderController::class, 'confirm'])->name('restaurant.orders.confirm');
-    Route::post('/orders/{order}/reject', [RestaurantOrderController::class, 'reject'])->name('restaurant.orders.reject');
-    Route::post('/orders/{order}/ready', [RestaurantOrderController::class, 'markReady'])->name('restaurant.orders.ready');
-    Route::post('/orders/external', [RestaurantOrderController::class, 'storeExternal'])->name('restaurant.orders.external');
+    Route::post('/orders/{order}/confirm', [RestaurantOrderController::class, 'confirm'])
+        ->name('restaurant.orders.confirm');
+
+    Route::post('/orders/{order}/reject', [RestaurantOrderController::class, 'reject'])
+        ->name('restaurant.orders.reject');
+
+    // ⭐ Start Preparing — 'confirmed' → 'preparing'
+    Route::post('/orders/{order}/ready', [RestaurantOrderController::class, 'ready'])
+        ->name('restaurant.orders.ready');
+
+    // ⭐ Mark as Ready — 'preparing' → 'ready_for_pickup' / 'rider_assigned'
+    Route::post('/orders/{order}/mark-ready', [RestaurantOrderController::class, 'markReady'])
+        ->name('restaurant.orders.mark-ready');
+
+    Route::post('/orders/external', [RestaurantOrderController::class, 'storeExternal'])
+        ->name('restaurant.orders.external');
 
     // Operating Hours
     Route::get('/hours', [RestaurantOrderController::class, 'hours'])->name('restaurant.hours');
@@ -104,7 +117,8 @@ Route::middleware(['auth', 'role:restaurant'])->prefix('restaurant')->group(func
     Route::post('/toggle-open', [RestaurantOrderController::class, 'toggleOpen'])->name('restaurant.toggle-open');
 
     // Profile
-    Route::get('/profile', fn() => view('restaurant.profile', ['restaurant' => auth()->user()->restaurant]))->name('restaurant.profile');
+    Route::get('/profile', fn() => view('restaurant.profile', ['restaurant' => auth()->user()->restaurant]))
+        ->name('restaurant.profile');
     Route::patch('/profile', [RestaurantOrderController::class, 'updateProfile'])->name('restaurant.profile.update');
 
     // Image uploads
@@ -117,7 +131,6 @@ Route::middleware(['auth', 'role:restaurant'])->prefix('restaurant')->group(func
     Route::resource('menu-items', MenuItemController::class);
     Route::patch('/menu-items/{menuItem}/toggle', [MenuItemController::class, 'toggleAvailability'])->name('menu-items.toggle');
 });
-
 // ============================================
 // RIDER ROUTES
 // ============================================
