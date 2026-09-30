@@ -95,12 +95,7 @@ Route::middleware(['auth', 'role:restaurant'])->prefix('restaurant')->group(func
 
     Route::post('/orders/{order}/reject', [RestaurantOrderController::class, 'reject'])
         ->name('restaurant.orders.reject');
-// ⭐ AI Assistant
-    Route::post('/ai/chat', [\App\Http\Controllers\Restaurant\AiAssistantController::class, 'chat'])
-        ->name('restaurant.ai.chat');
 
-    Route::get('/ai/status', [\App\Http\Controllers\Restaurant\AiAssistantController::class, 'status'])
-        ->name('restaurant.ai.status');
     // ⭐ Start Preparing — 'confirmed' → 'preparing'
     Route::post('/orders/{order}/ready', [RestaurantOrderController::class, 'ready'])
         ->name('restaurant.orders.ready');
@@ -137,6 +132,17 @@ Route::middleware(['auth', 'role:restaurant'])->prefix('restaurant')->group(func
     // Menu items
     Route::resource('menu-items', MenuItemController::class);
     Route::patch('/menu-items/{menuItem}/toggle', [MenuItemController::class, 'toggleAvailability'])->name('menu-items.toggle');
+});
+
+
+// ============================================
+// AI CHAT — Customer only
+// ============================================
+Route::middleware(['auth', 'role:customer'])->prefix('ai')->group(function () {
+    Route::post('/chat', [\App\Http\Controllers\Restaurant\AiAssistantController::class, 'chat'])
+        ->name('ai.chat');
+    Route::get('/status', [\App\Http\Controllers\Restaurant\AiAssistantController::class, 'status'])
+        ->name('ai.status');
 });
 // ============================================
 // RIDER ROUTES
@@ -208,11 +214,23 @@ Route::middleware(['auth', 'role:rider'])->prefix('rider')->group(function () {
     Route::delete('/reviews/{review}', [AdminReviewController::class, 'destroy'])->name('admin.reviews.destroy');
 
     // Settings
-    Route::get('/settings', fn() => view('admin.settings'))->name('admin.settings');
+    // Settings
+Route::get('/settings', fn() => view('admin.settings', [
+    'config' => \App\Models\SystemConfig::current(),
+]))->name('admin.settings');
     Route::post('/config', [ConfigController::class, 'update'])->name('admin.config.update');
     Route::post('/config/logo', [ConfigController::class, 'uploadLogo'])->name('admin.config.logo.upload');
     Route::delete('/config/logo', [ConfigController::class, 'removeLogo'])->name('admin.config.logo.remove');
     Route::post('/config/logo/size', [ConfigController::class, 'updateLogoSize'])->name('admin.config.logo.size');
+    // ⭐ AI Icon Customizer
+    Route::post('/config/ai-icon', [ConfigController::class, 'uploadAiIcon'])
+        ->name('admin.config.ai-icon.upload');
+    Route::delete('/config/ai-icon', [ConfigController::class, 'removeAiIcon'])
+        ->name('admin.config.ai-icon.remove');
+    Route::post('/config/ai-icon/preset', [ConfigController::class, 'setAiIconPreset'])
+        ->name('admin.config.ai-icon.preset');
+    Route::post('/config/ai-icon/size', [ConfigController::class, 'updateAiIconSize'])
+        ->name('admin.config.ai-icon.size');
 });
 
 // ============================================

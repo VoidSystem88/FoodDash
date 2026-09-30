@@ -5,14 +5,16 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SystemConfig;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ConfigController extends Controller
 {
-    /**
-     * Update general system configuration.
-     */
-        public function update(Request $request)
+    private const BRANDING_DIR = 'branding';
+
+    // ============================================
+    // SYSTEM CONFIGURATION
+    // ============================================
+
+    public function update(Request $request)
     {
         $data = $request->validate([
             'town_address' => 'required|string|max:255',
@@ -23,15 +25,15 @@ class ConfigController extends Controller
             'commission_rate' => 'required|numeric|min:0|max:50',
         ]);
 
-        $config = SystemConfig::current();
-        $config->update($data);
+        SystemConfig::current()->update($data);
 
         return back()->with('success', 'System configuration updated.');
     }
 
-    /**
-     * Upload custom logo.
-     */
+    // ============================================
+    // MAIN LOGO (fallback)
+    // ============================================
+
     public function uploadLogo(Request $request)
     {
         $request->validate([
@@ -39,151 +41,189 @@ class ConfigController extends Controller
         ]);
 
         $config = SystemConfig::current();
+        $this->deleteBrandingFile($config->logo_path);
 
-        // Delete old logo
-        if ($config->logo_path) {
-            $oldPath = storage_path('app/public/' . $config->logo_path);
-            if (file_exists($oldPath)) {
-                @unlink($oldPath);
-            }
-        }
-
-        // Ensure directory
-        $dir = storage_path('app/public/branding');
-        if (!file_exists($dir)) {
-            mkdir($dir, 0755, true);
-        }
-
-        // Save new logo
-        $file = $request->file('logo');
-        $extension = $file->getClientOriginalExtension();
-        $filename = 'branding/logo_' . uniqid() . '_' . time() . '.' . $extension;
-
-        $file->move($dir, basename($filename));
+        $filename = $this->uploadBrandingFile($request->file('logo'), 'logo');
 
         $config->update(['logo_path' => $filename]);
 
         return back()->with('success', 'Logo uploaded successfully.');
     }
 
-    /**
-     * Remove custom logo.
-     */
-        /**
-     * Remove custom logo.
-     */
-    public function uploadLightLogo(Request $request)
-{
-    $request->validate([
-        'logo' => 'required|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
-    ]);
-
-    $config = SystemConfig::current();
-
-    // Delete old
-    if ($config->light_logo_path) {
-        $oldPath = storage_path('app/public/' . $config->light_logo_path);
-        if (file_exists($oldPath)) @unlink($oldPath);
-    }
-
-    // Ensure directory
-    $dir = storage_path('app/public/branding');
-    if (!file_exists($dir)) mkdir($dir, 0755, true);
-
-    // Save new
-    $file = $request->file('logo');
-    $extension = $file->getClientOriginalExtension();
-    $filename = 'branding/light_logo_' . uniqid() . '_' . time() . '.' . $extension;
-
-    $file->move($dir, basename($filename));
-
-    $config->update(['light_logo_path' => $filename]);
-
-    return back()->with('success', 'Light mode logo uploaded.');
-}
-
-public function removeLightLogo()
-{
-    $config = SystemConfig::current();
-
-    if ($config->light_logo_path) {
-        $path = storage_path('app/public/' . $config->light_logo_path);
-        if (file_exists($path)) @unlink($path);
-    }
-
-    $config->update(['light_logo_path' => null]);
-
-    return back()->with('success', 'Light mode logo removed.');
-}
-
-public function uploadDarkLogo(Request $request)
-{
-    $request->validate([
-        'logo' => 'required|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
-    ]);
-
-    $config = SystemConfig::current();
-
-    if ($config->dark_logo_path) {
-        $oldPath = storage_path('app/public/' . $config->dark_logo_path);
-        if (file_exists($oldPath)) @unlink($oldPath);
-    }
-
-    $dir = storage_path('app/public/branding');
-    if (!file_exists($dir)) mkdir($dir, 0755, true);
-
-    $file = $request->file('logo');
-    $extension = $file->getClientOriginalExtension();
-    $filename = 'branding/dark_logo_' . uniqid() . '_' . time() . '.' . $extension;
-
-    $file->move($dir, basename($filename));
-
-    $config->update(['dark_logo_path' => $filename]);
-
-    return back()->with('success', 'Dark mode logo uploaded.');
-}
-
-public function removeDarkLogo()
-{
-    $config = SystemConfig::current();
-
-    if ($config->dark_logo_path) {
-        $path = storage_path('app/public/' . $config->dark_logo_path);
-        if (file_exists($path)) @unlink($path);
-    }
-
-    $config->update(['dark_logo_path' => null]);
-
-    return back()->with('success', 'Dark mode logo removed.');
-}
     public function removeLogo()
     {
         $config = SystemConfig::current();
-
-        if ($config->logo_path) {
-            $path = storage_path('app/public/' . $config->logo_path);
-            if (file_exists($path)) {
-                @unlink($path);
-            }
-        }
-
+        $this->deleteBrandingFile($config->logo_path);
         $config->update(['logo_path' => null]);
 
         return back()->with('success', 'Logo removed. Default branding will be used.');
     }
 
-    /**
-     * Update logo height.
-     */
     public function updateLogoSize(Request $request)
     {
         $data = $request->validate([
             'logo_height' => 'required|integer|min:24|max:60',
         ]);
 
-        $config = SystemConfig::current();
-        $config->update($data);
+        SystemConfig::current()->update($data);
 
         return back()->with('success', 'Logo size updated.');
+    }
+
+    // ============================================
+    // LIGHT MODE LOGO
+    // ============================================
+
+    public function uploadLightLogo(Request $request)
+    {
+        $request->validate([
+            'logo' => 'required|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
+        ]);
+
+        $config = SystemConfig::current();
+        $this->deleteBrandingFile($config->light_logo_path);
+
+        $filename = $this->uploadBrandingFile($request->file('logo'), 'light_logo');
+
+        $config->update(['light_logo_path' => $filename]);
+
+        return back()->with('success', 'Light mode logo uploaded.');
+    }
+
+    public function removeLightLogo()
+    {
+        $config = SystemConfig::current();
+        $this->deleteBrandingFile($config->light_logo_path);
+        $config->update(['light_logo_path' => null]);
+
+        return back()->with('success', 'Light mode logo removed.');
+    }
+
+    // ============================================
+    // DARK MODE LOGO
+    // ============================================
+
+    public function uploadDarkLogo(Request $request)
+    {
+        $request->validate([
+            'logo' => 'required|image|mimes:png,jpg,jpeg,svg,webp|max:2048',
+        ]);
+
+        $config = SystemConfig::current();
+        $this->deleteBrandingFile($config->dark_logo_path);
+
+        $filename = $this->uploadBrandingFile($request->file('logo'), 'dark_logo');
+
+        $config->update(['dark_logo_path' => $filename]);
+
+        return back()->with('success', 'Dark mode logo uploaded.');
+    }
+
+    public function removeDarkLogo()
+    {
+        $config = SystemConfig::current();
+        $this->deleteBrandingFile($config->dark_logo_path);
+        $config->update(['dark_logo_path' => null]);
+
+        return back()->with('success', 'Dark mode logo removed.');
+    }
+
+    // ============================================
+    // AI ICON
+    // ============================================
+
+    public function uploadAiIcon(Request $request)
+    {
+        $request->validate([
+            'ai_icon' => 'required|image|mimes:png,jpg,jpeg,svg,webp|max:1024',
+        ]);
+
+        $config = SystemConfig::current();
+        $this->deleteBrandingFile($config->ai_icon_path);
+
+        $filename = $this->uploadBrandingFile($request->file('ai_icon'), 'ai_icon');
+
+        $config->update([
+            'ai_icon_path' => $filename,
+            'ai_icon_type' => 'custom',
+        ]);
+
+        return back()->with('success', 'AI icon uploaded.');
+    }
+
+    public function removeAiIcon()
+    {
+        $config = SystemConfig::current();
+        $this->deleteBrandingFile($config->ai_icon_path);
+
+        $config->update([
+            'ai_icon_path' => null,
+            'ai_icon_type' => 'default',
+        ]);
+
+        return back()->with('success', 'AI icon reset to default.');
+    }
+
+    public function setAiIconPreset(Request $request)
+    {
+        $data = $request->validate([
+            'preset' => 'required|in:default,sparkle,bot,chat,magic',
+        ]);
+
+        $config = SystemConfig::current();
+        $this->deleteBrandingFile($config->ai_icon_path);
+
+        $config->update([
+            'ai_icon_path' => null,
+            'ai_icon_type' => $data['preset'],
+        ]);
+
+        return back()->with('success', 'AI icon preset updated.');
+    }
+
+    public function updateAiIconSize(Request $request)
+    {
+        $data = $request->validate([
+            'ai_icon_size' => 'required|integer|min:40|max:80',
+        ]);
+
+        SystemConfig::current()->update($data);
+
+        return back()->with('success', 'AI icon size updated.');
+    }
+
+    // ============================================
+    // HELPERS
+    // ============================================
+
+    /**
+     * Upload a branding file (logo, ai_icon, etc.) and return the relative path.
+     */
+    private function uploadBrandingFile($file, string $prefix): string
+    {
+        $dir = storage_path('app/public/' . self::BRANDING_DIR);
+        if (!file_exists($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $extension = $file->getClientOriginalExtension();
+        $filename = self::BRANDING_DIR . '/' . $prefix . '_' . uniqid() . '_' . time() . '.' . $extension;
+
+        $file->move($dir, basename($filename));
+
+        return $filename;
+    }
+
+    /**
+     * Delete a branding file by relative path.
+     */
+    private function deleteBrandingFile(?string $relativePath): void
+    {
+        if (!$relativePath) return;
+
+        $fullPath = storage_path('app/public/' . $relativePath);
+        if (file_exists($fullPath)) {
+            @unlink($fullPath);
+        }
     }
 }

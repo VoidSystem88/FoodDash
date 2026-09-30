@@ -17,29 +17,25 @@ class AiAssistantController extends Controller
         $this->assistant = $assistant;
     }
 
-    /**
-     * Handle AI chat request.
-     */
     public function chat(Request $request)
     {
-        // 1. Validate input
         $data = $request->validate([
             'message' => 'required|string|max:500',
             'history' => 'nullable|array|max:10',
         ]);
 
         $user = $request->user();
-        $restaurant = $user->restaurant;
 
-        if (!$restaurant) {
+        // Customer only (defense-in-depth)
+        if (!$user->isCustomer()) {
             return response()->json([
                 'ok' => false,
-                'message' => 'Restaurant not found.',
+                'message' => 'The AI Assistant is available to customers only.',
+                'customer_only' => true,
             ], 403);
         }
 
-        // 2. Rate limiting — 20 messages/day per restaurant
-        $rateKey = 'ai-chat:' . $restaurant->id;
+        $rateKey = 'ai-chat:' . $user->id;
         $dailyLimit = config('groq.daily_message_limit', 20);
 
         if (RateLimiter::tooManyAttempts($rateKey, $dailyLimit)) {
@@ -48,12 +44,11 @@ class AiAssistantController extends Controller
 
             return response()->json([
                 'ok' => false,
-                'message' => "Na-hit mo na yung daily limit ({$dailyLimit} messages). Subukan muli sa {$hours} oras.",
+                'message' => "You've reached your daily limit ({$dailyLimit} messages). Try again in {$hours} hours.",
                 'limit_reached' => true,
-            ], 429);
+            ]);
         }
 
-        // 3. Validate history structure
         $history = collect($data['history'] ?? [])
             ->filter(fn($m) => isset($m['role'], $m['content'])
                 && in_array($m['role'], ['user', 'assistant']))
@@ -61,12 +56,10 @@ class AiAssistantController extends Controller
             ->values()
             ->toArray();
 
-        // 4. Call AI assistant
         try {
             $result = $this->assistant->ask($data['message'], $history);
 
-            // 5. Hit the rate limiter
-            RateLimiter::hit($rateKey, 86400); // 24 hours
+            RateLimiter::hit($rateKey, 86400);
 
             return response()->json([
                 'ok' => true,
@@ -78,29 +71,30 @@ class AiAssistantController extends Controller
         } catch (\Throwable $e) {
             Log::error('AI Assistant error', [
                 'user_id' => $user->id,
-                'restaurant_id' => $restaurant->id,
+                'role' => $user->role,
                 'message' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'ok' => false,
-                'message' => 'Paumanhin, may error sa AI. Subukan muli.',
-            ], 500);
+                'message' => 'Sorry, there was an error. Please try again.',
+            ]);
         }
     }
 
-    /**
-     * Get remaining messages today.
-     */
     public function status(Request $request)
     {
-        $restaurant = $request->user()->restaurant;
+        $user = $request->user();
 
-        if (!$restaurant) {
-            return response()->json(['ok' => false], 403);
+        if (!$user->isCustomer()) {
+            return response()->json([
+                'ok' => false,
+                'customer_only' => true,
+                'remaining' => 0,
+            ], 403);
         }
 
-        $rateKey = 'ai-chat:' . $restaurant->id;
+        $rateKey = 'ai-chat:' . $user->id;
         $dailyLimit = config('groq.daily_message_limit', 20);
         $used = RateLimiter::attempts($rateKey);
 

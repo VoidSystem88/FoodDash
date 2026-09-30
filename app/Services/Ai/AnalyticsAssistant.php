@@ -2,12 +2,11 @@
 
 namespace App\Services\Ai;
 
-use App\Services\Ai\Tools\GetBusyHours;
-use App\Services\Ai\Tools\GetOrdersCount;
-use App\Services\Ai\Tools\GetRejectedOrders;
-use App\Services\Ai\Tools\GetReviewsSummary;
-use App\Services\Ai\Tools\GetSalesStats;
-use App\Services\Ai\Tools\GetTopItems;
+use App\Services\Ai\Tools\GetCustomerOrders;
+use App\Services\Ai\Tools\GetFavoriteRestaurants;
+use App\Services\Ai\Tools\GetMenuItems;
+use App\Services\Ai\Tools\GetRecommendedFoods;
+use App\Services\Ai\Tools\GetRestaurantSearch;
 use Illuminate\Support\Facades\Log;
 
 class AnalyticsAssistant
@@ -20,78 +19,56 @@ class AnalyticsAssistant
     {
         $this->client = $client;
 
-        // Register all tools
+        // Customer-focused tools
         $this->tools = [
-            new GetSalesStats(),
-            new GetTopItems(),
-            new GetBusyHours(),
-            new GetReviewsSummary(),
-            new GetRejectedOrders(),
-            new GetOrdersCount(),
+            new GetRestaurantSearch(),
+            new GetMenuItems(),
+            new GetRecommendedFoods(),
+            new GetCustomerOrders(),
+            new GetFavoriteRestaurants(),
         ];
     }
 
-    /**
-     * Main entry point: ask the AI a question and return the response.
-     *
-     * @param string $userMessage  The user's question
-     * @param array  $history      Previous messages (optional)
-     * @return array               ['reply' => string, 'tool_calls' => array, 'usage' => array]
-     */
     public function ask(string $userMessage, array $history = []): array
     {
-        $restaurant = $this->getRestaurant();
-        if (!$restaurant) {
-            return ['reply' => 'Restaurant not found. Please log in as a restaurant owner.'];
+        $user = auth()->user();
+        if (!$user) {
+            return ['reply' => 'You must be logged in to use the assistant.'];
         }
 
-        // Build system prompt
-        $systemPrompt = $this->buildSystemPrompt($restaurant);
+        if (!$user->isCustomer()) {
+            return [
+                'reply' => 'I am a FoodDash customer assistant only. I cannot help with your request.',
+                'tool_calls' => [],
+            ];
+        }
 
-        // Build initial messages
-        $messages = [
-            ['role' => 'system', 'content' => $systemPrompt],
-        ];
+        $systemPrompt = $this->buildSystemPrompt($user);
 
-        // Add history (last 10 messages to save tokens)
-        $history = array_slice($history, -10);
-        foreach ($history as $msg) {
+        $messages = [['role' => 'system', 'content' => $systemPrompt]];
+
+        foreach (array_slice($history, -10) as $msg) {
             $messages[] = $msg;
         }
 
-        // Add current user message
         $messages[] = ['role' => 'user', 'content' => $userMessage];
 
-        // Convert tools to Groq format
         $toolsArray = array_map(fn($t) => $t->toArray(), $this->tools);
-
         $executedToolCalls = [];
-        $usage = [];
 
-        // Loop: AI decides → tools execute → AI responds
         for ($i = 0; $i < $this->maxIterations; $i++) {
             $response = $this->client->chat($messages, $toolsArray);
-
-            // Track usage
-            if (isset($response['usage'])) {
-                $usage[] = $response['usage'];
-            }
-
             $assistantMessage = $this->client->getMessage($response);
 
-            // If no tool calls, this is the final answer
             if (empty($assistantMessage['tool_calls'])) {
                 return [
                     'reply' => $assistantMessage['content'] ?? 'Sorry, I could not generate a response.',
                     'tool_calls' => $executedToolCalls,
-                    'usage' => $usage,
                 ];
             }
 
-            // Add assistant message to conversation
             $messages[] = $assistantMessage;
 
-            // Execute each tool call
             foreach ($assistantMessage['tool_calls'] as $toolCall) {
                 $toolName = $toolCall['function']['name'];
                 $arguments = json_decode($toolCall['function']['arguments'] ?? '{}', true);
@@ -105,18 +82,15 @@ class AnalyticsAssistant
                         $executedToolCalls[] = [
                             'name' => $toolName,
                             'arguments' => $arguments,
-                            'result_summary' => $this->summarizeResult($result),
                         ];
                     } catch (\Throwable $e) {
                         Log::error("Tool execution failed: {$toolName}", [
                             'error' => $e->getMessage(),
-                            'arguments' => $arguments,
                         ]);
                         $result = ['error' => $e->getMessage()];
                     }
                 }
 
-                // Add tool result as a message
                 $messages[] = [
                     'role' => 'tool',
                     'tool_call_id' => $toolCall['id'],
@@ -128,43 +102,60 @@ class AnalyticsAssistant
         return [
             'reply' => 'Sorry, I could not complete your request. Please try a simpler question.',
             'tool_calls' => $executedToolCalls,
-            'usage' => $usage,
         ];
     }
 
-    /**
-     * Build the system prompt for the AI.
-     */
-    protected function buildSystemPrompt($restaurant): string
+    protected function buildSystemPrompt($user): string
     {
-        $name = $restaurant->name;
+        $name = $user->name;
         $today = now()->format('l, F j, Y');
 
         return <<<PROMPT
-You are a helpful analytics assistant for a restaurant owner named "{$name}" on FoodDash (a food delivery platform in the Philippines).
+You are Dash, a friendly AI assistant for FoodDash — a food delivery platform in the Philippines.
 
+You are speaking with customer: {$name}
 Today's date: {$today}
 
-Your job is to help the restaurant owner understand their business performance by answering questions about sales, orders, customers, and reviews.
+CRITICAL RULE — NEVER HALLUCINATE:
+You MUST use the available tools to answer ANY question about restaurants, menu items, orders, or favorites.
+NEVER make up restaurant names, menu items, prices, or any data.
+If a tool returns no results, say so honestly: "I couldn't find any restaurants matching your request."
 
-Guidelines:
-- Always use the available tools to fetch real data. Never make up numbers.
-- Be concise and friendly. Answer in a mix of English and Tagalog if the user writes in Tagalog.
-- When presenting numbers, use ₱ for Philippine Peso (e.g., ₱1,234.56).
-- If a question requires multiple tools, call them in sequence or in parallel.
-- If the user asks something outside your scope (e.g., personal advice), politely redirect.
-- If data is zero or empty, say so honestly instead of making up data.
-- Use the correct period (today, yesterday, this_week, last_week, this_month, last_month, this_year, all_time) based on what the user asks.
-- If unsure about the period, default to "this_month".
-- When summarizing, focus on insights: trends, comparisons, anomalies.
+Your job is to help customers with:
+- Finding restaurants (by name, cuisine, or location)
+- Discovering menu items and food options
+- Getting food recommendations
+- Checking their order history
+- Viewing their favorites
 
-Format your responses clearly with numbers and short bullet points when appropriate.
+Available tools you MUST use:
+- search_restaurants: Search restaurants by name/cuisine/location
+- get_menu_items: Get menu items (supports filtering by restaurant, cuisine, and EXCLUDING keywords)
+- get_recommended_foods: Get popular food picks from open restaurants
+- get_customer_orders: Get the customer's order history
+- get_favorite_restaurants: Get the customer's favorites
+
+EXAMPLES of correct tool usage:
+- "What restaurants are open?" → call search_restaurants
+- "Anong ibang menu bukod sa pizza?" → call get_menu_items with exclude_keyword="pizza"
+- "What should I eat?" → call get_recommended_foods
+- "Show me my orders" → call get_customer_orders
+- "What are my favorites?" → call get_favorite_restaurants
+
+IMPORTANT RULES:
+1. ALWAYS use tools for restaurant/menu/order questions. Never make up data.
+2. Answer in ENGLISH only. Do not use Tagalog or Filipino.
+3. Be warm, friendly, and concise.
+4. Use ₱ for Philippine Peso (e.g., ₱250).
+5. When listing items, use clean bullet points.
+6. If a tool returns no results, say so politely.
+7. If asked about non-customer topics (restaurant analytics, rider earnings, admin tasks), politely redirect: "I'm a customer assistant only. For that, please contact the appropriate department."
+8. NEVER invent menu items, restaurants, or prices.
+
+You represent FoodDash — be a helpful brand ambassador for customers!
 PROMPT;
     }
 
-    /**
-     * Find a tool by name.
-     */
     protected function findTool(string $name): ?object
     {
         foreach ($this->tools as $tool) {
@@ -173,26 +164,5 @@ PROMPT;
             }
         }
         return null;
-    }
-
-    /**
-     * Summarize a tool result for logging.
-     */
-    protected function summarizeResult(array $result): string
-    {
-        if (isset($result['error'])) {
-            return 'ERROR: ' . $result['error'];
-        }
-
-        $keys = array_keys($result);
-        return 'keys: ' . implode(', ', array_slice($keys, 0, 6));
-    }
-
-    /**
-     * Get current restaurant from auth.
-     */
-    protected function getRestaurant()
-    {
-        return auth()->user()?->restaurant;
     }
 }

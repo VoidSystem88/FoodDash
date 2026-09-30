@@ -703,7 +703,6 @@
 
     {{-- ============================================ --}}
     {{-- SLIDE-DOWN NOTIFICATION BANNER (Rider only) --}}
-    {{-- Uses $store.notifications.slideDownOffers --}}
     {{-- ============================================ --}}
     @auth
         @if (auth()->user()->isRider())
@@ -777,13 +776,12 @@
     {{-- ============================================ --}}
     <script>
     // ============================================
-    // CHAT BADGE FUNCTIONS (pareho pa rin)
+    // CHAT BADGE FUNCTIONS
     // ============================================
     function customerChatBadge() {
         return {
             unread: 0,
             interval: null,
-
             init() {
                 this.fetchUnread();
                 this.interval = setInterval(() => {
@@ -793,7 +791,6 @@
                     if (this.interval) clearInterval(this.interval);
                 });
             },
-
             async fetchUnread() {
                 try {
                     const res = await fetch('{{ route('customer.chat.unread-active') }}', {
@@ -815,7 +812,6 @@
         return {
             unread: 0,
             interval: null,
-
             init() {
                 this.fetchUnread();
                 this.interval = setInterval(() => {
@@ -825,7 +821,6 @@
                     if (this.interval) clearInterval(this.interval);
                 });
             },
-
             async fetchUnread() {
                 try {
                     const res = await fetch('{{ route('rider.chat.unread-active') }}', {
@@ -851,7 +846,6 @@
             showInstall: false,
             deferredPrompt: null,
             dismissed: false,
-
             init() {
                 if (window.matchMedia('(display-mode: standalone)').matches) return;
                 if (localStorage.getItem('pwa-dismissed') === 'yes') return;
@@ -866,7 +860,6 @@
                     this.deferredPrompt = null;
                 });
             },
-
             async install() {
                 if (!this.deferredPrompt) return;
                 this.deferredPrompt.prompt();
@@ -874,7 +867,6 @@
                 if (outcome === 'accepted') this.showInstall = false;
                 this.deferredPrompt = null;
             },
-
             dismiss() {
                 this.showInstall = false;
                 localStorage.setItem('pwa-dismissed', 'yes');
@@ -915,11 +907,10 @@
     }
 
     // ============================================
-    // NOTIFICATIONS STORE (single source of truth)
+    // NOTIFICATIONS STORE
     // ============================================
     document.addEventListener('alpine:init', () => {
         Alpine.store('notifications', {
-            // State
             isOpen: false,
             notifications: [],
             unreadCount: 0,
@@ -928,12 +919,10 @@
             slideDownTimer: {},
             newOrders: [],
 
-            // Context
             restaurantId: {{ auth()->user()?->restaurant?->id ?? 'null' }},
             riderId: {{ auth()->user()?->rider?->id ?? 'null' }},
             currentUserId: {{ auth()->id() ?? 'null' }},
 
-            // Internal
             countdownInterval: null,
             beepInterval: null,
             loadNotificationsInterval: null,
@@ -950,15 +939,8 @@
                 if (this.initialized) return;
                 this.initialized = true;
 
-                console.log('🔔 Notification store initialized', {
-                    userId: this.currentUserId,
-                    restaurantId: this.restaurantId,
-                    riderId: this.riderId,
-                });
-
                 this.loadNotifications();
 
-                // User notification channel
                 if (this.currentUserId && typeof window.Echo !== 'undefined') {
                     window.Echo.private(`user.${this.currentUserId}`)
                         .listen('.notification.new', (e) => {
@@ -977,7 +959,6 @@
                         });
                 }
 
-                // Restaurant channel
                 if (this.restaurantId && typeof window.Echo !== 'undefined') {
                     window.Echo.private(`restaurant.${this.restaurantId}`)
                         .listen('.new.order', (e) => {
@@ -985,31 +966,23 @@
                         });
                 }
 
-                // ⭐ RIDER channel — dito lumalabas ang offers
                 if (this.riderId && typeof window.Echo !== 'undefined') {
-                    console.log('🔌 Subscribing to rider.' + this.riderId);
                     window.Echo.private(`rider.${this.riderId}`)
                         .listen('.delivery.offer', (e) => {
-                            console.log('🔥 Delivery offer received:', e);
                             this.handleNewOffer(e);
                         });
-                } else if ({{ auth()->user() && auth()->user()->isRider() ? 'true' : 'false' }}) {
-                    console.error('❌ Rider has no Rider record! riderId =', this.riderId);
                 }
 
-                // Countdown ticker
                 this.countdownInterval = setInterval(() => {
                     this.tickCountdowns();
                 }, 1000);
 
-                // Beep reminder
                 this.beepInterval = setInterval(() => {
                     if (this.offers.length > 0 || this.newOrders.length > 0) {
                         this.playBeep();
                     }
                 }, 5000);
 
-                // Background refresh
                 this.loadNotificationsInterval = setInterval(() => {
                     if (this.offers.length === 0 && this.newOrders.length === 0 && !this.isOpen) {
                         this.loadNotifications();
@@ -1094,10 +1067,7 @@
 
             async handleNewOffer(e) {
                 const orderId = parseInt(e.order_id);
-                if (this.offers.find(o => o.order_id === orderId)) {
-                    console.log('⏭️ Offer already in list, skipping');
-                    return;
-                }
+                if (this.offers.find(o => o.order_id === orderId)) return;
 
                 try {
                     const res = await fetch(`/rider/offers/${orderId}/details`, {
@@ -1107,16 +1077,10 @@
                         }
                     });
 
-                    if (!res.ok) {
-                        console.warn('❌ Offer details fetch failed:', res.status);
-                        return;
-                    }
+                    if (!res.ok) return;
 
                     const data = await res.json();
-                    if (!data.ok) {
-                        console.warn('❌ Offer details not ok:', data.message);
-                        return;
-                    }
+                    if (!data.ok) return;
 
                     const expiresIn = Math.floor(parseInt(data.offer.expires_in) || 180);
 
@@ -1137,8 +1101,6 @@
 
                     this.offers.push(offer);
                     this.slideDownOffers.push(offer);
-
-                    console.log('✅ Offer added to store. Total offers:', this.offers.length);
 
                     this.slideDownTimer[orderId] = setTimeout(() => {
                         this.dismissSlideDown(orderId);
@@ -1235,7 +1197,7 @@
     </script>
 
     {{-- ============================================ --}}
-    {{-- ALPINE.JS (LOADED FIRST) --}}
+    {{-- ALPINE.JS --}}
     {{-- ============================================ --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 
@@ -1254,14 +1216,16 @@
     </script>
 
     {{-- ============================================ --}}
-    {{-- PAGE-SPECIFIC SCRIPTS (AFTER Alpine!) --}}
+    {{-- PAGE-SPECIFIC SCRIPTS --}}
     {{-- ============================================ --}}
     @stack('scripts')
 
-    {{-- AI ASSISTANT (restaurant only) --}}
+    {{-- ============================================ --}}
+    {{-- AI ASSISTANT — Customer only --}}
+    {{-- ============================================ --}}
     @auth
-        @if (auth()->user()->isRestaurant())
-            @include('restaurant.partials.ai-assistant')
+        @if (auth()->user()->isCustomer())
+            @include('partials.ai-bubble')
         @endif
     @endauth
 

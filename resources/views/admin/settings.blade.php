@@ -40,7 +40,208 @@
             {{ $errors->first() }}
         </div>
     @endif
+{{-- ============================================ --}}
+{{-- AI ICON CUSTOMIZER --}}
+{{-- ============================================ --}}
+<div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 overflow-hidden mb-6 transition-colors"
+     x-data="aiIconCustomizer()">
 
+    <div class="px-5 py-3 border-b border-gray-100 dark:border-dark-700 flex items-center gap-2">
+        <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-neutral-100">AI Assistant Icon</h2>
+    </div>
+
+    <div class="p-5 space-y-5">
+
+        {{-- PREVIEW --}}
+        <div class="flex items-center gap-5 p-5 bg-gray-50 dark:bg-dark-850 rounded-xl border border-gray-200 dark:border-dark-600">
+            <div class="flex-shrink-0">
+                <div class="rounded-full bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg flex items-center justify-center relative"
+                     :style="`width: ${currentSize}px; height: ${currentSize}px; box-shadow: 0 4px 16px rgba(249,115,22,0.4);`">
+                    {!! $config->ai_icon_html !!}
+                    <span style="position:absolute;top:2px;right:2px;width:12px;height:12px;background:#22c55e;border:2px solid white;border-radius:50%;"></span>
+                </div>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-gray-900 dark:text-neutral-100 uppercase tracking-wide mb-1">
+                    Live Preview
+                </p>
+                <p class="text-xs text-gray-500 dark:text-neutral-400">
+                    Ganito ang makikita ng customers sa kanilang screen.
+                </p>
+                <p class="text-[10px] text-gray-400 dark:text-neutral-500 mt-1">
+                    Type: <strong>{{ ucfirst($config->ai_icon_type) }}</strong> · Size: <strong x-text="currentSize"></strong>px
+                </p>
+            </div>
+        </div>
+
+        {{-- PRESET ICONS --}}
+        <div>
+            <label class="block text-xs font-semibold text-gray-700 dark:text-neutral-300 mb-3 uppercase tracking-wide">
+                Choose a Preset
+            </label>
+
+            <div class="grid grid-cols-5 gap-3">
+                @php
+                    $presets = [
+                        'default' => [
+                            'label' => 'Default',
+                            'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>',
+                        ],
+                        'sparkle' => [
+                            'label' => 'Sparkle',
+                            'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>',
+                        ],
+                        'bot' => [
+                            'label' => 'Bot',
+                            'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>',
+                        ],
+                        'chat' => [
+                            'label' => 'Chat',
+                            'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>',
+                        ],
+                        'magic' => [
+                            'label' => 'Magic',
+                            'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 4V2m0 20v-2M8 9l-2-2m12 12l-2-2M4 15H2m20 0h-2m-3.42-8.42l1.42-1.42M5.42 18.42L4 20M9 21h6M12 8a4 4 0 00-4 4c0 1.5.5 2 1 3h6c.5-1 1-1.5 1-3a4 4 0 00-4-4z"/></svg>',
+                        ],
+                    ];
+                @endphp
+
+                @foreach ($presets as $key => $preset)
+                    <form method="POST" action="{{ route('admin.config.ai-icon.preset') }}">
+                        @csrf
+                        <input type="hidden" name="preset" value="{{ $key }}">
+                        <button type="submit"
+                                title="{{ $preset['label'] }}"
+                                class="w-full aspect-square rounded-xl border-2 transition flex flex-col items-center justify-center gap-1
+                                    {{ $config->ai_icon_type === $key
+                                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/30'
+                                        : 'border-gray-200 dark:border-dark-600 hover:border-orange-300 dark:hover:border-orange-800' }}">
+                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white p-1.5">
+                                {!! $preset['svg'] !!}
+                            </div>
+                            <span class="text-[9px] font-semibold text-gray-600 dark:text-neutral-400 uppercase tracking-wide">
+                                {{ $preset['label'] }}
+                            </span>
+                        </button>
+                    </form>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- CUSTOM UPLOAD --}}
+        <div>
+            <label class="block text-xs font-semibold text-gray-700 dark:text-neutral-300 mb-2 uppercase tracking-wide">
+                Or Upload Custom Icon
+            </label>
+
+            <form method="POST"
+                  action="{{ route('admin.config.ai-icon.upload') }}"
+                  enctype="multipart/form-data"
+                  class="space-y-2">
+                @csrf
+
+                <input type="file"
+                       name="ai_icon"
+                       accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
+                       @change="validateFile($event)"
+                       class="block w-full text-xs text-gray-700 dark:text-neutral-300
+                              file:mr-3 file:py-2 file:px-4
+                              file:rounded-lg file:border-0
+                              file:text-xs file:font-medium
+                              file:bg-gray-900 file:text-white
+                              hover:file:bg-gray-800 dark:file:bg-dark-700
+                              file:cursor-pointer
+                              border border-gray-300 dark:border-dark-600 rounded-lg
+                              focus:outline-none focus:ring-2 focus:ring-orange-500">
+
+                <p class="text-[10px] text-gray-500 dark:text-neutral-400">
+                    PNG, JPG, SVG, WebP · Max 1MB · Recommended: square transparent PNG
+                </p>
+
+                <p class="text-[10px] text-red-600" x-show="error" x-text="error"></p>
+
+                <div class="flex gap-2 pt-1">
+                    <button type="submit"
+                            class="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-lg text-xs font-medium shadow-sm hover:from-orange-600 hover:to-orange-700 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Upload
+                    </button>
+                </div>
+            </form>
+
+            {{-- REMOVE CUSTOM ICON --}}
+            @if ($config->hasCustomAiIcon())
+                <form method="POST"
+                      action="{{ route('admin.config.ai-icon.remove') }}"
+                      onsubmit="return confirm('Remove custom AI icon and reset to default?');"
+                      class="mt-3 pt-3 border-t border-gray-100 dark:border-dark-700">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                            class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 hover:text-red-700 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/30 px-3 py-1.5 rounded-md text-xs font-medium transition">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Remove Custom Icon
+                    </button>
+                </form>
+            @endif
+        </div>
+
+        {{-- SIZE SLIDER --}}
+        <div>
+            <div class="flex justify-between items-center mb-2">
+                <label class="text-xs font-semibold text-gray-700 dark:text-neutral-300 uppercase tracking-wide">
+                    Icon Size
+                </label>
+                <span class="text-xs font-bold text-orange-600 dark:text-orange-400">
+                    <span x-text="currentSize"></span>px
+                </span>
+            </div>
+
+            <form method="POST" action="{{ route('admin.config.ai-icon.size') }}" class="space-y-3">
+                @csrf
+
+                <input type="range"
+                       name="ai_icon_size"
+                       min="40"
+                       max="80"
+                       step="2"
+                       x-model="currentSize"
+                       class="w-full h-2 bg-gray-200 dark:bg-dark-700 rounded-lg appearance-none cursor-pointer accent-orange-500">
+
+                <div class="flex justify-between text-[10px] text-gray-400 dark:text-neutral-500">
+                    <span>40px (small)</span>
+                    <span>56px (default)</span>
+                    <span>80px (large)</span>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 bg-gray-900 dark:bg-dark-700 text-white px-4 py-2 rounded-lg text-xs font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Apply Size
+                    </button>
+                    <button type="button"
+                            @click="resetSize({{ $config->ai_icon_size ?? 56 }})"
+                            class="inline-flex items-center gap-2 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-neutral-300 px-4 py-2 rounded-lg text-xs font-medium hover:bg-gray-50 dark:hover:bg-dark-850 transition">
+                        Reset
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
     @php $config = \App\Models\SystemConfig::current(); @endphp
 
     {{-- ============================================ --}}
@@ -597,6 +798,35 @@ function townConfig() {
             }
 
             this.geocoding = false;
+        }
+    }
+}
+function aiIconCustomizer() {
+    return {
+        error: '',
+        currentSize: {{ \App\Models\SystemConfig::current()->ai_icon_size ?? 56 }},
+
+        validateFile(event) {
+            this.error = '';
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 1024 * 1024) {
+                this.error = 'File is too large. Maximum 1MB.';
+                event.target.value = '';
+                return;
+            }
+
+            const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp'];
+            if (!allowed.includes(file.type)) {
+                this.error = 'Invalid file type. Use PNG, JPG, SVG, or WebP.';
+                event.target.value = '';
+                return;
+            }
+        },
+
+        resetSize(defaultSize) {
+            this.currentSize = defaultSize;
         }
     }
 }
