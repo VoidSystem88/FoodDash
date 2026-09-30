@@ -25,7 +25,7 @@ class MenuItemController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
         ]);
 
         if ($request->hasFile('image')) {
@@ -49,41 +49,41 @@ class MenuItemController extends Controller
     }
 
     public function update(Request $request, MenuItem $menuItem)
-    {
-        $restaurant = auth()->user()->restaurant;
-        abort_unless($menuItem->restaurant_id === $restaurant->id, 403);
+{
+    $restaurant = auth()->user()->restaurant;
+    abort_unless($menuItem->restaurant_id === $restaurant->id, 403);
 
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
-        ]);
+    $data = $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'price' => 'required|numeric|min:0',
+        'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+    ]);
 
-        if ($request->hasFile('image')) {
-            // Delete old
-            if ($menuItem->image_path) {
-                $old = storage_path('app/public/' . $menuItem->image_path);
-                if (file_exists($old)) @unlink($old);
-            }
-
-            $file = $request->file('image');
-            $filename = 'menu-items/' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
-
-            $dir = storage_path('app/public/menu-items');
-            if (!file_exists($dir)) {
-                mkdir($dir, 0755, true);
-            }
-
-            $file->move($dir, basename($filename));
-            $data['image_path'] = $filename;
+    if ($request->hasFile('image')) {
+        // Delete old
+        if ($menuItem->image_path) {
+            $old = storage_path('app/public/' . $menuItem->image_path);
+            if (file_exists($old)) @unlink($old);
         }
 
-        unset($data['image']);
-        $menuItem->update($data);
+        $file = $request->file('image');
+        $filename = 'menu-items/' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
 
-        return back()->with('success', 'Menu item updated.');
+        $dir = storage_path('app/public/menu-items');
+        if (!file_exists($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $file->move($dir, basename($filename));
+        $data['image_path'] = $filename;
     }
+
+    unset($data['image']);
+    $menuItem->update($data);
+
+    return back()->with('success', 'Menu item updated.');
+}
 
     public function toggleAvailability(MenuItem $menuItem)
     {

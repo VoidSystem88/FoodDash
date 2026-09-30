@@ -18,6 +18,8 @@ class SystemConfig extends Model
         'default_delivery_fee',
         'commission_rate',
         'logo_path',
+        'light_logo_path', 
+        'dark_logo_path',
         'logo_height',
     ];
 
@@ -42,7 +44,55 @@ class SystemConfig extends Model
             'logo_height' => 40,
         ]);
     }
+public function getLightLogoUrlAttribute(): ?string
+{
+    if (!$this->light_logo_path) return null;
 
+    $path = storage_path('app/public/' . $this->light_logo_path);
+    if (!file_exists($path)) return null;
+
+    return asset('storage/' . $this->light_logo_path);
+}
+
+public function hasLightLogo(): bool
+{
+    return $this->light_logo_url !== null;
+}
+
+public function getDarkLogoUrlAttribute(): ?string
+{
+    if (!$this->dark_logo_path) return null;
+
+    $path = storage_path('app/public/' . $this->dark_logo_path);
+    if (!file_exists($path)) return null;
+
+    return asset('storage/' . $this->dark_logo_path);
+}
+
+public function hasDarkLogo(): bool
+{
+    return $this->dark_logo_url !== null;
+}
+
+/**
+ * Kunin ang tamang logo URL base sa current theme.
+ */
+public function getActiveLogoUrlAttribute(): ?string
+{
+    // Dark mode
+    if (request()->cookie('theme') === 'dark' || session('theme') === 'dark') {
+        if ($this->hasDarkLogo()) {
+            return $this->dark_logo_url;
+        }
+    }
+
+    // Light mode o fallback
+    if ($this->hasLightLogo()) {
+        return $this->light_logo_url;
+    }
+
+    return $this->logo_url;
+}
     public function getLogoUrlAttribute(): ?string
     {
         if (!$this->logo_path) {

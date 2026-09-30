@@ -7,7 +7,7 @@
     {{-- HERO HEADER --}}
     {{-- ============================================ --}}
     <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
-        <div class="flex justify-between items-start mb-4">
+        <div class="flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="relative">
                     @if (auth()->user()->avatar_url)
@@ -47,60 +47,38 @@
                 </button>
             @endif
         </div>
-
-        <div class="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-            <div>
-                <p class="text-xs text-zinc-500 dark:text-zinc-400">Today's Deliveries</p>
-                <p class="text-2xl font-bold text-zinc-900 dark:text-white">{{ $completedToday }}</p>
-            </div>
-            <div class="border-l border-zinc-200 dark:border-zinc-800 pl-3">
-                <p class="text-xs text-zinc-500 dark:text-zinc-400">Today's Earnings</p>
-                <p class="text-2xl font-bold text-orange-500">
-                    ₱{{ number_format($earningsToday, 0) }}
-                </p>
-            </div>
-        </div>
     </div>
 
     {{-- ============================================ --}}
-    {{-- STAT CARDS --}}
+    {{-- TODAY'S STATS -- compact, ipakita lang kapag may activity --}}
     {{-- ============================================ --}}
-    <div class="grid grid-cols-3 gap-3">
-        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
-            <div class="w-10 h-10 rounded-full bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center mb-2">
-                <svg class="w-5 h-5 text-white dark:text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+    @if ($completedToday > 0 || $earningsToday > 0)
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 transition-colors">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-7 h-7 rounded-full bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-3.5 h-3.5 text-white dark:text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Completed Today</p>
+                </div>
+                <p class="text-xl font-bold text-zinc-900 dark:text-white">{{ $completedToday }}</p>
             </div>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400">Completed</p>
-            <p class="text-xl font-bold text-zinc-900 dark:text-white">{{ $completedToday }}</p>
-        </div>
 
-        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
-            <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center mb-2">
-                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+            <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 transition-colors">
+                <div class="flex items-center gap-2 mb-1">
+                    <div class="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <p class="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-wide font-bold">Earned Today</p>
+                </div>
+                <p class="text-xl font-bold text-orange-500">₱{{ number_format($earningsToday, 0) }}</p>
             </div>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400">Earnings</p>
-            <p class="text-xl font-bold text-orange-500">
-                ₱{{ number_format($earningsToday, 0) }}
-            </p>
         </div>
-
-        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center mb-2"
-                 :class="online ? 'bg-orange-500' : 'bg-zinc-800 dark:bg-zinc-200'">
-                <svg class="w-5 h-5" :class="online ? 'text-white' : 'text-white dark:text-zinc-900'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-            </div>
-            <p class="text-xs text-zinc-500 dark:text-zinc-400">Status</p>
-            <p class="text-sm font-bold mt-1"
-               :class="online ? 'text-orange-500' : 'text-zinc-500 dark:text-zinc-400'"
-               x-text="online ? 'Ready' : 'Offline'"></p>
-        </div>
-    </div>
+    @endif
 
     {{-- ============================================ --}}
     {{-- READY FOR PICKUP ORDERS --}}
@@ -120,7 +98,7 @@
 
             <div class="space-y-3">
                 @foreach ($readyOrders as $order)
-                    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden hover:shadow-md transition">
+                    <div class="bg-white dark:bg-zinc-900 rounded-lg border-2 border-orange-500 overflow-hidden hover:shadow-lg transition">
 
                         {{-- HEADER --}}
                         <div class="px-5 py-3 bg-orange-500 text-white flex items-center justify-between">
@@ -212,7 +190,7 @@
 
             <div class="space-y-3">
                 <template x-for="offer in offers" :key="offer.order_id">
-                    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden hover:shadow-md transition">
+                    <div class="bg-white dark:bg-zinc-900 rounded-lg border-2 border-orange-500 overflow-hidden hover:shadow-lg transition">
 
                         {{-- COUNTDOWN --}}
                         <div class="h-1.5 bg-zinc-100 dark:bg-zinc-800 overflow-hidden">

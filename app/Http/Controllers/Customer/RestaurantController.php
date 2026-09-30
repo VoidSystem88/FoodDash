@@ -34,7 +34,32 @@ class RestaurantController extends Controller
 
         return view('customer.restaurants', compact('restaurants', 'cuisines'));
     }
+public function randomMenuItems()
+{
+    $items = \App\Models\MenuItem::with('restaurant')
+        ->where('is_available', true)
+        ->whereHas('restaurant', function ($q) {
+            $q->where('is_open', true);
+        })
+        ->inRandomOrder()
+        ->limit(8)
+        ->get()
+        ->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'description' => $item->description,
+                'price' => (float) $item->price,
+                'image_url' => $item->image_url,
+                'restaurant_name' => $item->restaurant->name ?? '',
+                'restaurant_url' => $item->restaurant
+                    ? route('customer.restaurants.show', $item->restaurant)
+                    : '#',
+            ];
+        });
 
+    return response()->json(['items' => $items]);
+}
     public function show(Restaurant $restaurant)
     {
         // ⭐ Force fresh load mula DB

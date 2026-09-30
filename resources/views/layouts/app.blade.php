@@ -41,11 +41,15 @@
                 <div class="flex items-center gap-6">
                     @php $config = \App\Models\SystemConfig::current(); @endphp
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                        @if ($config->hasLogo())
-                            <img src="{{ $config->logo_url }}"
-                                 alt="{{ config('app.name', 'FoodDash') }}"
-                                 class="w-auto"
-                                 style="height: {{ $config->logo_height_px }}px;">
+                        @if ($config->hasLogo() || $config->hasLightLogo() || $config->hasDarkLogo())
+                            <img src="{{ $config->hasLightLogo() ? $config->light_logo_url : $config->logo_url }}"
+                                alt="{{ config('app.name', 'FoodDash') }}"
+                                class="w-auto dark:hidden"
+                                style="height: {{ $config->logo_height_px }}px;">
+                            <img src="{{ $config->hasDarkLogo() ? $config->dark_logo_url : ($config->hasLightLogo() ? $config->light_logo_url : $config->logo_url) }}"
+                                alt="{{ config('app.name', 'FoodDash') }}"
+                                class="w-auto hidden dark:block"
+                                style="height: {{ $config->logo_height_px }}px;">
                         @else
                             <span class="font-semibold text-lg text-gray-900 dark:text-neutral-100">
                                 {{ config('app.name', 'FoodDash') }}
@@ -397,11 +401,16 @@
             <div class="flex justify-between items-center h-14">
                 @php $config = \App\Models\SystemConfig::current(); @endphp
                 <a href="{{ route('customer.restaurants') }}" class="flex items-center gap-2 flex-shrink-0">
-                    @if ($config->hasLogo())
-                        <img src="{{ $config->logo_url }}"
-                             alt="{{ config('app.name', 'FoodDash') }}"
-                             class="w-auto"
-                             style="height: {{ $config->logo_height_px }}px;">
+                    @if ($config->hasLogo() || $config->hasLightLogo() || $config->hasDarkLogo())
+                        <img src="{{ $config->active_logo_url }}"
+                            alt="{{ config('app.name', 'FoodDash') }}"
+                            class="w-auto dark:hidden"
+                            style="height: {{ $config->logo_height_px }}px;"
+                            id="light-logo">
+                        <img src="{{ $config->hasDarkLogo() ? $config->dark_logo_url : $config->active_logo_url }}"
+                            alt="{{ config('app.name', 'FoodDash') }}"
+                            class="w-auto hidden dark:block"
+                            style="height: {{ $config->logo_height_px }}px;">
                     @else
                         <span class="font-semibold text-lg text-gray-900 dark:text-neutral-100">
                             {{ config('app.name', 'FoodDash') }}

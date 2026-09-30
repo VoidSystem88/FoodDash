@@ -155,7 +155,7 @@
                                     <p class="text-sm text-neutral-600 dark:text-neutral-400">
                                         <span class="text-orange-600 dark:text-orange-400 font-bold">Click to upload</span> photo
                                     </p>
-                                    <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-1">JPG, PNG, WebP · Max 2MB</p>
+                                    <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-1">JPG, PNG, WebP · Max 5MB</p>
                                 </div>
                             </template>
                             <template x-if="imagePreview">
@@ -324,7 +324,13 @@
 
                             {{-- EDIT --}}
                             <button type="button"
-                                    onclick="alert('Edit feature coming soon!');"
+                                    @click="openEdit({
+                                        id: {{ $item->id }},
+                                        name: @js($item->name),
+                                        description: @js($item->description),
+                                        price: {{ $item->price }},
+                                        image_url: @js($item->image_url),
+                                    })"
                                     title="Edit"
                                     class="w-8 h-8 rounded-full bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur shadow-md flex items-center justify-center text-neutral-700 dark:text-neutral-300 hover:scale-110 active:scale-95 transition transform">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -448,7 +454,13 @@
 
                         {{-- EDIT --}}
                         <button type="button"
-                                onclick="alert('Edit feature coming soon!');"
+                                @click="openEdit({
+                                    id: {{ $item->id }},
+                                    name: @js($item->name),
+                                    description: @js($item->description),
+                                    price: {{ $item->price }},
+                                    image_url: @js($item->image_url),
+                                })"
                                 title="Edit"
                                 class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-[#262626] hover:bg-neutral-200 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center justify-center transition">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -476,6 +488,157 @@
 
     @endif
 
+    {{-- ============================================ --}}
+    {{-- EDIT MODAL --}}
+    {{-- ============================================ --}}
+    <div x-show="editingItem"
+         x-cloak
+         x-transition.opacity
+         @keydown.escape.window="closeEdit()"
+         @click.self="closeEdit()"
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60">
+
+        <div x-show="editingItem"
+             x-transition.scale.origin.center
+             class="bg-white dark:bg-[#141414] rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-neutral-200 dark:border-[#262626]">
+
+            {{-- MODAL HEADER --}}
+            <div class="flex items-center justify-between px-6 py-4 border-b border-neutral-200 dark:border-[#262626]">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-neutral-900 dark:text-white">Edit Menu Item</h2>
+                        <p class="text-xs text-neutral-500 dark:text-neutral-400" x-text="'Editing #' + (editingItem?.id ?? '')"></p>
+                    </div>
+                </div>
+
+                <button type="button"
+                        @click="closeEdit()"
+                        class="w-9 h-9 rounded-lg hover:bg-neutral-100 dark:hover:bg-[#262626] flex items-center justify-center text-neutral-500 dark:text-neutral-400 transition">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            {{-- MODAL BODY --}}
+            <form :action="editingItem ? '/menu-items/' + editingItem.id : ''"
+                  method="POST"
+                  enctype="multipart/form-data"
+                  class="p-6 space-y-5">
+                @csrf
+                @method('PUT')
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                            Item Name <span class="text-orange-500">*</span>
+                        </label>
+                        <input type="text"
+                               name="name"
+                               x-model="editForm.name"
+                               required
+                               class="w-full border border-neutral-300 dark:border-[#262626] dark:bg-[#0a0a0a] dark:text-white rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                            Price (₱) <span class="text-orange-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500 text-sm font-bold">₱</span>
+                            <input type="number"
+                                   name="price"
+                                   x-model="editForm.price"
+                                   step="0.01"
+                                   min="0"
+                                   required
+                                   class="w-full border border-neutral-300 dark:border-[#262626] dark:bg-[#0a0a0a] dark:text-white rounded-xl pl-8 pr-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                        Description <span class="text-neutral-400 dark:text-neutral-500 font-normal">(optional)</span>
+                    </label>
+                    <textarea name="description"
+                              x-model="editForm.description"
+                              rows="3"
+                              class="w-full border border-neutral-300 dark:border-[#262626] dark:bg-[#0a0a0a] dark:text-white rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"></textarea>
+                </div>
+
+                {{-- IMAGE UPLOAD --}}
+                <div>
+                    <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                        Food Photo
+                        <span class="text-neutral-400 dark:text-neutral-500 font-normal">
+                            (optional · iwan lang kung ayaw palitan)
+                        </span>
+                    </label>
+
+                    <label class="block cursor-pointer">
+                        <input type="file"
+                               name="image"
+                               accept="image/jpeg,image/jpg,image/png,image/webp"
+                               @change="onEditFileChange($event)"
+                               class="hidden">
+                        <div class="border-2 border-dashed border-neutral-300 dark:border-[#262626] rounded-xl p-6 text-center hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950/20 transition">
+                            <template x-if="!editImagePreview && !editingItem?.image_url">
+                                <div>
+                                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center mx-auto mb-3 shadow-md">
+                                        <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <p class="text-sm text-neutral-600 dark:text-neutral-400">
+                                        <span class="text-orange-600 dark:text-orange-400 font-bold">Click to upload</span> photo
+                                    </p>
+                                    <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-1">JPG, PNG, WebP · Max 2MB</p>
+                                </div>
+                            </template>
+
+                            <template x-if="editImagePreview">
+                                <div class="flex flex-col items-center">
+                                    <img :src="editImagePreview" class="w-32 h-32 rounded-xl object-cover shadow-md">
+                                    <p class="text-xs text-orange-600 dark:text-orange-400 font-semibold mt-2">New photo — click to change</p>
+                                </div>
+                            </template>
+
+                            <template x-if="!editImagePreview && editingItem?.image_url">
+                                <div class="flex flex-col items-center">
+                                    <img :src="editingItem.image_url" class="w-32 h-32 rounded-xl object-cover shadow-md">
+                                    <p class="text-xs text-neutral-500 dark:text-neutral-400 font-semibold mt-2">Current photo — click to replace</p>
+                                </div>
+                            </template>
+                        </div>
+                    </label>
+                </div>
+
+                {{-- ACTIONS --}}
+                <div class="flex gap-2 pt-2">
+                    <button type="submit"
+                            class="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-98 transition transform flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Save Changes
+                    </button>
+                    <button type="button"
+                            @click="closeEdit()"
+                            class="px-6 py-2.5 border border-neutral-300 dark:border-[#262626] text-neutral-700 dark:text-neutral-300 rounded-xl font-semibold text-sm hover:bg-neutral-50 dark:hover:bg-[#0a0a0a] transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 @endsection
 
@@ -493,24 +656,33 @@ function menuManager() {
         filter: 'all',
         viewKey: 'fooddash_menu_view',
 
+        // ⭐ EDIT STATE
+        editingItem: null,
+        editForm: {
+            name: '',
+            description: '',
+            price: '',
+        },
+        editImagePreview: '',
+
         init() {
-            // Restore view mode from localStorage
             const saved = localStorage.getItem(this.viewKey);
             if (saved && ['grid', 'list'].includes(saved)) {
                 this.viewMode = saved;
             }
 
-            // Save view mode on change
             this.$watch('viewMode', (v) => localStorage.setItem(this.viewKey, v));
         },
 
+        // ========================================
+        // ADD FORM
+        // ========================================
         onFileChange(e) {
             const file = e.target.files[0];
             if (!file) return;
 
-            // Validate size (2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                alert('File is too large. Max 2MB.');
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File is too large. Max 5MB.');
                 e.target.value = '';
                 return;
             }
@@ -530,6 +702,52 @@ function menuManager() {
 
         resetForm() {
             this.imagePreview = '';
+        },
+
+        // ========================================
+        // ⭐ EDIT FORM
+        // ========================================
+        openEdit(item) {
+            this.editingItem = item;
+            this.editForm = {
+                name: item.name,
+                description: item.description || '',
+                price: item.price,
+            };
+            this.editImagePreview = '';
+
+            // Prevent body scroll while modal is open
+            document.body.style.overflow = 'hidden';
+        },
+
+        closeEdit() {
+            this.editingItem = null;
+            this.editForm = { name: '', description: '', price: '' };
+            this.editImagePreview = '';
+            document.body.style.overflow = '';
+        },
+
+        onEditFileChange(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File is too large. Max 5MB.');
+                e.target.value = '';
+                return;
+            }
+
+            if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+                alert('Invalid file type. Use JPG, PNG, or WebP.');
+                e.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                this.editImagePreview = ev.target.result;
+            };
+            reader.readAsDataURL(file);
         }
     }
 }

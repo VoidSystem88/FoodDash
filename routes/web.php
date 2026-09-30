@@ -39,6 +39,8 @@ Route::get('/restaurants', [RestaurantController::class, 'index'])->name('custom
 Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->name('customer.restaurants.show');
 Route::get('/restaurants/{restaurant}/reviews', [RestaurantReviewController::class, 'index'])
     ->name('customer.restaurants.reviews');
+Route::get('/random-menu-items', [RestaurantController::class, 'randomMenuItems'])
+    ->name('customer.menu.random');
 
 // ============================================
 // CUSTOMER ROUTES (Auth Required)
@@ -170,7 +172,18 @@ Route::middleware(['auth', 'role:rider'])->prefix('rider')->group(function () {
 // ============================================
 // ADMIN ROUTES
 // ============================================
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+        // ⭐ Light/Dark logo routes
+    Route::post('/config/light-logo', [ConfigController::class, 'uploadLightLogo'])
+        ->name('admin.config.light-logo.upload');
+    Route::delete('/config/light-logo', [ConfigController::class, 'removeLightLogo'])
+        ->name('admin.config.light-logo.remove');
+
+    Route::post('/config/dark-logo', [ConfigController::class, 'uploadDarkLogo'])
+        ->name('admin.config.dark-logo.upload');
+    Route::delete('/config/dark-logo', [ConfigController::class, 'removeDarkLogo'])
+        ->name('admin.config.dark-logo.remove');
+    Route::get('/orders/{order}', [AccountController::class, 'showOrder'])->name('admin.orders.show');
     Route::get('/dashboard', [AccountController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/accounts', [AccountController::class, 'accounts'])->name('admin.accounts');
     Route::get('/orders', [AccountController::class, 'orders'])->name('admin.orders');

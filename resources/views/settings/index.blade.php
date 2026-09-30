@@ -137,13 +137,14 @@
             </form>
         </div>
     </div>
-    {{-- ============================================ --}}
-    {{-- PUSH NOTIFICATIONS --}}
+        {{-- ============================================ --}}
+    {{-- PUSH NOTIFICATIONS — TOGGLE STYLE --}}
     {{-- ============================================ --}}
     <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-700 overflow-hidden mb-4 transition-colors"
          x-data="pushNotifications()"
          x-init="init()">
 
+        {{-- HEADER --}}
         <div class="px-6 py-4 border-b border-gray-100 dark:border-dark-700 flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/40 dark:to-orange-950/40 flex items-center justify-center">
                 <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,15 +182,17 @@
             <template x-if="supported">
                 <div class="space-y-4">
 
-                    {{-- STATUS INDICATOR --}}
-                    <div class="flex items-center justify-between p-4 rounded-xl border transition-colors"
+                    {{-- TOGGLE ROW --}}
+                    <div class="flex items-center justify-between gap-4 p-4 rounded-xl border transition-colors"
                          :class="subscribed
                                 ? 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'
                                 : (permission === 'denied'
                                     ? 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
                                     : 'bg-gray-50 dark:bg-dark-850 border-gray-200 dark:border-dark-600')">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full flex items-center justify-center"
+
+                        <div class="flex items-center gap-3 min-w-0">
+                            {{-- STATUS ICON --}}
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
                                  :class="subscribed
                                         ? 'bg-green-100 dark:bg-green-900/40'
                                         : (permission === 'denied'
@@ -214,7 +217,9 @@
                                     </svg>
                                 </template>
                             </div>
-                            <div>
+
+                            {{-- LABEL --}}
+                            <div class="min-w-0">
                                 <p class="font-semibold text-sm"
                                    :class="subscribed
                                           ? 'text-green-900 dark:text-green-300'
@@ -229,83 +234,65 @@
                                               ? 'text-red-700 dark:text-red-400'
                                               : 'text-gray-500 dark:text-neutral-400')"
                                    x-text="subscribed
-                                          ? 'You will receive push notifications on this device'
+                                          ? 'You will receive alerts on this device'
                                           : (permission === 'denied'
-                                              ? 'Notifications are blocked. Enable them in browser settings.'
-                                              : 'Enable to receive order updates even when the tab is closed')"></p>
+                                              ? 'Blocked in browser settings'
+                                              : 'Turn on to receive order updates')"></p>
                             </div>
                         </div>
+
+                        {{-- ⭐ TOGGLE SWITCH --}}
+                        <button type="button"
+                                @click="toggle()"
+                                :disabled="loading || permission === 'denied'"
+                                :class="(loading || permission === 'denied') ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'"
+                                class="relative inline-flex items-center h-7 w-12 rounded-full transition-colors duration-200 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 dark:focus:ring-offset-dark-800"
+                                :style="subscribed ? 'background-color: #f97316;' : 'background-color: #d4d4d8;'"
+                                role="switch"
+                                :aria-checked="subscribed">
+
+                            <span class="inline-block w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-200"
+                                  :class="subscribed ? 'translate-x-6' : 'translate-x-1'"></span>
+                        </button>
                     </div>
 
                     {{-- LOADING --}}
                     <template x-if="loading">
-                        <div class="text-center py-2">
-                            <p class="text-sm text-gray-500 dark:text-neutral-400">Processing...</p>
+                        <div class="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-neutral-400">
+                            <svg class="w-4 h-4 animate-spin text-orange-500" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <span>Processing...</span>
                         </div>
                     </template>
 
-                    {{-- ERROR MESSAGE --}}
+                    {{-- ERROR --}}
                     <template x-if="error">
-                        <div class="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-300"
-                             x-text="error"></div>
+                        <div class="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-800 dark:text-red-300 flex items-start gap-2">
+                            <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span x-text="error"></span>
+                        </div>
                     </template>
 
-                    {{-- SUCCESS MESSAGE --}}
+                    {{-- SUCCESS --}}
                     <template x-if="successMessage">
-                        <div class="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-300"
-                             x-text="successMessage"></div>
+                        <div class="p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg text-sm text-green-800 dark:text-green-300 flex items-start gap-2">
+                            <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span x-text="successMessage"></span>
+                        </div>
                     </template>
-
-                    {{-- ACTIONS --}}
-                    <div class="flex flex-wrap gap-2">
-                        <template x-if="!subscribed && permission !== 'denied'">
-                            <button type="button"
-                                    @click="enable()"
-                                    :disabled="loading"
-                                    :class="loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-orange-700 active:scale-98'"
-                                    class="inline-flex items-center gap-2 bg-orange-600 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition transform">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                                Enable Push Notifications
-                            </button>
-                        </template>
-
-                        <template x-if="subscribed">
-                            <button type="button"
-                                    @click="disable()"
-                                    :disabled="loading"
-                                    :class="loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-50 dark:hover:bg-red-950/30'"
-                                    class="inline-flex items-center gap-2 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-5 py-2.5 rounded-xl font-semibold text-sm transition">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                                </svg>
-                                Disable
-                            </button>
-                        </template>
-
-                        <template x-if="subscribed">
-                            <button type="button"
-                                    @click="testNotification()"
-                                    :disabled="loading"
-                                    :class="loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-dark-850'"
-                                    class="inline-flex items-center gap-2 border border-gray-300 dark:border-dark-600 text-gray-700 dark:text-neutral-300 px-5 py-2.5 rounded-xl font-semibold text-sm transition">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                </svg>
-                                Send Test
-                            </button>
-                        </template>
-                    </div>
 
                     {{-- BLOCKED HELP --}}
                     <template x-if="permission === 'denied'">
                         <div class="pt-3 border-t border-gray-100 dark:border-dark-700">
-                            <p class="text-xs text-gray-500 dark:text-neutral-400">
-                                <strong>Paano i-unblock:</strong>
+                            <p class="text-xs text-gray-500 dark:text-neutral-400 leading-relaxed">
+                                <strong class="text-gray-700 dark:text-neutral-300">Paano i-unblock:</strong>
                                 I-click ang <strong>lock icon</strong> sa address bar → hanapin ang "Notifications" → i-set sa <strong>Allow</strong> → i-refresh ang page.
                             </p>
                         </div>
@@ -454,73 +441,36 @@ function pushNotifications() {
             }
         },
 
-        async enable() {
-            this.loading = true;
-            this.error = '';
-            this.successMessage = '';
-
-            try {
-                await window.PushNotifications.subscribeToPush();
-                this.subscribed = true;
-                this.permission = Notification.permission;
-                this.successMessage = 'Push notifications enabled! You will now receive alerts on this device.';
-
-                setTimeout(() => { this.successMessage = ''; }, 5000);
-            } catch (err) {
-                console.error('Enable failed:', err);
-                this.error = err.message || 'Could not enable notifications.';
-                this.permission = Notification.permission;
-            }
-
-            this.loading = false;
-        },
-
-        async disable() {
-            if (!confirm('Disable push notifications on this device?')) return;
+        // ⭐ SINGLE TOGGLE METHOD
+        async toggle() {
+            if (this.loading) return;
+            if (this.permission === 'denied') return;
 
             this.loading = true;
             this.error = '';
             this.successMessage = '';
 
             try {
-                await window.PushNotifications.unsubscribeFromPush();
-                this.subscribed = false;
-                this.successMessage = 'Push notifications disabled.';
+                if (this.subscribed) {
+                    // Toggle OFF
+                    await window.PushNotifications.unsubscribeFromPush();
+                    this.subscribed = false;
+                    this.successMessage = 'Push notifications disabled.';
 
-                setTimeout(() => { this.successMessage = ''; }, 5000);
-            } catch (err) {
-                console.error('Disable failed:', err);
-                this.error = err.message || 'Could not disable notifications.';
-            }
-
-            this.loading = false;
-        },
-
-        async testNotification() {
-            this.loading = true;
-            this.error = '';
-            this.successMessage = '';
-
-            try {
-                const res = await fetch('/push/test', {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    }
-                });
-
-                const data = await res.json();
-
-                if (data.ok) {
-                    this.successMessage = 'Test notification sent! Check your notification area.';
-                    setTimeout(() => { this.successMessage = ''; }, 5000);
+                    setTimeout(() => { this.successMessage = ''; }, 4000);
                 } else {
-                    this.error = data.message || 'Could not send test notification.';
+                    // Toggle ON
+                    await window.PushNotifications.subscribeToPush();
+                    this.subscribed = true;
+                    this.permission = Notification.permission;
+                    this.successMessage = 'Push notifications enabled!';
+
+                    setTimeout(() => { this.successMessage = ''; }, 4000);
                 }
             } catch (err) {
-                console.error('Test failed:', err);
-                this.error = 'Could not send test notification.';
+                console.error('Toggle failed:', err);
+                this.error = err.message || 'Could not toggle notifications.';
+                this.permission = Notification.permission;
             }
 
             this.loading = false;

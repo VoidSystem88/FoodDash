@@ -79,6 +79,19 @@ class AccountController extends Controller
         return view('admin.accounts', compact('users', 'filter', 'counts'));
     }
 
+    public function showOrder(Order $order)
+{
+    $order->load([
+        'customer',
+        'restaurant.user',
+        'rider.user',
+        'items.menuItem',
+        'payment',
+        'review',
+    ]);
+
+    return view('admin.orders.show', compact('order'));
+}
     public function orders(Request $request)
     {
         $query = Order::with(['customer', 'restaurant', 'rider']);

@@ -58,88 +58,245 @@
         </div>
 
         <div class="p-5">
-            <p class="text-xs text-gray-500 dark:text-neutral-400 mb-4">
-                Upload your custom logo and adjust its size. Recommended: transparent PNG or SVG, at least 200×60px.
+            <p class="text-xs text-gray-500 dark:text-neutral-400 mb-5">
+                Upload separate logos for light and dark mode. Recommended: transparent PNG or SVG, at least 200×60px.
             </p>
 
-            {{-- CURRENT LOGO PREVIEW --}}
-            <div class="bg-gray-50 dark:bg-dark-850 rounded-lg border border-gray-200 dark:border-dark-600 p-6 mb-4 text-center">
-                <p class="text-[10px] text-gray-400 dark:text-neutral-500 uppercase tracking-wider font-medium mb-3">Preview</p>
+            {{-- ⭐ TWO LOGOS SIDE-BY-SIDE --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-                @if ($config->hasLogo())
-                    <div class="inline-block bg-white dark:bg-dark-800 rounded-lg px-6 py-4 border border-gray-200 dark:border-dark-600">
-                        <img src="{{ $config->logo_url }}"
-                             alt="Current logo"
-                             class="w-auto"
-                             style="height: {{ $config->logo_height_px }}px;">
+                {{-- ============================================ --}}
+                {{-- LIGHT MODE LOGO --}}
+                {{-- ============================================ --}}
+                <div class="border border-gray-200 dark:border-dark-600 rounded-xl overflow-hidden">
+
+                    {{-- HEADER --}}
+                    <div class="px-4 py-3 bg-gradient-to-r from-amber-50 to-white dark:from-amber-950/30 dark:to-dark-800 border-b border-gray-100 dark:border-dark-600 flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-900 dark:text-neutral-100">Light Mode Logo</p>
+                            <p class="text-[10px] text-gray-500 dark:text-neutral-400">Makikita sa bright background</p>
+                        </div>
                     </div>
-                    <p class="text-xs text-gray-400 dark:text-neutral-500 mt-2">
-                        Height: {{ $config->logo_height_px }}px
-                    </p>
-                @else
-                    <div class="inline-block">
-                        <span class="font-semibold text-2xl text-gray-400 dark:text-neutral-500">
-                            {{ config('app.name', 'FoodDash') }}
-                        </span>
+
+                    {{-- BODY --}}
+                    <div class="p-4 space-y-4">
+
+                        {{-- PREVIEW --}}
+                        <div class="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-600 p-4 text-center">
+                            <p class="text-[10px] text-gray-400 dark:text-neutral-500 uppercase tracking-wider font-medium mb-2">Preview (Light BG)</p>
+
+                            <div class="inline-block bg-white rounded-lg px-6 py-3 border border-gray-200">
+                                @if ($config->hasLightLogo())
+                                    <img src="{{ $config->light_logo_url }}"
+                                         alt="Light logo"
+                                         class="w-auto max-w-[180px] h-auto"
+                                         style="height: {{ $config->logo_height_px }}px;">
+                                @elseif ($config->hasLogo())
+                                    <img src="{{ $config->logo_url }}"
+                                         alt="Logo"
+                                         class="w-auto max-w-[180px] h-auto"
+                                         style="height: {{ $config->logo_height_px }}px;">
+                                    <p class="text-[10px] text-amber-600 dark:text-amber-400 mt-2 italic">Using main logo</p>
+                                @else
+                                    <span class="font-semibold text-xl text-gray-400">
+                                        {{ config('app.name', 'FoodDash') }}
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- UPLOAD FORM --}}
+                        <form method="POST"
+                              action="{{ route('admin.config.light-logo.upload') }}"
+                              enctype="multipart/form-data"
+                              class="space-y-2">
+                            @csrf
+
+                            <label class="block text-xs font-medium text-gray-700 dark:text-neutral-300">
+                                {{ $config->hasLightLogo() ? 'Replace Light Logo' : 'Upload Light Logo' }}
+                            </label>
+
+                            <input type="file"
+                                   name="logo"
+                                   accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
+                                   @change="validateFile($event, 'lightError')"
+                                   class="block w-full text-xs text-gray-700 dark:text-neutral-300
+                                          file:mr-3 file:py-1.5 file:px-3
+                                          file:rounded-md file:border-0
+                                          file:text-xs file:font-medium
+                                          file:bg-gray-900 file:text-white
+                                          hover:file:bg-gray-800
+                                          file:cursor-pointer
+                                          border border-gray-300 dark:border-dark-600 rounded-md
+                                          focus:outline-none focus:ring-2 focus:ring-gray-900">
+
+                            <p class="text-[10px] text-gray-500 dark:text-neutral-400">
+                                PNG, JPG, SVG, WebP · Max 2MB
+                            </p>
+                            <p class="text-[10px] text-red-600" x-show="lightError" x-text="lightError"></p>
+
+                            <div class="flex gap-2 pt-1">
+                                <button type="submit"
+                                        class="inline-flex items-center gap-1.5 bg-gray-900 dark:bg-dark-700 text-white px-3.5 py-1.5 rounded-md text-xs font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    {{ $config->hasLightLogo() ? 'Replace' : 'Upload' }}
+                                </button>
+                            </div>
+                        </form>
+
+                        {{-- REMOVE LIGHT LOGO --}}
+                        @if ($config->hasLightLogo())
+                            <form method="POST"
+                                  action="{{ route('admin.config.light-logo.remove') }}"
+                                  onsubmit="return confirm('Remove light mode logo?');"
+                                  class="pt-3 border-t border-gray-100 dark:border-dark-600">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 hover:text-red-700 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/30 px-3 py-1.5 rounded-md text-xs font-medium transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Remove
+                                </button>
+                            </form>
+                        @endif
                     </div>
-                    <p class="text-xs text-gray-400 dark:text-neutral-500 mt-2">Using default text logo</p>
-                @endif
+                </div>
+
+                {{-- ============================================ --}}
+                {{-- DARK MODE LOGO --}}
+                {{-- ============================================ --}}
+                <div class="border border-gray-200 dark:border-dark-600 rounded-xl overflow-hidden">
+
+                    {{-- HEADER --}}
+                    <div class="px-4 py-3 bg-gradient-to-r from-indigo-50 to-white dark:from-indigo-950/30 dark:to-dark-800 border-b border-gray-100 dark:border-dark-600 flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-900 dark:text-neutral-100">Dark Mode Logo</p>
+                            <p class="text-[10px] text-gray-500 dark:text-neutral-400">Makikita sa dark background</p>
+                        </div>
+                    </div>
+
+                    {{-- BODY --}}
+                    <div class="p-4 space-y-4">
+
+                        {{-- PREVIEW --}}
+                        <div class="bg-gray-900 rounded-lg border border-gray-700 p-4 text-center">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-2">Preview (Dark BG)</p>
+
+                            <div class="inline-block bg-gray-900 rounded-lg px-6 py-3 border border-gray-700">
+                                @if ($config->hasDarkLogo())
+                                    <img src="{{ $config->dark_logo_url }}"
+                                         alt="Dark logo"
+                                         class="w-auto max-w-[180px] h-auto"
+                                         style="height: {{ $config->logo_height_px }}px;">
+                                @elseif ($config->hasLogo())
+                                    <img src="{{ $config->logo_url }}"
+                                         alt="Logo"
+                                         class="w-auto max-w-[180px] h-auto"
+                                         style="height: {{ $config->logo_height_px }}px;">
+                                    <p class="text-[10px] text-indigo-400 mt-2 italic">Using main logo</p>
+                                @else
+                                    <span class="font-semibold text-xl text-gray-400">
+                                        {{ config('app.name', 'FoodDash') }}
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- UPLOAD FORM --}}
+                        <form method="POST"
+                              action="{{ route('admin.config.dark-logo.upload') }}"
+                              enctype="multipart/form-data"
+                              class="space-y-2">
+                            @csrf
+
+                            <label class="block text-xs font-medium text-gray-700 dark:text-neutral-300">
+                                {{ $config->hasDarkLogo() ? 'Replace Dark Logo' : 'Upload Dark Logo' }}
+                            </label>
+
+                            <input type="file"
+                                   name="logo"
+                                   accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
+                                   @change="validateFile($event, 'darkError')"
+                                   class="block w-full text-xs text-gray-700 dark:text-neutral-300
+                                          file:mr-3 file:py-1.5 file:px-3
+                                          file:rounded-md file:border-0
+                                          file:text-xs file:font-medium
+                                          file:bg-gray-900 file:text-white
+                                          hover:file:bg-gray-800
+                                          file:cursor-pointer
+                                          border border-gray-300 dark:border-dark-600 rounded-md
+                                          focus:outline-none focus:ring-2 focus:ring-gray-900">
+
+                            <p class="text-[10px] text-gray-500 dark:text-neutral-400">
+                                PNG, JPG, SVG, WebP · Max 2MB
+                            </p>
+                            <p class="text-[10px] text-red-600" x-show="darkError" x-text="darkError"></p>
+
+                            <div class="flex gap-2 pt-1">
+                                <button type="submit"
+                                        class="inline-flex items-center gap-1.5 bg-gray-900 dark:bg-dark-700 text-white px-3.5 py-1.5 rounded-md text-xs font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                    {{ $config->hasDarkLogo() ? 'Replace' : 'Upload' }}
+                                </button>
+                            </div>
+                        </form>
+
+                        {{-- REMOVE DARK LOGO --}}
+                        @if ($config->hasDarkLogo())
+                            <form method="POST"
+                                  action="{{ route('admin.config.dark-logo.remove') }}"
+                                  onsubmit="return confirm('Remove dark mode logo?');"
+                                  class="pt-3 border-t border-gray-100 dark:border-dark-600">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                        class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 hover:text-red-700 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/30 px-3 py-1.5 rounded-md text-xs font-medium transition">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Remove
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
             </div>
 
-            {{-- UPLOAD FORM --}}
-            <form method="POST"
-                  action="{{ route('admin.config.logo.upload') }}"
-                  enctype="multipart/form-data"
-                  class="space-y-3">
-                @csrf
-
-                <div>
-                    <label class="block text-xs font-medium text-gray-700 dark:text-neutral-300 mb-1.5">
-                        {{ $config->hasLogo() ? 'Replace Logo' : 'Upload Logo' }}
-                    </label>
-
-                    <input type="file"
-                           name="logo"
-                           accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
-                           @change="validateFile($event)"
-                           class="block w-full text-sm text-gray-700 dark:text-neutral-300
-                                  file:mr-4 file:py-2 file:px-4
-                                  file:rounded-lg file:border-0
-                                  file:text-sm file:font-medium
-                                  file:bg-gray-900 file:text-white
-                                  hover:file:bg-gray-800
-                                  file:cursor-pointer
-                                  border border-gray-300 dark:border-dark-600 rounded-lg
-                                  focus:outline-none focus:ring-2 focus:ring-gray-900">
-                    <p class="text-xs text-gray-500 dark:text-neutral-400 mt-1.5">
-                        Accepted: PNG, JPG, SVG, WebP · Max 2MB
-                    </p>
-                    <p class="text-xs text-red-600 mt-1" x-show="error" x-text="error"></p>
-                </div>
-
-                <div class="flex gap-2">
-                    <button type="submit"
-                            class="inline-flex items-center gap-2 bg-gray-900 dark:bg-dark-700 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
-                        {{ $config->hasLogo() ? 'Replace' : 'Upload' }}
-                    </button>
-                </div>
-            </form>
-
-            {{-- LOGO SIZE CONTROL --}}
-            @if ($config->hasLogo())
+            {{-- ============================================ --}}
+            {{-- LOGO SIZE CONTROL (shared) --}}
+            {{-- ============================================ --}}
+            @if ($config->hasLogo() || $config->hasLightLogo() || $config->hasDarkLogo())
                 <form method="POST"
                       action="{{ route('admin.config.logo.size') }}"
-                      class="mt-5 pt-5 border-t border-gray-100 dark:border-dark-700 space-y-4">
+                      class="mt-6 pt-5 border-t border-gray-100 dark:border-dark-700 space-y-4">
                     @csrf
 
                     <div>
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-xs font-medium text-gray-700 dark:text-neutral-300">
-                                Logo Height
+                                Logo Height (applies to both light & dark)
                             </label>
                             <span class="text-xs font-bold text-gray-900 dark:text-neutral-100">
                                 <span x-text="currentSize"></span>px
@@ -179,24 +336,85 @@
                 </form>
             @endif
 
-            {{-- REMOVE LOGO --}}
-            @if ($config->hasLogo())
-                <form method="POST"
-                      action="{{ route('admin.config.logo.remove') }}"
-                      onsubmit="return confirm('Remove the custom logo and use the default text?');"
-                      class="mt-3 pt-5 border-t border-gray-100 dark:border-dark-700">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            class="inline-flex items-center gap-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-950/30 px-4 py-2 rounded-lg text-sm font-medium transition">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {{-- ============================================ --}}
+            {{-- MAIN LOGO (fallback kung wala light/dark specific) --}}
+            {{-- ============================================ --}}
+            <div class="mt-6 pt-5 border-t border-gray-100 dark:border-dark-700">
+                <div class="flex items-start gap-3 mb-4">
+                    <div class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-dark-700 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-gray-600 dark:text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Remove Custom Logo
-                    </button>
-                </form>
-            @endif
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-gray-900 dark:text-neutral-100">Main Logo (Fallback)</p>
+                        <p class="text-[10px] text-gray-500 dark:text-neutral-400">
+                            Default logo to display when no light or dark logo is set.
+                        </p>
+                    </div>
+                </div>
+
+                @if ($config->hasLogo())
+                    <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-dark-850 rounded-lg border border-gray-200 dark:border-dark-600">
+                        <div class="bg-white dark:bg-dark-800 rounded-lg px-4 py-2 border border-gray-200 dark:border-dark-600">
+                            <img src="{{ $config->logo_url }}"
+                                 alt="Main logo"
+                                 class="w-auto max-w-[120px] h-auto"
+                                 style="height: {{ min(30, $config->logo_height_px) }}px;">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs text-gray-600 dark:text-neutral-400">
+                                Active fallback logo. Replace or remove below.
+                            </p>
+                        </div>
+                        <form method="POST"
+                              action="{{ route('admin.config.logo.remove') }}"
+                              onsubmit="return confirm('Remove the main logo?');"
+                              class="flex-shrink-0">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    class="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 hover:text-red-700 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/30 px-3 py-1.5 rounded-md text-xs font-medium transition">
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Remove
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <form method="POST"
+                          action="{{ route('admin.config.logo.upload') }}"
+                          enctype="multipart/form-data"
+                          class="space-y-2">
+                        @csrf
+                        <input type="file"
+                               name="logo"
+                               accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
+                               @change="validateFile($event, 'mainError')"
+                               class="block w-full text-xs text-gray-700 dark:text-neutral-300
+                                      file:mr-3 file:py-1.5 file:px-3
+                                      file:rounded-md file:border-0
+                                      file:text-xs file:font-medium
+                                      file:bg-gray-900 file:text-white
+                                      hover:file:bg-gray-800
+                                      file:cursor-pointer
+                                      border border-gray-300 dark:border-dark-600 rounded-md
+                                      focus:outline-none focus:ring-2 focus:ring-gray-900">
+                        <p class="text-[10px] text-red-600" x-show="mainError" x-text="mainError"></p>
+                        <button type="submit"
+                                class="inline-flex items-center gap-1.5 bg-gray-900 dark:bg-dark-700 text-white px-3.5 py-1.5 rounded-md text-xs font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            Upload Main Logo
+                        </button>
+                    </form>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -258,7 +476,7 @@
             <input type="hidden" name="town_center_lat" :value="lat">
             <input type="hidden" name="town_center_lng" :value="lng">
 
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 dark:text-neutral-300 mb-1.5">
                         Service Radius (km)
@@ -312,23 +530,25 @@
 <script>
 function logoCustomizer() {
     return {
-        error: '',
+        lightError: '',
+        darkError: '',
+        mainError: '',
         currentSize: {{ \App\Models\SystemConfig::current()->logo_height_px }},
 
-        validateFile(event) {
-            this.error = '';
+        validateFile(event, errorField) {
+            this[errorField] = '';
             const file = event.target.files[0];
             if (!file) return;
 
             if (file.size > 2 * 1024 * 1024) {
-                this.error = 'File is too large. Maximum 2MB.';
+                this[errorField] = 'File is too large. Maximum 2MB.';
                 event.target.value = '';
                 return;
             }
 
             const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp'];
             if (!allowed.includes(file.type)) {
-                this.error = 'Invalid file type. Use PNG, JPG, SVG, or WebP.';
+                this[errorField] = 'Invalid file type. Use PNG, JPG, SVG, or WebP.';
                 event.target.value = '';
                 return;
             }

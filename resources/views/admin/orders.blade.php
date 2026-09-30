@@ -160,7 +160,8 @@
                             ];
                             $statusClass = $statusStyles[$o->status] ?? 'bg-amber-50 text-amber-700 border-amber-200';
                         @endphp
-                        <tr class="hover:bg-gray-50 transition">
+                        <tr onclick="window.location='{{ route('admin.orders.show', $o) }}'"
+    class="hover:bg-gray-50 transition cursor-pointer">
 
                             {{-- ORDER ID --}}
                             <td class="px-5 py-3">
