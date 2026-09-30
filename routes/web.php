@@ -95,7 +95,12 @@ Route::middleware(['auth', 'role:restaurant'])->prefix('restaurant')->group(func
 
     Route::post('/orders/{order}/reject', [RestaurantOrderController::class, 'reject'])
         ->name('restaurant.orders.reject');
+// ⭐ AI Assistant
+    Route::post('/ai/chat', [\App\Http\Controllers\Restaurant\AiAssistantController::class, 'chat'])
+        ->name('restaurant.ai.chat');
 
+    Route::get('/ai/status', [\App\Http\Controllers\Restaurant\AiAssistantController::class, 'status'])
+        ->name('restaurant.ai.status');
     // ⭐ Start Preparing — 'confirmed' → 'preparing'
     Route::post('/orders/{order}/ready', [RestaurantOrderController::class, 'ready'])
         ->name('restaurant.orders.ready');

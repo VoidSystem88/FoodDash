@@ -1239,7 +1239,7 @@
     {{-- ============================================ --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 
-        {{-- ============================================ --}}
+    {{-- ============================================ --}}
     {{-- AUTO-CLEAR THEME ON LOGOUT --}}
     {{-- ============================================ --}}
     <script>
@@ -1257,5 +1257,13 @@
     {{-- PAGE-SPECIFIC SCRIPTS (AFTER Alpine!) --}}
     {{-- ============================================ --}}
     @stack('scripts')
+
+    {{-- AI ASSISTANT (restaurant only) --}}
+    @auth
+        @if (auth()->user()->isRestaurant())
+            @include('restaurant.partials.ai-assistant')
+        @endif
+    @endauth
+
 </body>
 </html>
