@@ -217,7 +217,7 @@ php artisan reverb:start --debug
 Terminal 3 — Queue worker:
 
 bash
-php artisan queue:listen --tries=1
+php artisan queue:work
 Terminal 4 — Vite dev server (or skip if you ran npm run build):
 
 bash
@@ -227,11 +227,13 @@ Visit: http://localhost:8000
 🔑 Default Accounts
 After seeding, you can log in with these accounts (password: password):
 
-Role	Email
-Admin	admin@fooddash.test
-Customer	customer@fooddash.test
-Restaurant	restaurant@fooddash.test
-Rider	rider@fooddash.test
+Role	Name	Email
+Admin	System Admin	adminvoid00@gmail.com
+Customer	Jelvie	aparicijelvie09x@gmail.com
+Restaurant	Kid (PizzaKid)	jelvieaparici09x@gmail.com
+Restaurant	Ben (Oro Eatery)	restaurantoro90@gmail.com
+Rider	El Isog	voidsystem88@gmail.com
+Rider	Juan	fooddashrider@gmail.com
 🎯 Key Features Explained
 🛵 Multi-Batch Rider Search
 When a restaurant confirms an order, the system searches for riders in expanding radius batches:
