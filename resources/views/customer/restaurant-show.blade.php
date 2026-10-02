@@ -10,8 +10,10 @@
 
         <div class="h-40 relative overflow-hidden">
             @if ($restaurant->cover_image_url)
-                <img src="{{ $restaurant->cover_image_url }}" alt="{{ $restaurant->name }}" class="absolute inset-0 w-full h-full object-cover">
-            @else
+<img src="{{ $restaurant->cover_image_url }}"
+     alt="{{ $restaurant->name }}"
+     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                 @else
                 <div class="absolute inset-0 bg-gradient-to-br from-orange-500 via-orange-400 to-amber-400"></div>
                 <div class="absolute inset-0 opacity-20"
                      style="background-image: radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 80%, white 1px, transparent 1px); background-size: 40px 40px;"></div>
@@ -37,7 +39,7 @@
                     @endif
                 </div>
 
-                    <div class="flex-1 pb-1 min-w-0">
+                <div class="flex-1 pb-1 min-w-0">
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-neutral-100 leading-tight">{{ $restaurant->name }}</h1>
                     @if ($restaurant->display_badge)
                         <span class="inline-block mt-1 text-xs px-2.5 py-1 rounded-full bg-amber-800 dark:bg-amber-900 text-white font-bold uppercase tracking-wider">
@@ -179,9 +181,9 @@
                         {{-- IMAGE --}}
                         <div class="relative aspect-square overflow-hidden">
                             @if ($item->image_path)
-                                <img src="{{ Storage::disk('public')->url($item->image_path) }}"
-                                     alt="{{ $item->name }}"
-                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                <img src="{{ $item->image_url }}"
+                                alt="{{ $item->name }}"
+                                class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             @else
                                 <div class="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-50 dark:from-dark-850 dark:to-dark-800 flex items-center justify-center">
                                     <svg class="w-16 h-16 text-gray-300 dark:text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -511,6 +513,217 @@
                             </div>
                         </template>
 
+                        {{-- ============================================ --}}
+                        {{-- PAYMENT METHOD SELECTOR (Dropdown Style) --}}
+                        {{-- ============================================ --}}
+                        <div class="pt-4 border-t border-gray-100 dark:border-dark-700">
+                            <div class="flex items-center gap-2 mb-3">
+                                <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <label class="text-sm font-semibold text-gray-900 dark:text-neutral-100">Payment Method</label>
+                            </div>
+
+                            {{-- COD — Always visible --}}
+                            <label class="block cursor-pointer mb-2">
+                                <input type="radio"
+                                       name="payment_method"
+                                       value="cod"
+                                       x-model="paymentMethod"
+                                       @change="showOtherPaymentMethods = false; paymentReference = ''"
+                                       class="peer sr-only">
+
+                                <div class="relative border-2 rounded-xl p-3 flex items-center gap-3 transition-all duration-200
+                                            border-gray-200 dark:border-dark-600
+                                            peer-checked:border-orange-500 peer-checked:bg-orange-50 dark:peer-checked:bg-orange-950/30
+                                            peer-checked:shadow-md peer-checked:shadow-orange-500/20
+                                            hover:border-gray-300 dark:hover:border-dark-500">
+
+                                    <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-dark-700 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-gray-600 dark:text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                    </div>
+
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-bold text-gray-900 dark:text-neutral-100 peer-checked:text-orange-700 dark:peer-checked:text-orange-400">
+                                            Cash on Delivery
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-neutral-400">
+                                            Pay via Cash on Delivery
+                                        </p>
+                                    </div>
+
+                                    <span class="w-5 h-5 rounded-full bg-orange-500 items-center justify-center hidden peer-checked:flex flex-shrink-0">
+                                        <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </label>
+
+                            {{-- TOGGLE BUTTON --}}
+                            <button type="button"
+                                    @click="showOtherPaymentMethods = !showOtherPaymentMethods"
+                                    class="w-full flex items-center justify-between gap-2 py-2 px-1 text-xs font-semibold
+                                           text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 transition group">
+
+                                <span class="flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    <span x-text="showOtherPaymentMethods ? 'Hide other methods' : 'Pay another method'"></span>
+                                </span>
+
+                                <svg class="w-3.5 h-3.5 transition-transform duration-200"
+                                     :class="showOtherPaymentMethods ? 'rotate-180' : ''"
+                                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {{-- COLLAPSIBLE — GCash + Maya --}}
+                            <div x-show="showOtherPaymentMethods"
+                                 x-cloak
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 -translate-y-2"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 translate-y-0"
+                                 x-transition:leave-end="opacity-0 -translate-y-2"
+                                 class="space-y-2 mt-2">
+
+                                {{-- GCASH --}}
+                                <label class="block cursor-pointer">
+                                    <input type="radio"
+                                           name="payment_method"
+                                           value="gcash"
+                                           x-model="paymentMethod"
+                                           class="peer sr-only">
+
+                                    <div class="relative border-2 rounded-xl p-3 flex items-center gap-3 transition-all duration-200
+                                                border-gray-200 dark:border-dark-600
+                                                peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-950/30
+                                                peer-checked:shadow-md peer-checked:shadow-blue-500/20
+                                                hover:border-gray-300 dark:hover:border-dark-500">
+
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950/50 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-2.76 0-5-2.24-5-5s2.24-5 5-5c1.38 0 2.63.56 3.54 1.46l-1.41 1.41C13.41 9.34 12.75 9 12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c1.39 0 2.56-.94 2.88-2.23h-2.88v-1.5h4.5c.04.24.06.49.06.75 0 2.76-2.24 5-5 5z"/>
+                                            </svg>
+                                        </div>
+
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-bold text-gray-900 dark:text-neutral-100 peer-checked:text-blue-700 dark:peer-checked:text-blue-400">
+                                                GCash
+                                            </p>
+                                            <p class="text-xs text-gray-500 dark:text-neutral-400">
+                                                Send payment via GCash
+                                            </p>
+                                        </div>
+
+                                        <span class="w-5 h-5 rounded-full bg-blue-500 items-center justify-center hidden peer-checked:flex flex-shrink-0">
+                                            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </label>
+
+                                {{-- MAYA --}}
+                                <label class="block cursor-pointer">
+                                    <input type="radio"
+                                           name="payment_method"
+                                           value="maya"
+                                           x-model="paymentMethod"
+                                           class="peer sr-only">
+
+                                    <div class="relative border-2 rounded-xl p-3 flex items-center gap-3 transition-all duration-200
+                                                border-gray-200 dark:border-dark-600
+                                                peer-checked:border-green-500 peer-checked:bg-green-50 dark:peer-checked:bg-green-950/30
+                                                peer-checked:shadow-md peer-checked:shadow-green-500/20
+                                                hover:border-gray-300 dark:hover:border-dark-500">
+
+                                        <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-950/50 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.5 15v-4.5H9v-1.5h1.5V9.5c0-1.38 1.12-2.5 2.5-2.5H15v1.5h-2c-.55 0-1 .45-1 1V11H15v1.5h-3V17h-1.5z"/>
+                                            </svg>
+                                        </div>
+
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-bold text-gray-900 dark:text-neutral-100 peer-checked:text-green-700 dark:peer-checked:text-green-400">
+                                                Maya
+                                            </p>
+                                            <p class="text-xs text-gray-500 dark:text-neutral-400">
+                                                Send payment via Maya (PayMaya)
+                                            </p>
+                                        </div>
+
+                                        <span class="w-5 h-5 rounded-full bg-green-500 items-center justify-center hidden peer-checked:flex flex-shrink-0">
+                                            <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </span>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {{-- GCASH / MAYA INFO + REFERENCE INPUT --}}
+                            <template x-if="paymentMethod === 'gcash' || paymentMethod === 'maya'">
+                                <div class="space-y-3 mt-3">
+                                    <div class="p-3 rounded-xl border flex items-start gap-2"
+                                         :class="paymentMethod === 'gcash'
+                                            ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800'
+                                            : 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800'">
+
+                                        <svg class="w-4 h-4 flex-shrink-0 mt-0.5"
+                                             :class="paymentMethod === 'gcash' ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'"
+                                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+
+                                        <div class="text-xs space-y-1.5 flex-1"
+                                             :class="paymentMethod === 'gcash' ? 'text-blue-800 dark:text-blue-300' : 'text-green-800 dark:text-green-300'">
+
+                                            <p class="font-bold">
+                                                <span x-text="paymentMethod === 'gcash' ? 'Send to GCash' : 'Send to Maya'"></span>
+                                            </p>
+
+                                            <p>1. I-send ang bayad sa number na ito:</p>
+
+                                            <div class="flex items-center gap-2 bg-white/70 dark:bg-dark-800/70 px-2.5 py-1.5 rounded-lg">
+                                                <p class="font-mono font-bold text-sm"
+                                                   x-text="paymentMethod === 'gcash'
+                                                       ? '{{ \App\Models\SystemConfig::current()->gcash_number ?? '0917-XXX-XXXX' }}'
+                                                       : '{{ \App\Models\SystemConfig::current()->maya_number ?? '0917-XXX-XXXX' }}'">
+                                                </p>
+                                            </div>
+
+                                            <p>2. Kopyahin ang <strong>reference number</strong> pagkatapos mag-send.</p>
+                                            <p>3. I-paste sa ibaba at i-submit.</p>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-700 dark:text-neutral-300 mb-1.5">
+                                            Reference Number <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text"
+                                               name="payment_reference"
+                                               x-model="paymentReference"
+                                               :required="paymentMethod !== 'cod'"
+                                               maxlength="50"
+                                               placeholder="e.g. 1234567890123"
+                                               class="w-full border border-gray-300 dark:border-dark-600 dark:bg-dark-850 dark:text-neutral-100 rounded-xl px-3 py-2.5 text-sm font-mono tracking-wide
+                                                      focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
+                                        <p class="text-[10px] text-gray-500 dark:text-neutral-400 mt-1">
+                                            I-verify ng rider ang reference number bago i-mark as paid.
+                                        </p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
                         <template x-for="line in cartLines" :key="'input-' + line.id">
                             <div>
                                 <input type="hidden" :name="'items[' + line.index + '][menu_item_id]'" :value="line.id">
@@ -636,6 +849,11 @@ function orderForm(restaurantId, menuItems) {
         cart: {},
         deliveryFee: {{ \App\Models\SystemConfig::current()->default_delivery_fee }},
 
+        // ⭐ PAYMENT STATE
+        paymentMethod: 'cod',
+        paymentReference: '',
+        showOtherPaymentMethods: false,
+
         showGuestModal: false,
         showExitModal: false,
         pendingNavigation: null,
@@ -712,7 +930,12 @@ function orderForm(restaurantId, menuItems) {
             try { localStorage.removeItem(this.storageKey); localStorage.removeItem(this.addressKey); } catch (err) {}
         },
 
-        clearCartOnSubmit() { this.clearCartStorage(); },
+        clearCartOnSubmit() {
+            this.clearCartStorage();
+            this.paymentMethod = 'cod';
+            this.paymentReference = '';
+            this.showOtherPaymentMethods = false;
+        },
 
         saveAddress() {
             try {

@@ -223,31 +223,33 @@ public function updateStatus(Request $request, Order $order)
      * ⭐ RECORD PAYMENT
      */
     public function recordPayment(Request $request, Order $order)
-    {
-        $rider = $request->user()->rider;
-        abort_unless($order->rider_id === $rider->id, 403);
+{
+    $rider = $request->user()->rider;
+    abort_unless($order->rider_id === $rider->id, 403);
 
-        // ⭐ BAGO: Siguraduhing 'delivered' na ang order
-        if ($order->status !== 'delivered') {
-            return redirect()->route('rider.dashboard')
-                ->with('error', 'Cannot record payment — order is not yet delivered.');
-        }
-
-        if ($order->payment()->exists()) {
-            return redirect()->route('rider.dashboard')
-                ->with('error', 'Payment already recorded.');
-        }
-
-        Payment::create([
-            'order_id' => $order->id,
-            'rider_paid_restaurant' => $order->restaurant_earnings ?? $order->food_cost,
-            'rider_collected_customer' => $order->total_amount,
-            'recorded_at' => now(),
-        ]);
-
+    if ($order->status !== 'delivered') {
         return redirect()->route('rider.dashboard')
-            ->with('success', 'Payment recorded successfully!');
+            ->with('error', 'Cannot record payment — order is not yet delivered.');
     }
+
+    if ($order->payment()->exists()) {
+        return redirect()->route('rider.dashboard')
+            ->with('error', 'Payment already recorded.');
+    }
+
+    Payment::create([
+        'order_id' => $order->id,
+        'rider_paid_restaurant' => $order->restaurant_earnings ?? $order->food_cost,
+        'rider_collected_customer' => $order->total_amount,
+        'recorded_at' => now(),
+    ]);
+
+    // ⭐ Mark as paid
+    $order->update(['payment_status' => 'paid']);
+
+    return redirect()->route('rider.dashboard')
+        ->with('success', 'Payment recorded successfully!');
+}
 
     /**
      * Calculate distance between two coordinates (km)

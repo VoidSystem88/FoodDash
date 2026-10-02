@@ -17,7 +17,7 @@
         </div>
 
         <div class="ai-popup-text">
-            <p class="ai-popup-title">Hi! I'm Dash 👋</p>
+            <p class="ai-popup-title">Hi! I'm Dash </p>
             <p class="ai-popup-body">I can help you find restaurants, discover food, and track your orders. Try me!</p>
         </div>
 
@@ -50,15 +50,13 @@
 
     {{-- HEADER --}}
     <div class="ai-panel-header" id="aiPanelHeader">
-        <div class="ai-panel-avatar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-        </div>
+    {{-- ⭐ DYNAMIC ICON FROM ADMIN SETTINGS --}}
+    <div class="ai-panel-avatar">
+        {!! $config->ai_icon_html !!}
+    </div>
 
         <div class="ai-panel-title">
-            <p class="ai-panel-name">FoodDash Assistant</p>
+            <p class="ai-panel-name">Ai Assistant</p>
             <p class="ai-panel-subtitle">
                 <span class="ai-panel-dot"></span>
                 Online
@@ -76,37 +74,41 @@
     </div>
 
     {{-- MESSAGES --}}
-    <div id="aiMessages" class="ai-messages">
+<div id="aiMessages" class="ai-messages">
 
-        {{-- Welcome --}}
-        <div class="ai-message ai-message-bot">
-            <div class="ai-bubble ai-bubble-bot">
-                <p>Hi! I'm <strong>Dash</strong>, your FoodDash customer assistant. I can help you find restaurants, discover menu items, recommend food, and track your orders.</p>
-            </div>
-        </div>
-
-        {{-- Suggestions --}}
-        <div class="ai-suggestions">
-            <p class="ai-suggestions-label">Try asking</p>
-
-            <button type="button" class="ai-suggestion" onclick="sendAIMessage('What restaurants are open right now?')">
-                What restaurants are open right now?
-            </button>
-
-            <button type="button" class="ai-suggestion" onclick="sendAIMessage('What menu items do you have besides pizza?')">
-                What menu items do you have besides pizza?
-            </button>
-
-            <button type="button" class="ai-suggestion" onclick="sendAIMessage('Show me my recent orders')">
-                Show me my recent orders
-            </button>
-
-            <button type="button" class="ai-suggestion" onclick="sendAIMessage('What are my favorites?')">
-                What are my favorites?
-            </button>
-        </div>
+    <div class="ai-welcome">
+    <div class="ai-welcome-avatar">
+        {!! $config->ai_icon_html !!}
     </div>
 
+    <h3 class="ai-welcome-title">Hi! I'm Dash </h3>
+
+    <p class="ai-welcome-text">
+        Your <strong>Smart Food Analytics assistant</strong>. I can help you find restaurants, discover menu items, recommend food, and track your orders.
+    </p>
+
+    {{-- ⭐ Badge --}}
+    <div class="ai-welcome-badge">
+        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <span>Powered by DashBite AI</span>
+    </div>
+</div>
+
+    {{-- Suggestions --}}
+    <div class="ai-suggestions">
+        <p class="ai-suggestions-label">Try asking</p>
+
+        <button type="button" class="ai-suggestion" onclick="sendAIMessage('What restaurants are open right now?')">
+            What restaurants are open right now?
+        </button>
+
+        <button type="button" class="ai-suggestion" onclick="sendAIMessage('What menu items do you have besides pizza?')">
+            What menu items do you have besides pizza?
+        </button>        
+    </div>
+</div>
     {{-- INPUT --}}
     <form id="aiForm" onsubmit="event.preventDefault(); sendAIMessage();" class="ai-input-form">
         <input type="text"
@@ -127,6 +129,121 @@
 {{-- STYLES --}}
 {{-- ============================================ --}}
 <style>
+    .ai-welcome-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    padding: 4px 10px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #c2410c;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.dark .ai-welcome-badge {
+    background: rgba(249, 115, 22, 0.15);
+    border-color: rgba(249, 115, 22, 0.3);
+    color: #fb923c;
+}
+    /* ============================================
+   ⭐ CENTERED WELCOME SCREEN
+   ============================================ */
+.ai-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 16px 20px;
+    gap: 12px;
+    animation: aiSlideIn 0.35s ease-out;
+}
+
+/* Avatar wrapper */
+.ai-welcome-avatar {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.ai-welcome-avatar svg,
+.ai-welcome-avatar img {
+    width: 80px;
+    height: 80px;
+    color: white;
+    object-fit: contain;
+}
+
+/* Welcome title */
+.ai-welcome-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Welcome text */
+.ai-welcome-text {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.55;
+    max-width: 280px;
+}
+
+.ai-welcome-text strong {
+    font-weight: 600;
+    color: #ea580c;
+}
+
+/* Pulse animation for avatar */
+@keyframes aiWelcomePulse {
+    0%, 100% {
+        box-shadow:
+            0 8px 24px rgba(249, 115, 22, 0.35),
+            0 4px 12px rgba(249, 115, 22, 0.2),
+            0 0 0 4px rgba(249, 115, 22, 0.1);
+    }
+    50% {
+        box-shadow:
+            0 8px 32px rgba(249, 115, 22, 0.5),
+            0 4px 16px rgba(249, 115, 22, 0.3),
+            0 0 0 8px rgba(249, 115, 22, 0.05);
+    }
+}
+
+/* ⭐ Dark mode */
+.dark .ai-welcome-title {
+    color: #f4f4f5;
+}
+
+.dark .ai-welcome-text {
+    color: #a1a1aa;
+}
+
+.dark .ai-welcome-text strong {
+    color: #fb923c;
+}
+
+/* ⭐ Suggestions centered below welcome */
+.ai-suggestions {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
 /* ============================================
    BUBBLE BUTTON — transparent, clean
    ============================================ */

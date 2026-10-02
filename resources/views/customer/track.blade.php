@@ -500,7 +500,25 @@
     {{-- ============================================ --}}
     <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
         <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400 mb-4 font-bold">Order Summary</p>
-
+{{-- Payment Info --}}
+<div class="flex justify-between text-sm pt-2 border-t border-zinc-200 dark:border-zinc-800">
+    <span class="text-zinc-500 dark:text-zinc-400">Payment</span>
+    <div class="text-right">
+        <span class="font-bold text-zinc-900 dark:text-white">
+            {{ $order->payment_method_label }}
+        </span>
+        @if ($order->payment_reference)
+            <p class="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono mt-0.5">
+                Ref: {{ $order->payment_reference }}
+            </p>
+        @endif
+        @if ($order->isPrepaid())
+            <span class="inline-block mt-1 text-[10px] bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
+                ✓ Paid
+            </span>
+        @endif
+    </div>
+</div>
         <div class="space-y-2">
             @foreach ($order->items as $item)
                 <div class="flex justify-between text-sm">

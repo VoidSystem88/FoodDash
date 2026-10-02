@@ -4,11 +4,17 @@
     {{-- DARK MODE - Inline script para hindi mag-flash bago mag-load --}}
     <script>
     (function() {
+    // ⭐ Guest users → FORCE LIGHT MODE
+    @guest
+        localStorage.setItem('theme', 'light');
+        document.documentElement.classList.remove('dark');
+    @else
         const stored = localStorage.getItem('theme');
         if (stored === 'dark' || (stored === 'system' || !stored) && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.documentElement.classList.add('dark');
         }
-    })();
+    @endguest
+})();
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

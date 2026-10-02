@@ -35,6 +35,6 @@ class MenuItem extends Model
             return \Storage::disk('public')->url($this->image_path);
         }
 
-        return '';
+        return asset('images/noimg.png');  // ⭐ Default placeholder
     }
 }

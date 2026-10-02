@@ -96,7 +96,8 @@ class Restaurant extends Model
         if ($this->cover_image && \Storage::disk('public')->exists($this->cover_image)) {
             return \Storage::disk('public')->url($this->cover_image);
         }
-        return '';
+
+        return asset('images/noimg.png');  // ⭐ Default placeholder
     }
 
     public function getProfileImageUrlAttribute(): string
@@ -104,7 +105,8 @@ class Restaurant extends Model
         if ($this->profile_image && \Storage::disk('public')->exists($this->profile_image)) {
             return \Storage::disk('public')->url($this->profile_image);
         }
-        return '';
+
+        return asset('images/noimg.png');  // ⭐ Default placeholder
     }
 
     // ============================================

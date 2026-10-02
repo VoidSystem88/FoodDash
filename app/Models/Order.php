@@ -13,6 +13,9 @@ class Order extends Model
         'customer_id',
         'restaurant_id',
         'rider_id',
+        'payment_method',
+        'payment_reference',
+        'payment_status',
         'status',
         'rejection_reason',
         'restaurant_started_preparing_at',
@@ -56,7 +59,28 @@ class Order extends Model
 // ============================================
 // RIDER STATE HELPERS
 // ============================================
+// Sa helpers section
 
+public function isPrepaid(): bool
+{
+    return in_array($this->payment_method, ['gcash', 'maya'])
+        && $this->payment_status === 'paid';
+}
+
+public function isCashOnDelivery(): bool
+{
+    return $this->payment_method === 'cod';
+}
+
+public function getPaymentMethodLabelAttribute(): string
+{
+    return match ($this->payment_method) {
+        'gcash' => 'GCash',
+        'maya' => 'Maya (PayMaya)',
+        'cod' => 'Cash on Delivery',
+        default => 'Unknown',
+    };
+}
 /**
  * Check kung verified na ang order para sa rider.
  * Verified = restaurant nag-start ng preparing.

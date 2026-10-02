@@ -7,11 +7,18 @@
     <button x-show="!isOpen"
             @click="isOpen = true"
             type="button"
-            class="relative w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 shadow-2xl flex items-center justify-center text-white hover:scale-105 active:scale-95 transition transform border-2 border-white dark:border-dark-800">
+            class="relative w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 shadow-2xl flex items-center justify-center text-white hover:scale-105 active:scale-95 transition transform border-2 border-white dark:border-dark-800 overflow-hidden">
 
-        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-        </svg>
+        {{-- ⭐ PROFILE PICTURE OR DEFAULT ICON --}}
+        @if (auth()->user()->avatar_url)
+            <img src="{{ auth()->user()->avatar_url }}"
+                 alt="{{ auth()->user()->name }}"
+                 class="w-full h-full rounded-full object-cover">
+        @else
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+        @endif
 
         <span class="absolute top-0 right-0 w-3 h-3 rounded-full bg-green-400 animate-pulse border-2 border-white dark:border-dark-800"></span>
     </button>
@@ -24,19 +31,27 @@
          class="bg-white dark:bg-dark-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-dark-700 overflow-hidden flex flex-col"
          style="width: 380px; height: 520px; max-width: calc(100vw - 2rem); max-height: calc(100vh - 2rem);">
 
-        {{-- HEADER --}}
+        {{-- ⭐ HEADER — DYNAMIC PROFILE --}}
         <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 flex items-center gap-3 flex-shrink-0">
-            <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-            </div>
+
+            {{-- Avatar/Profile Picture --}}
+            @if (auth()->user()->avatar_url)
+                <img src="{{ auth()->user()->avatar_url }}"
+                     alt="{{ auth()->user()->name }}"
+                     class="w-9 h-9 rounded-full object-cover border-2 border-white/30 flex-shrink-0">
+            @else
+                <div class="w-9 h-9 rounded-full {{ auth()->user()->avatar_color }} flex items-center justify-center text-white text-xs font-bold border-2 border-white/30 flex-shrink-0">
+                    {{ auth()->user()->initials }}
+                </div>
+            @endif
+
             <div class="flex-1 min-w-0">
-                <p class="font-bold text-white text-sm">FoodDash Assistant</p>
+                <p class="font-bold text-white text-sm truncate">{{ auth()->user()->name }}</p>
                 <p class="text-[10px] text-white/80">
                     <span x-text="remaining"></span> messages left today
                 </p>
             </div>
+
             <button @click="isOpen = false" type="button"
                     class="w-7 h-7 rounded-lg hover:bg-white/20 flex items-center justify-center text-white transition flex-shrink-0">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -52,10 +67,19 @@
             {{-- WELCOME + SUGGESTIONS --}}
             <template x-if="messages.length === 0 && !loading">
                 <div>
-                    <div class="bg-white dark:bg-dark-800 rounded-2xl rounded-bl-none p-3 border border-gray-200 dark:border-dark-700 shadow-sm">
-                        <p class="text-sm text-gray-700 dark:text-neutral-300">
-                            Kumusta! Ako si <strong>Dash</strong> — tutulungan kita sa analytics ng restaurant mo. Anong gusto mong malaman?
-                        </p>
+                    <div class="flex items-end gap-2">
+                        {{-- ⭐ AI AVATAR --}}
+                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                        </div>
+
+                        <div class="bg-white dark:bg-dark-800 rounded-2xl rounded-bl-none p-3 border border-gray-200 dark:border-dark-700 shadow-sm max-w-[85%]">
+                            <p class="text-sm text-gray-700 dark:text-neutral-300">
+                                Kumusta! Ako si <strong>Dash</strong> — tutulungan kita sa analytics ng restaurant mo. Anong gusto mong malaman?
+                            </p>
+                        </div>
                     </div>
 
                     <div class="mt-3 space-y-1.5">
@@ -73,13 +97,24 @@
                 </div>
             </template>
 
-            {{-- MESSAGE LIST --}}
+            {{-- ⭐ MESSAGE LIST — WITH AVATARS --}}
             <template x-for="(msg, i) in messages" :key="i">
-                <div :class="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
+                <div :class="msg.role === 'user' ? 'flex justify-end items-end gap-2' : 'flex justify-start items-end gap-2'">
+
+                    {{-- ⭐ AI AVATAR (left) --}}
+                    <template x-if="msg.role === 'assistant'">
+                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                        </div>
+                    </template>
+
+                    {{-- MESSAGE BUBBLE --}}
                     <div :class="msg.role === 'user'
                             ? 'bg-orange-600 text-white rounded-br-none'
                             : 'bg-white dark:bg-dark-800 text-gray-700 dark:text-neutral-300 border border-gray-200 dark:border-dark-700 rounded-bl-none'"
-                         class="max-w-[85%] px-3 py-2 rounded-2xl shadow-sm text-sm">
+                         class="max-w-[80%] px-3 py-2 rounded-2xl shadow-sm text-sm">
                         <p class="whitespace-pre-wrap break-words" x-text="msg.content"></p>
 
                         {{-- Tool badge --}}
@@ -92,12 +127,32 @@
                             </div>
                         </template>
                     </div>
+
+                    {{-- ⭐ USER AVATAR (right) --}}
+                    <template x-if="msg.role === 'user'">
+                        <div class="flex-shrink-0">
+                            @if (auth()->user()->avatar_url)
+                                <img src="{{ auth()->user()->avatar_url }}"
+                                     alt="{{ auth()->user()->name }}"
+                                     class="w-7 h-7 rounded-full object-cover shadow-sm">
+                            @else
+                                <div class="w-7 h-7 rounded-full {{ auth()->user()->avatar_color }} flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
+                                    {{ auth()->user()->initials }}
+                                </div>
+                            @endif
+                        </div>
+                    </template>
                 </div>
             </template>
 
-            {{-- TYPING --}}
+            {{-- ⭐ TYPING — WITH AI AVATAR --}}
             <template x-if="loading">
-                <div class="flex justify-start">
+                <div class="flex justify-start items-end gap-2">
+                    <div class="w-7 h-7 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                    </div>
                     <div class="bg-white dark:bg-dark-800 border border-gray-200 dark:border-dark-700 px-3 py-2 rounded-2xl rounded-bl-none shadow-sm">
                         <div class="flex gap-1">
                             <span class="typing-dot"></span>

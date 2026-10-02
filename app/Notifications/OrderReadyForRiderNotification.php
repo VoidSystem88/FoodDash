@@ -22,19 +22,19 @@ class OrderReadyForRiderNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject("🍔 Order #{$this->order->id} — Ready for Pickup!")
+            ->subject(" Order #{$this->order->id} — Ready for Pickup!")
             ->greeting("Hi {$notifiable->name}!")
             ->line("Ang order #{$this->order->id} ay ready na para i-pickup!")
             ->line("**Pickup From:**")
             ->line($this->order->restaurant->name)
             ->line($this->order->restaurant->address)
             ->action('View Order', url('/rider/dashboard'))
-            ->line('Ingat sa pagmamaneho! 🛵');
+            ->line('Drive safe! ');
     }
 
     public function toArray(object $notifiable): array
     {
-        $title = '🍔 Food Ready!';
+        $title = ' Food Ready!';
         $body = "Order #{$this->order->id} — pickup na sa {$this->order->restaurant->name}";
 
         broadcast(new NotificationSent(

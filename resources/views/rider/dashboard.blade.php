@@ -407,13 +407,31 @@
                         <p class="font-bold text-sm text-zinc-900 dark:text-white">{{ $currentOrder->restaurant->name ?? '—' }}</p>
                         <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{{ $currentOrder->restaurant->address ?? '' }}</p>
 
-                        <div class="flex items-center gap-2 mt-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg px-3 py-2">
-                            <svg class="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            <span class="text-xs text-zinc-600 dark:text-zinc-400">Pay restaurant:</span>
-                            <span class="text-sm font-bold text-orange-500">₱{{ number_format($currentOrder->restaurant_earnings ?? $currentOrder->food_cost, 2) }}</span>
-                        </div>
+                        @if ($currentOrder->isPrepaid())
+    {{-- PREPAID --}}
+    <div class="flex items-center gap-2 mt-2 bg-green-500 rounded-lg px-3 py-2">
+        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="text-xs text-white/90 font-bold">PAID via {{ $currentOrder->payment_method_label }}</span>
+        <span class="text-sm font-bold text-white ml-auto">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
+    </div>
+    <p class="text-[10px] text-gray-500 dark:text-neutral-400 mt-1">
+        Huwag nang maningil ng cash. Ref: <span class="font-mono font-bold">{{ $currentOrder->payment_reference }}</span>
+    </p>
+                @else
+                    {{-- COD --}}
+                    <div class="flex items-center gap-2 mt-2 bg-orange-500 rounded-lg px-3 py-2">
+                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span class="text-xs text-white/90">Collect from customer:</span>
+                        <span class="text-sm font-bold text-white">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
+                    </div>
+                    <p class="text-[10px] text-orange-600 dark:text-orange-400 mt-1 font-medium">
+                        💵 Cash on Delivery
+                    </p>
+                @endif
                     </div>
                 </div>
 

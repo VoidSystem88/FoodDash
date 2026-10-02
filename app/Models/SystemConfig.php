@@ -17,6 +17,8 @@ class SystemConfig extends Model
         'service_radius_km',
         'default_delivery_fee',
         'commission_rate',
+        'gcash_number',
+        'maya_number',
         'logo_path',
         'light_logo_path',
         'dark_logo_path',
@@ -24,11 +26,13 @@ class SystemConfig extends Model
         'ai_icon_path',
         'ai_icon_type',
         'ai_icon_size',
+        'ai_icon_html',
     ];
 
     protected $casts = [
         'town_center_lat' => 'float',
         'town_center_lng' => 'float',
+        'ai_icon_size' => 'integer',
         'service_radius_km' => 'float',
         'default_delivery_fee' => 'float',
         'commission_rate' => 'float',

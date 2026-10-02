@@ -64,6 +64,7 @@
             </div>
         </div>
     </div>
+
     {{-- ============================================ --}}
     {{-- RECOMMENDED MENU CAROUSEL --}}
     {{-- ============================================ --}}
@@ -107,11 +108,13 @@
         <template x-if="items.length > 0">
             <div class="relative">
                 <div x-ref="scroller"
-                     @mouseenter="pause()"
-                     @mouseleave="resume()"
-                     @touchstart.passive="pause()"
-                     @touchend.passive="resume()"
-                     class="flex gap-3 overflow-x-auto scroll-smooth px-5 py-4 carousel-scroll">
+                    @mouseenter="pause()"
+                    @mouseleave="resume()"
+                    @mousedown="onDragStart()"
+                    @mouseup="onDragEnd()"
+                    @touchstart.passive="pause(); onDragStart()"
+                    @touchend.passive="resume(); onDragEnd()"
+                    class="flex gap-3 overflow-x-auto scroll-smooth px-5 py-4 carousel-scroll">
 
                     <template x-for="(item, index) in items" :key="item.id + '-' + index">
                         <a :href="item.restaurant_url"
@@ -158,21 +161,22 @@
             </div>
         </template>
     </div>
+
     {{-- ============================================ --}}
     {{-- CUISINE CHIPS --}}
     {{-- ============================================ --}}
     @if (isset($cuisines) && $cuisines->count() > 0)
         <div class="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#262626] p-4">
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap items-center gap-2">
                 <a href="{{ route('customer.restaurants', ['search' => request('search')]) }}"
-                   class="text-xs px-3.5 py-2 rounded-full border-2 transition font-semibold {{ !request('cuisine')
+                   class="inline-flex items-center text-xs px-3.5 py-2 rounded-full border-2 transition font-semibold whitespace-nowrap {{ !request('cuisine')
                         ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white border-transparent shadow-md'
                         : 'bg-white dark:bg-[#0a0a0a] text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-[#262626] hover:border-orange-400 dark:hover:border-orange-700' }}">
                     All Cuisines
                 </a>
                 @foreach ($cuisines as $cuisine)
                     <a href="{{ route('customer.restaurants', ['search' => request('search'), 'cuisine' => $cuisine]) }}"
-                       class="text-xs px-3.5 py-2 rounded-full border-2 transition font-semibold {{ request('cuisine') === $cuisine
+                       class="inline-flex items-center text-xs px-3.5 py-2 rounded-full border-2 transition font-semibold whitespace-nowrap {{ request('cuisine') === $cuisine
                             ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white border-transparent shadow-md'
                             : 'bg-white dark:bg-[#0a0a0a] text-neutral-700 dark:text-neutral-300 border-neutral-200 dark:border-[#262626] hover:border-orange-400 dark:hover:border-orange-700' }}">
                         {{ $cuisine }}
@@ -187,13 +191,13 @@
     {{-- ============================================ --}}
     @if (request('search') || request('cuisine'))
         <div class="bg-gradient-to-r from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/10 border border-orange-200 dark:border-orange-800/50 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
-            <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-sm">
+            <div class="flex items-center gap-2 min-w-0">
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-sm shrink-0">
                     <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                     </svg>
                 </div>
-                <p class="text-xs text-neutral-700 dark:text-neutral-300">
+                <p class="text-xs text-neutral-700 dark:text-neutral-300 truncate">
                     Showing
                     @if (request('search'))
                         results for "<strong class="text-neutral-900 dark:text-white">{{ request('search') }}</strong>"
@@ -206,7 +210,7 @@
             </div>
 
             <a href="{{ route('customer.restaurants') }}"
-               class="text-xs text-orange-600 dark:text-orange-400 hover:underline font-bold">
+               class="text-xs text-orange-600 dark:text-orange-400 hover:underline font-bold shrink-0">
                 Clear
             </a>
         </div>
@@ -218,30 +222,30 @@
     @if ($restaurants->count() > 0)
         <div class="bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#262626] p-4">
             <div class="flex items-center justify-between flex-wrap gap-3">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-md shrink-0">
                         <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <h2 class="font-bold text-neutral-900 dark:text-white">Restaurants</h2>
                         <p class="text-xs text-neutral-500 dark:text-neutral-400">{{ $restaurants->count() }} available</p>
                     </div>
                 </div>
 
                 {{-- VIEW TOGGLE --}}
-                <div class="flex items-center gap-1 bg-neutral-200 dark:bg-[#0a0a0a] rounded-lg p-1 border border-neutral-200 dark:border-[#262626]">
+                <div class="inline-flex items-center bg-neutral-200 dark:bg-[#0a0a0a] rounded-lg p-1 border border-neutral-200 dark:border-[#262626] shrink-0">
                     <button type="button" @click="viewMode = 'grid'"
-                            :class="viewMode === 'grid' ? 'bg-gradient-to-r from-orange-500 to-orange-600 shadow-sm text-white' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700'"
-                            class="p-2 rounded-md transition" title="Card view">
+                            :class="viewMode === 'grid' ? 'bg-gradient-to-r from-orange-500 to-orange-600 shadow-sm text-white' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'"
+                            class="w-8 h-8 rounded-md transition flex items-center justify-center" title="Card view">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                         </svg>
                     </button>
                     <button type="button" @click="viewMode = 'list'"
-                            :class="viewMode === 'list' ? 'bg-gradient-to-r from-orange-500 to-orange-600 shadow-sm text-white' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700'"
-                            class="p-2 rounded-md transition" title="List view">
+                            :class="viewMode === 'list' ? 'bg-gradient-to-r from-orange-500 to-orange-600 shadow-sm text-white' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'"
+                            class="w-8 h-8 rounded-md transition flex items-center justify-center" title="List view">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
@@ -287,7 +291,9 @@
         {{-- ============================================ --}}
         {{-- GRID VIEW --}}
         {{-- ============================================ --}}
-        <div x-show="viewMode === 'grid'" class="grid grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
+        <div x-show="viewMode === 'grid'"
+             x-cloak
+             class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             @foreach ($restaurants as $restaurant)
                 @php
                     $isOpen = $restaurant->isOpenNow();
@@ -295,7 +301,7 @@
                 @endphp
 
                 <div x-data="favoriteToggle({{ $restaurant->id }}, {{ $isFav ? 'true' : 'false' }})"
-                     class="relative group">
+                     class="relative group h-full">
 
                     {{-- HEART BUTTON --}}
                     @auth
@@ -333,17 +339,17 @@
 
                     {{-- CARD --}}
                     <a href="{{ route('customer.restaurants.show', $restaurant) }}"
-                       class="block bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#262626] overflow-hidden hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-800/50 transition-all duration-200">
+                       class="block h-full bg-white dark:bg-[#141414] rounded-2xl border border-neutral-200 dark:border-[#262626] overflow-hidden hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-800/50 transition-all duration-200 flex flex-col">
 
                         {{-- COVER IMAGE --}}
-                        <div class="relative aspect-square overflow-hidden">
+                        <div class="relative aspect-[4/3] overflow-hidden shrink-0">
                             @if ($restaurant->cover_image_url)
                                 <img src="{{ $restaurant->cover_image_url }}"
                                      alt="{{ $restaurant->name }}"
                                      class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                             @else
                                 <div class="absolute inset-0 bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 flex items-center justify-center">
-                                    <svg class="w-20 h-20 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <svg class="w-16 h-16 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
                                 </div>
@@ -366,7 +372,7 @@
                         </div>
 
                         {{-- BODY --}}
-                        <div class="p-3">
+                        <div class="p-3 flex-1 flex flex-col">
                             <div class="flex items-start justify-between gap-2 mb-1">
                                 <h2 class="font-bold text-neutral-900 dark:text-white text-sm leading-tight line-clamp-1 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition">
                                     {{ $restaurant->name }}
@@ -374,7 +380,7 @@
                             </div>
 
                             @if ($restaurant->display_badge)
-                                <span class="inline-block text-[10px] bg-gradient-to-r from-orange-500 to-orange-600 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider mb-2 shadow-sm">
+                                <span class="inline-block text-[10px] bg-gradient-to-r from-orange-500 to-orange-600 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider mb-2 shadow-sm w-fit">
                                     {{ $restaurant->display_badge }}
                                 </span>
                             @endif
@@ -387,7 +393,7 @@
                                 <span class="line-clamp-1">{{ $restaurant->address }}</span>
                             </div>
 
-                            <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-[#262626]">
+                            <div class="flex items-center justify-between pt-2 border-t border-neutral-100 dark:border-[#262626] mt-auto">
                                 <div class="flex items-center gap-1 text-xs">
                                     @if ($restaurant->rating_count > 0)
                                         <svg class="w-3.5 h-3.5 text-orange-500 fill-orange-500" viewBox="0 0 20 20">
@@ -470,7 +476,7 @@
                         </div>
 
                         {{-- Right side: rating + items --}}
-                        <div class="flex-shrink-0 text-right">
+                        <div class="flex-shrink-0 text-right hidden sm:block">
                             <div class="flex items-center justify-end gap-1 text-xs mb-1">
                                 @if ($restaurant->rating_count > 0)
                                     <svg class="w-3.5 h-3.5 text-orange-500 fill-orange-500" viewBox="0 0 20 20">
@@ -549,7 +555,6 @@
     }
 </style>
 <script>
-    
 function restaurantList() {
     return {
         viewMode: 'grid',
@@ -604,6 +609,7 @@ function favoriteToggle(restaurantId, initialIsFavorite) {
         }
     }
 }
+
 function menuCarousel() {
     return {
         items: [],
@@ -612,28 +618,30 @@ function menuCarousel() {
         isPaused: false,
         refreshInterval: null,
         countdownInterval: null,
-        autoScrollInterval: null,
+        rafId: null,
+        lastFrameTime: 0,
+        scrollSpeed: 0.5,
+        isDragging: false,
 
         async init() {
             await this.fetchItems();
 
-            // Countdown ticker
             this.countdownInterval = setInterval(() => {
                 this.countdown = Math.max(0, this.countdown - 1);
             }, 1000);
 
-            // Refresh every 30s
             this.refreshInterval = setInterval(() => {
                 this.fetchItems();
                 this.countdown = 30;
             }, 30000);
 
-            // Auto-scroll every 3s (right-to-left)
-            this.autoScrollInterval = setInterval(() => {
-                if (!this.isPaused) {
-                    this.autoScroll();
-                }
-            }, 3000);
+            this.$nextTick(() => {
+                this.startAnimationLoop();
+            });
+
+            window.addEventListener('beforeunload', () => {
+                if (this.rafId) cancelAnimationFrame(this.rafId);
+            });
         },
 
         async fetchItems() {
@@ -650,12 +658,13 @@ function menuCarousel() {
                 }
 
                 const data = await res.json();
-                this.items = data.items || [];
+                const newItems = data.items || [];
 
-                // Reset scroll to start when new items load
+                this.items = [...newItems, ...newItems];
+
                 this.$nextTick(() => {
                     if (this.$refs.scroller) {
-                        this.$refs.scroller.scrollTo({ left: 0, behavior: 'auto' });
+                        this.$refs.scroller.scrollLeft = 0;
                     }
                 });
             } catch (err) {
@@ -665,41 +674,28 @@ function menuCarousel() {
             this.loading = false;
         },
 
-        autoScroll() {
+        startAnimationLoop() {
             const el = this.$refs.scroller;
-            if (!el) return;
-
-            const firstCard = el.querySelector('a');
-            if (!firstCard) return;
-
-            const cardWidth = firstCard.offsetWidth;
-            const gap = 12;
-            const step = cardWidth + gap;
-
-            const maxScroll = el.scrollWidth - el.clientWidth;
-
-            if (el.scrollLeft >= maxScroll - 5) {
-                // Reached end — infinite loop back to start
-                el.scrollTo({ left: 0, behavior: 'smooth' });
-            } else {
-                el.scrollBy({ left: step, behavior: 'smooth' });
+            if (!el) {
+                this.rafId = requestAnimationFrame(() => this.startAnimationLoop());
+                return;
             }
-        },
 
-        scrollLeft() {
-            const el = this.$refs.scroller;
-            if (!el) return;
-            const firstCard = el.querySelector('a');
-            const step = firstCard ? firstCard.offsetWidth + 12 : 200;
-            el.scrollBy({ left: -step, behavior: 'smooth' });
-        },
+            const animate = () => {
+                if (!this.isPaused && !this.isDragging && el.scrollWidth > el.clientWidth) {
+                    const halfWidth = el.scrollWidth / 2;
 
-        scrollRight() {
-            const el = this.$refs.scroller;
-            if (!el) return;
-            const firstCard = el.querySelector('a');
-            const step = firstCard ? firstCard.offsetWidth + 12 : 200;
-            el.scrollBy({ left: step, behavior: 'smooth' });
+                    el.scrollLeft += this.scrollSpeed;
+
+                    if (el.scrollLeft >= halfWidth) {
+                        el.scrollLeft -= halfWidth;
+                    }
+                }
+
+                this.rafId = requestAnimationFrame(animate);
+            };
+
+            this.rafId = requestAnimationFrame(animate);
         },
 
         pause() {
@@ -708,6 +704,32 @@ function menuCarousel() {
 
         resume() {
             this.isPaused = false;
+        },
+
+        onDragStart() {
+            this.isDragging = true;
+        },
+
+        onDragEnd() {
+            this.isDragging = false;
+        },
+
+        scrollLeft() {
+            const el = this.$refs.scroller;
+            if (!el) return;
+
+            const firstCard = el.querySelector('a');
+            const step = firstCard ? firstCard.offsetWidth + 12 : 200;
+            el.scrollBy({ left: -step, behavior: 'smooth' });
+        },
+
+        scrollRight() {
+            const el = this.$refs.scroller;
+            if (!el) return;
+
+            const firstCard = el.querySelector('a');
+            const step = firstCard ? firstCard.offsetWidth + 12 : 200;
+            el.scrollBy({ left: step, behavior: 'smooth' });
         }
     }
 }

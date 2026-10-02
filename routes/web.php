@@ -189,7 +189,10 @@ Route::middleware(['auth', 'role:rider'])->prefix('rider')->group(function () {
         ->name('admin.config.light-logo.upload');
     Route::delete('/config/light-logo', [ConfigController::class, 'removeLightLogo'])
         ->name('admin.config.light-logo.remove');
-
+    Route::post('/config/ai-icon/preset', [ConfigController::class, 'saveAiIconPreset'])->name('admin.config.ai-icon.preset');
+    Route::post('/config/ai-icon/upload', [ConfigController::class, 'uploadAiIcon'])->name('admin.config.ai-icon.upload');
+    Route::delete('/config/ai-icon/remove', [ConfigController::class, 'removeAiIcon'])->name('admin.config.ai-icon.remove');
+    Route::post('/config/ai-icon/size', [ConfigController::class, 'updateAiIconSize'])->name('admin.config.ai-icon.size');
     Route::post('/config/dark-logo', [ConfigController::class, 'uploadDarkLogo'])
         ->name('admin.config.dark-logo.upload');
     Route::delete('/config/dark-logo', [ConfigController::class, 'removeDarkLogo'])

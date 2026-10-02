@@ -38,14 +38,18 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'restaurant_id' => 'required|exists:restaurants,id',
-            'items' => 'required|array|min:1',
-            'items.*.menu_item_id' => 'required|exists:menu_items,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'delivery_address' => 'required|string',
-            'delivery_lat' => 'required|numeric',
-            'delivery_lng' => 'required|numeric',
-        ]);
+        'restaurant_id' => 'required|exists:restaurants,id',
+        'items' => 'required|array|min:1',
+        'items.*.menu_item_id' => 'required|exists:menu_items,id',
+        'items.*.quantity' => 'required|integer|min:1',
+        'delivery_address' => 'required|string',
+        'delivery_lat' => 'required|numeric',
+        'delivery_lng' => 'required|numeric',
+
+        // ⭐ Payment
+        'payment_method' => 'required|in:cod,gcash,maya',
+        'payment_reference' => 'nullable|string|max:50|required_if:payment_method,gcash,maya',
+    ]);
 
         // ============================================
         // CHECK KUNG BUKAS ANG RESTAURANT
@@ -84,6 +88,9 @@ class OrderController extends Controller
                 'customer_id' => auth()->id(),
                 'restaurant_id' => $data['restaurant_id'],
                 'status' => 'received',
+                'payment_method' => $data['payment_method'],
+                'payment_reference' => $data['payment_reference'] ?? null,
+                'payment_status' => $data['payment_method'] === 'cod' ? 'pending' : 'pending',
                 'food_cost' => $foodCost,
                 'delivery_fee' => $deliveryFee,
                 'commission_rate' => $commissionRate,
