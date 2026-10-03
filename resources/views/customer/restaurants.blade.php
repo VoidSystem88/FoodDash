@@ -118,6 +118,7 @@
 
                     <template x-for="(item, index) in items" :key="item.id + '-' + index">
                         <a :href="item.restaurant_url"
+                            @click="quickAdd(item)"
                            class="flex-shrink-0 w-44 sm:w-48 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-neutral-200 dark:border-[#262626] overflow-hidden hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-800/50 transition-all duration-200 group cursor-pointer">
 
                             {{-- IMAGE --}}
@@ -643,7 +644,15 @@ function menuCarousel() {
                 if (this.rafId) cancelAnimationFrame(this.rafId);
             });
         },
-
+            quickAdd(item) {
+                sessionStorage.setItem('fooddash_quick_add', JSON.stringify({
+                    item_id: item.id,
+                    restaurant_id: item.restaurant_id,
+                    quantity: 1,
+                    timestamp: Date.now(),
+                }));
+                window.location.href = item.restaurant_url;
+            },
         async fetchItems() {
             this.loading = true;
 

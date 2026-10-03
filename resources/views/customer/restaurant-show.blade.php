@@ -871,6 +871,7 @@ function orderForm(restaurantId, menuItems) {
             this.menu.forEach(m => { this.cart[m.id] = 0; });
             this.restoreCart();
             this.restoreAddress();
+            this.checkQuickAdd();
 
             const savedView = localStorage.getItem(this.viewKey);
             if (savedView && ['grid', 'list'].includes(savedView)) {

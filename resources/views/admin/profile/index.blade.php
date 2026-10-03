@@ -12,7 +12,7 @@
         <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl opacity-10 -mr-20 -mt-20"></div>
         <div class="absolute bottom-0 left-0 w-48 h-48 bg-yellow-300 rounded-full blur-3xl opacity-20 -ml-16 -mb-16"></div>
 
-        <div class="relative p-6 text-white">
+        <div class="relative p-6 text-white" x-data="profileHeader()" x-init="init()">
             {{-- TOP --}}
             <div class="flex justify-between items-start mb-6">
                 <div class="flex items-center gap-3">
@@ -28,12 +28,33 @@
                     </div>
                 </div>
 
-                {{-- ADMIN BADGE --}}
-                <div class="flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-3.5 py-1.5 border border-white/20">
-                    <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    <span class="text-xs font-bold uppercase tracking-wide text-white">Admin</span>
+                {{-- RIGHT: DARK MODE TOGGLE + ADMIN BADGE --}}
+                <div class="flex items-center gap-2">
+
+                    {{-- ⭐ DARK MODE TOGGLE --}}
+                    <button type="button"
+                            @click="setTheme(theme === 'dark' ? 'light' : 'dark')"
+                            class="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur flex items-center justify-center transition border border-white/20"
+                            title="Toggle dark mode">
+                        {{-- Sun icon (light mode) --}}
+                        <svg x-show="theme === 'light' || theme === 'system'" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                        {{-- Moon icon (dark mode) --}}
+                        <svg x-show="theme === 'dark'" x-cloak class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </button>
+
+                    {{-- ADMIN BADGE --}}
+                    <div class="flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-3.5 py-1.5 border border-white/20">
+                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span class="text-xs font-bold uppercase tracking-wide text-white">Admin</span>
+                    </div>
                 </div>
             </div>
 
@@ -517,9 +538,43 @@
 
 @push('scripts')
 <script>
-function clearThemeBeforeLogout() {
-    localStorage.removeItem('theme');
-    document.documentElement.classList.remove('dark');
-}
+    function profileHeader() {
+        return {
+            theme: 'system',
+
+            init() {
+                const stored = localStorage.getItem('theme');
+                this.theme = stored || 'system';
+
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                    if (this.theme === 'system') {
+                        this.applyTheme();
+                    }
+                });
+            },
+
+            setTheme(mode) {
+                this.theme = mode;
+                localStorage.setItem('theme', mode);
+                this.applyTheme();
+            },
+
+            applyTheme() {
+                const isDark = this.theme === 'dark' ||
+                    (this.theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+        }
+    }
+
+    function clearThemeBeforeLogout() {
+        localStorage.removeItem('theme');
+        document.documentElement.classList.remove('dark');
+    }
 </script>
 @endpush
