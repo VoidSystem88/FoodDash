@@ -8,42 +8,43 @@
     {{-- ============================================ --}}
     <div class="flex justify-between items-center">
         <div>
-            <h1 class="text-2xl font-bold text-zinc-900 dark:text-white">Order #{{ $order->id }}</h1>
-            <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{{ $order->restaurant->name }}</p>
+            <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">{{ $order->restaurant->name }}</p>
         </div>
-        <a href="{{ route('customer.orders') }}"
-           class="inline-flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:text-orange-500 dark:hover:text-orange-500 transition group">
-            <svg class="w-4 h-4 group-hover:-translate-x-0.5 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-            Back
-        </a>
+        
     </div>
 
     {{-- ============================================ --}}
     {{-- STATUS CARD --}}
     {{-- ============================================ --}}
-    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
-        <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400 mb-1 font-medium">Current Status</p>
-        <p class="text-lg font-bold text-zinc-900 dark:text-white" x-text="statusLabel"></p>
+    <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 transition-colors">
+        <p class="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-1 font-bold">Current Status</p>
+        <p class="text-lg font-bold text-neutral-900 dark:text-white" x-text="statusLabel"></p>
 
         {{-- PROGRESS --}}
         <div class="mt-6 flex items-center">
             <template x-for="(step, i) in steps" :key="i">
                 <div class="flex items-center flex-1">
-                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-                         :class="stepIndex >= i ? 'bg-orange-500 text-white' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400'">
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-colors"
+                         :class="stepIndex >= i
+                            ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-sm shadow-orange-500/30'
+                            : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'">
                         <span x-text="i + 1"></span>
                     </div>
-                    <div class="flex-1 h-0.5 mx-1"
-                         :class="stepIndex > i ? 'bg-orange-500' : 'bg-zinc-200 dark:bg-zinc-800'"
+                    <div class="flex-1 h-0.5 mx-1 transition-colors"
+                         :class="stepIndex > i
+                            ? 'bg-gradient-to-r from-orange-500 to-orange-400'
+                            : 'bg-neutral-200 dark:bg-neutral-800'"
                          x-show="i < steps.length - 1"></div>
                 </div>
             </template>
         </div>
         <div class="flex justify-between mt-2">
             <template x-for="(step, i) in steps" :key="'lbl' + i">
-                <span class="text-xs" :class="stepIndex >= i ? 'text-zinc-900 dark:text-white font-medium' : 'text-zinc-400 dark:text-zinc-500'" x-text="step"></span>
+                <span class="text-xs transition-colors"
+                      :class="stepIndex >= i
+                        ? 'text-neutral-900 dark:text-white font-bold'
+                        : 'text-neutral-400 dark:text-neutral-500'"
+                      x-text="step"></span>
             </template>
         </div>
     </div>
@@ -52,16 +53,16 @@
     {{-- REJECTION REASON --}}
     {{-- ============================================ --}}
     @if ($order->status === 'rejected' && $order->rejection_reason)
-        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-red-200 dark:border-red-800 p-5">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 transition-colors">
             <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-neutral-700 to-neutral-900 dark:from-neutral-600 dark:to-neutral-800 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </div>
                 <div>
-                    <p class="text-xs uppercase tracking-wide text-red-600 dark:text-red-400 font-bold mb-1">Order Rejected</p>
-                    <p class="text-sm text-zinc-700 dark:text-zinc-300">Reason: {{ $order->rejection_reason }}</p>
+                    <p class="text-xs uppercase tracking-wider text-neutral-700 dark:text-neutral-300 font-bold mb-1">Order Rejected</p>
+                    <p class="text-sm text-neutral-700 dark:text-neutral-300">Reason: {{ $order->rejection_reason }}</p>
                 </div>
             </div>
         </div>
@@ -71,18 +72,18 @@
     {{-- CANCELLATION REASON --}}
     {{-- ============================================ --}}
     @if ($order->status === 'cancelled' && $order->cancellation_reason)
-        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 transition-colors">
             <div class="flex items-start gap-3">
-                <div class="w-10 h-10 rounded-full bg-zinc-800 dark:bg-zinc-200 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-5 h-5 text-white dark:text-zinc-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-neutral-700 to-neutral-900 dark:from-neutral-600 dark:to-neutral-800 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <svg class="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                     </svg>
                 </div>
                 <div>
-                    <p class="text-xs uppercase tracking-wide text-zinc-700 dark:text-zinc-300 font-bold mb-1">Order Cancelled</p>
-                    <p class="text-sm text-zinc-700 dark:text-zinc-300">Reason: {{ $order->cancellation_reason }}</p>
+                    <p class="text-xs uppercase tracking-wider text-neutral-700 dark:text-neutral-300 font-bold mb-1">Order Cancelled</p>
+                    <p class="text-sm text-neutral-700 dark:text-neutral-300">Reason: {{ $order->cancellation_reason }}</p>
                     @if ($order->cancelled_at)
-                        <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+                        <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-2">
                             Cancelled {{ $order->cancelled_at->diffForHumans() }}
                         </p>
                     @endif
@@ -92,257 +93,284 @@
     @endif
 
     {{-- ============================================ --}}
-    {{-- CANCEL ORDER FORM --}}
+    {{-- CANCEL ORDER (REDESIGNED MODAL) --}}
     {{-- ============================================ --}}
     @if ($order->canBeCancelledByCustomer())
-        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors"
-             x-data="{ showCancel: false }">
-            <div class="flex justify-between items-center gap-3">
-                <div>
-                    <p class="text-sm font-bold text-zinc-900 dark:text-white">Need to cancel?</p>
-                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                        You can cancel this order while it's still being processed.
-                    </p>
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 transition-colors"
+             x-data="cancelOrderModal()">
+
+            {{-- TRIGGER CARD --}}
+            <div class="flex justify-between items-center gap-3 flex-wrap">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-800 dark:to-neutral-900 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-neutral-700 dark:text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-neutral-900 dark:text-white">Need to cancel?</p>
+                        <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                            You can cancel this order while it's still being processed.
+                        </p>
+                    </div>
                 </div>
+
                 <button type="button"
-                        @click="showCancel = !showCancel"
-                        class="text-red-600 dark:text-red-400 bg-white dark:bg-zinc-900 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-950/30 px-4 py-2 rounded-lg text-sm font-medium transition">
+                        @click="openModal()"
+                        class="flex-shrink-0 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg hover:shadow-orange-500/30 active:scale-98 transition transform flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                     Cancel Order
                 </button>
             </div>
 
-            <div x-show="showCancel"
+            {{-- ⭐═══════════════════════════════════════════--}}
+            {{-- CANCEL MODAL --}}
+            {{-- ⭐═══════════════════════════════════════════--}}
+            <div x-show="showModal"
                  x-cloak
-                 x-transition
-                 class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                <form method="POST"
-                      action="{{ route('customer.orders.cancel', $order) }}"
-                      class="space-y-3"
-                      onsubmit="return confirm('Are you sure you want to cancel this order? This cannot be undone.');">
-                    @csrf
+                 x-transition.opacity
+                 @keydown.escape.window="closeModal()"
+                 @click.self="closeModal()"
+                 class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
 
-                    <div>
-                        <label class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-                            Reason for cancellation
-                        </label>
-                        <select name="cancellation_reason"
-                                required
-                                class="w-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                            <option value="">Select a reason...</option>
-                            <option value="Changed my mind">Changed my mind</option>
-                            <option value="Ordered by mistake">Ordered by mistake</option>
-                            <option value="Found a better option">Found a better option</option>
-                            <option value="Delivery taking too long">Delivery taking too long</option>
-                            <option value="Need to modify my order">Need to modify my order</option>
-                            <option value="Other">Other</option>
-                        </select>
+                <div x-show="showModal"
+                     x-transition.scale.origin.center
+                     class="bg-white dark:bg-neutral-900 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-neutral-200 dark:border-neutral-800">
+
+                    {{-- ⭐ GRADIENT ORANGE HEADER --}}
+                    <div class="relative bg-gradient-to-br from-orange-500 via-orange-500 to-orange-600 px-6 py-6 text-white overflow-hidden">
+                        {{-- Decorative --}}
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-3xl opacity-20 -mr-16 -mt-16"></div>
+                        <div class="absolute bottom-0 left-0 w-24 h-24 bg-amber-300 rounded-full blur-3xl opacity-30 -ml-12 -mb-12"></div>
+
+                        <div class="relative flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 border-2 border-white/30 shadow-md">
+                                <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-white/80 uppercase tracking-widest font-bold">Confirmation</p>
+                                <h3 class="text-lg font-bold leading-tight">Cancel this order?</h3>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="flex gap-2">
-                        <button type="submit"
-                                class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition">
-                            Confirm Cancellation
-                        </button>
-                        <button type="button"
-                                @click="showCancel = false"
-                                class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition">
-                            Keep Order
-                        </button>
+                    {{-- ⭐ BODY --}}
+                    <div class="p-6">
+
+                        {{-- ORDER PREVIEW CARD --}}
+                        <div class="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl p-4 border border-neutral-200 dark:border-neutral-800 mb-5">
+                            <div class="flex items-center gap-3">
+                                {{-- Restaurant Image --}}
+                                <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-200 dark:bg-neutral-800">
+                                    @if ($order->restaurant->profile_image_url)
+                                        <img src="{{ $order->restaurant->profile_image_url }}"
+                                             alt="{{ $order->restaurant->name }}"
+                                             class="w-full h-full object-cover">
+                                    @else
+                                        <div class="w-full h-full flex items-center justify-center">
+                                            <svg class="w-8 h-8 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            </svg>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Order Info --}}
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-bold text-sm text-neutral-900 dark:text-white truncate">
+                                        {{ $order->restaurant->name }}
+                                    </p>
+                                    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
+                                        Order #{{ $order->id }} · {{ $order->items->count() }} {{ Str::plural('item', $order->items->count()) }}
+                                    </p>
+                                    <p class="text-sm font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent mt-1">
+                                        ₱{{ number_format($order->total_amount, 2) }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- WARNING MESSAGE --}}
+                        <div class="flex items-start gap-3 mb-5">
+                            <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-bold text-neutral-900 dark:text-white mb-1">
+                                    This action cannot be undone
+                                </p>
+                                <p class="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                                    Once you cancel this order, <strong class="text-neutral-700 dark:text-neutral-300">it cannot be restored</strong>. You'll need to place a new order if you still want the food.
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- CANCELLATION REASON SELECTOR --}}
+                        <div class="mb-5">
+                            <label class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-2 uppercase tracking-wider">
+                                Reason for cancellation <span class="text-orange-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <select x-model="reason"
+                                        required
+                                        class="w-full appearance-none border-2 border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white rounded-xl px-4 py-3 pr-10 text-sm font-medium focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition cursor-pointer">
+                                    <option value="">Select a reason...</option>
+                                    <option value="Changed my mind">Changed my mind</option>
+                                    <option value="Ordered by mistake">Ordered by mistake</option>
+                                    <option value="Found a better option">Found a better option</option>
+                                    <option value="Delivery taking too long">Delivery taking too long</option>
+                                    <option value="Need to modify my order">Need to modify my order</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                {{-- Custom dropdown arrow --}}
+                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <svg class="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- ACTIONS --}}
+                        <div class="flex gap-2">
+                            <button type="button"
+                                    @click="closeModal()"
+                                    class="flex-1 bg-neutral-100 dark:bg-neutral-800 border-2 border-neutral-200 dark:border-neutral-700 text-neutral-900 dark:text-white px-4 py-3 rounded-xl font-bold text-sm hover:bg-neutral-200 dark:hover:bg-neutral-700 active:scale-98 transition transform">
+                                Keep Order
+                            </button>
+
+                            <form method="POST"
+                                  action="{{ route('customer.orders.cancel', $order) }}"
+                                  class="flex-1"
+                                  @submit="submitting = true">
+                                @csrf
+                                <input type="hidden" name="cancellation_reason" :value="reason">
+                                <button type="submit"
+                                        :disabled="!reason || submitting"
+                                        :class="(!reason || submitting)
+                                            ? 'opacity-40 cursor-not-allowed'
+                                            : 'hover:from-orange-600 hover:to-orange-700 hover:shadow-lg hover:shadow-orange-500/40 active:scale-98'"
+                                        class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-3 rounded-xl font-bold text-sm shadow-md shadow-orange-500/30 transition transform flex items-center justify-center gap-2">
+                                    <template x-if="!submitting">
+                                        <span class="flex items-center gap-2">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                            Cancel Order
+                                        </span>
+                                    </template>
+                                    <template x-if="submitting">
+                                        <span class="flex items-center gap-2">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                            </svg>
+                                            Cancelling...
+                                        </span>
+                                    </template>
+                                </button>
+                            </form>
+                        </div>
+
+                        {{-- Helper text --}}
+                        <p class="text-[10px] text-center text-neutral-400 dark:text-neutral-500 mt-3 leading-relaxed">
+                            Once cancelled, the restaurant and rider (if assigned) will be notified.
+                        </p>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     @endif
 
     {{-- ============================================ --}}
-    {{-- REVIEW SECTION --}}
+    {{-- DIRECT RATING FORM --}}
     {{-- ============================================ --}}
     @if ($order->status === 'delivered' && $order->canBeReviewed())
-        <div x-data="reviewForm({{ $order->id }})"
-             class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
-
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 transition-colors">
             <div class="flex items-start gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-orange-500/30">
                     <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                 </div>
                 <div class="flex-1">
-                    <p class="text-sm font-bold text-zinc-900 dark:text-white">
+                    <p class="text-sm font-bold text-neutral-900 dark:text-white">
                         Rate your experience
                     </p>
-                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
                         Help other customers by sharing your review for
-                        <strong class="text-zinc-700 dark:text-zinc-300">{{ $order->restaurant->name }}</strong>.
+                        <strong class="text-neutral-700 dark:text-neutral-300">{{ $order->restaurant->name }}</strong>.
                     </p>
                 </div>
             </div>
 
-            <button type="button"
-                    @click="showModal = true"
-                    class="w-full bg-orange-500 text-white py-3 rounded-lg font-medium text-sm hover:bg-orange-600 transition flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                Write a Review
-            </button>
+            {{-- INLINE RATING FORM --}}
+            <form method="POST" action="{{ route('customer.reviews.store', $order) }}" enctype="multipart/form-data" class="space-y-4">
+                @csrf
 
-            {{-- Review Modal --}}
-            <div x-show="showModal"
-                 x-cloak
-                 x-transition.opacity
-                 @keydown.escape.window="showModal = false"
-                 @click.self="showModal = false"
-                 class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/60">
-
-                <div x-show="showModal"
-                     x-transition.scale.origin.center
-                     class="bg-white dark:bg-zinc-900 rounded-lg shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
-
-                    <div class="flex justify-between items-start mb-5">
-                        <div>
-                            <h2 class="text-xl font-bold text-zinc-900 dark:text-white">Rate your experience</h2>
-                            <p class="text-sm text-zinc-500 dark:text-zinc-400">
-                                {{ $order->restaurant->name }}
-                            </p>
-                        </div>
-                        <button type="button"
-                                @click="showModal = false"
-                                class="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition">
-                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-
-                    <form @submit.prevent="submit()" class="space-y-4">
-
-                        {{-- Star Rating --}}
-                        <div>
-                            <label class="block text-sm font-bold text-zinc-900 dark:text-white mb-2">
-                                Overall Rating
-                            </label>
-                            <div class="flex gap-2">
-                                <template x-for="i in 5" :key="i">
-                                    <button type="button"
-                                            @click="rating = i"
-                                            @mouseenter="hoverRating = i"
-                                            @mouseleave="hoverRating = 0"
-                                            class="transition-transform hover:scale-110">
-                                        <svg class="w-10 h-10"
-                                             :class="i <= (hoverRating || rating) 
-                                                ? 'text-orange-500 fill-orange-500' 
-                                                : 'text-zinc-300 dark:text-zinc-600'"
-                                             viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                        </svg>
-                                    </button>
-                                </template>
-                            </div>
-                            <p x-show="rating > 0"
-                               x-text="['', 'Terrible', 'Poor', 'Average', 'Good', 'Excellent'][rating]"
-                               class="text-sm font-medium text-zinc-600 dark:text-zinc-400 mt-2"></p>
-                        </div>
-
-                        {{-- Title --}}
-                        <div>
-                            <label class="block text-sm font-bold text-zinc-900 dark:text-white mb-2">
-                                Title <span class="text-zinc-400 dark:text-zinc-500 font-normal">(optional)</span>
-                            </label>
-                            <input type="text"
-                                   x-model="title"
-                                   maxlength="100"
-                                   placeholder="e.g. Best pizza in town!"
-                                   class="w-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent">
-                        </div>
-
-                        {{-- Body --}}
-                        <div>
-                            <label class="block text-sm font-bold text-zinc-900 dark:text-white mb-2">
-                                Your Review
-                            </label>
-                            <textarea x-model="body"
-                                      required
-                                      minlength="10"
-                                      maxlength="2000"
-                                      rows="5"
-                                      placeholder="How was your experience? Was the food and service good?"
-                                      class="w-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"></textarea>
-                            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                                <span x-text="body.length"></span>/2000 characters (min 10)
-                            </p>
-                        </div>
-
-                        {{-- Photos --}}
-                        <div>
-                            <label class="block text-sm font-bold text-zinc-900 dark:text-white mb-2">
-                                Add Photos <span class="text-zinc-400 dark:text-zinc-500 font-normal">(optional, max 5)</span>
-                            </label>
-                            <div class="flex flex-wrap gap-2">
-                                <template x-for="(preview, i) in photoPreviews" :key="i">
-                                    <div class="relative w-20 h-20">
-                                        <img :src="preview" class="w-full h-full object-cover rounded-lg">
-                                        <button type="button"
-                                                @click="removePhoto(i)"
-                                                class="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition">
-                                            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </template>
-
-                                <button type="button"
-                                        x-show="photoPreviews.length < 5"
-                                        @click="$refs.photoInput.click()"
-                                        class="w-20 h-20 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 hover:border-orange-500 hover:text-orange-500 transition">
-                                    <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                              d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    <span class="text-xs">Add</span>
-                                </button>
-
-                                <input type="file"
-                                       x-ref="photoInput"
-                                       @change="onPhotoChange($event)"
-                                       accept="image/jpeg,image/jpg,image/png,image/webp"
-                                       multiple
-                                       class="hidden">
-                            </div>
-                        </div>
-
-                        {{-- Info --}}
-                        <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3 flex gap-2">
-                            <svg class="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p class="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                                Your review will be visible to everyone. Please base it on your genuine experience.
-                            </p>
-                        </div>
-
-                        {{-- Actions --}}
-                        <div class="flex gap-2 pt-2">
+                {{-- Star Rating --}}
+                <div x-data="{ rating: 0, hoverRating: 0 }">
+                    <label class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-2 uppercase tracking-wider">
+                        Overall Rating <span class="text-orange-500">*</span>
+                    </label>
+                    <div class="flex gap-2">
+                        <template x-for="i in 5" :key="i">
                             <button type="button"
-                                    @click="showModal = false"
-                                    class="flex-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white py-3 rounded-lg font-medium text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition">
-                                Cancel
+                                    @click="rating = i"
+                                    @mouseenter="hoverRating = i"
+                                    @mouseleave="hoverRating = 0"
+                                    class="transition-transform hover:scale-110">
+                                <svg class="w-10 h-10 transition-colors"
+                                     :class="i <= (hoverRating || rating)
+                                        ? 'text-orange-500 fill-orange-500 drop-shadow-sm'
+                                        : 'text-neutral-300 dark:text-neutral-600'"
+                                     viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
                             </button>
-                            <button type="submit"
-                                    :disabled="submitting || rating === 0 || body.length < 10"
-                                    :class="(submitting || rating === 0 || body.length < 10) 
-                                        ? 'opacity-40 cursor-not-allowed' 
-                                        : 'hover:bg-orange-600 active:scale-98'"
-                                    class="flex-1 bg-orange-500 text-white py-3 rounded-lg font-medium text-sm transition">
-                                <span x-show="!submitting">Submit Review</span>
-                                <span x-show="submitting">Submitting...</span>
-                            </button>
-                        </div>
-                    </form>
+                        </template>
+                    </div>
+                    <input type="hidden" name="rating" :value="rating">
+                    <p x-show="rating > 0"
+                       x-text="['', 'Terrible', 'Poor', 'Average', 'Good', 'Excellent'][rating]"
+                       class="text-sm font-bold text-orange-600 dark:text-orange-400 mt-2"></p>
                 </div>
-            </div>
+
+                {{-- Title --}}
+                <div>
+                    <label class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-2 uppercase tracking-wider">
+                        Title <span class="text-neutral-400 dark:text-neutral-500 font-medium normal-case">(optional)</span>
+                    </label>
+                    <input type="text" name="title" maxlength="100"
+                           placeholder="e.g. Best pizza in town!"
+                           class="w-full border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition placeholder-neutral-400">
+                </div>
+
+                {{-- Body --}}
+                <div>
+                    <label class="block text-xs font-bold text-neutral-700 dark:text-neutral-300 mb-2 uppercase tracking-wider">
+                        Your Review <span class="text-orange-500">*</span>
+                    </label>
+                    <textarea name="body" required minlength="10" maxlength="2000" rows="4"
+                              placeholder="How was your experience? Was the food and service good?"
+                              class="w-full border border-neutral-300 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none transition placeholder-neutral-400"></textarea>
+                </div>
+
+                {{-- Submit --}}
+                <button type="submit"
+                        class="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-bold text-sm shadow-md shadow-orange-500/30 hover:from-orange-600 hover:to-orange-700 hover:shadow-lg hover:shadow-orange-500/40 active:scale-98 transition transform flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Submit Review
+                </button>
+            </form>
         </div>
     @endif
 
@@ -351,35 +379,35 @@
     {{-- ============================================ --}}
     @if ($order->status === 'delivered' && $order->hasBeenReviewed())
         @php $review = $order->review; @endphp
-        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 transition-colors">
             <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-orange-500/30">
                     <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm font-bold text-zinc-900 dark:text-white">Review Submitted</p>
-                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                    <p class="text-sm font-bold text-neutral-900 dark:text-white">Review Submitted</p>
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400">
                         Thank you for your review.
                     </p>
                 </div>
             </div>
 
-            <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4">
+            <div class="bg-neutral-50 dark:bg-neutral-800/50 rounded-xl p-4 border border-neutral-200 dark:border-neutral-800">
                 <div class="flex items-center gap-1 mb-2">
                     @for ($i = 1; $i <= 5; $i++)
-                        <svg class="w-5 h-5 {{ $i <= $review->rating ? 'text-orange-500 fill-orange-500' : 'text-zinc-300 dark:text-zinc-600' }}"
+                        <svg class="w-5 h-5 {{ $i <= $review->rating ? 'text-orange-500 fill-orange-500' : 'text-neutral-300 dark:text-neutral-600' }}"
                              viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                     @endfor
                 </div>
                 @if ($review->title)
-                    <p class="font-bold text-zinc-900 dark:text-white mb-1 text-sm">{{ $review->title }}</p>
+                    <p class="font-bold text-neutral-900 dark:text-white mb-1 text-sm">{{ $review->title }}</p>
                 @endif
-                <p class="text-sm text-zinc-700 dark:text-zinc-300">{{ $review->body }}</p>
-                <p class="text-xs text-zinc-400 dark:text-zinc-500 mt-2">
+                <p class="text-sm text-neutral-700 dark:text-neutral-300">{{ $review->body }}</p>
+                <p class="text-xs text-neutral-400 dark:text-neutral-500 mt-2">
                     Submitted {{ $review->created_at->diffForHumans() }}
                 </p>
             </div>
@@ -390,17 +418,17 @@
     {{-- ORDER PICKED UP BADGE --}}
     {{-- ============================================ --}}
     @if ($order->verified_pickup_at)
-        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-orange-500 p-5">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl border-2 border-orange-500 p-5 transition-colors">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-orange-500/30">
                     <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm font-bold text-zinc-900 dark:text-white">Order Picked Up</p>
-                    <p class="text-xs text-zinc-500 dark:text-zinc-400">
-                        The rider has picked up your order at {{ $order->verified_pickup_at->format('g:i A') }}.
+                    <p class="text-sm font-bold text-neutral-900 dark:text-white">Order Picked Up</p>
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400">
+                        The rider picked up your order at {{ $order->verified_pickup_at->format('g:i A') }}.
                     </p>
                 </div>
             </div>
@@ -419,10 +447,10 @@
         @endphp
 
         <a href="{{ route('customer.chat.show', $order) }}"
-           class="flex items-center justify-between gap-3 bg-orange-500 hover:bg-orange-600 text-white px-5 py-4 rounded-lg transition group">
+           class="flex items-center justify-between gap-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-5 py-4 rounded-2xl shadow-md shadow-orange-500/30 hover:shadow-lg hover:shadow-orange-500/40 transition group">
 
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 border-2 border-white/30">
                     <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
@@ -436,7 +464,7 @@
                 </div>
 
                 @if ($unreadChat > 0)
-                    <span class="bg-white text-orange-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                    <span class="bg-white text-orange-600 text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
                         {{ $unreadChat }} new
                     </span>
                 @endif
@@ -452,21 +480,21 @@
     {{-- LIVE MAP --}}
     {{-- ============================================ --}}
     @if ($order->rider && in_array($order->status, ['rider_assigned', 'preparing', 'ready_for_pickup', 'picked_up', 'out_for_delivery']))
-        <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
+        <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 transition-colors">
             <div class="flex justify-between items-center mb-3">
-                <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400 font-bold">Live Rider Location</p>
-                <p class="text-xs text-zinc-500 dark:text-zinc-400" x-text="lastUpdated"></p>
+                <p class="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400 font-bold">Live Rider Location</p>
+                <p class="text-xs text-neutral-500 dark:text-neutral-400" x-text="lastUpdated"></p>
             </div>
-            <div id="map" class="w-full h-80 rounded-lg border border-zinc-200 dark:border-zinc-800 z-0"></div>
+            <div id="map" class="w-full h-80 rounded-2xl border border-neutral-200 dark:border-neutral-800 z-0 overflow-hidden"></div>
 
             <div class="mt-3 grid grid-cols-2 gap-3">
-                <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3">
-                    <p class="text-xs text-zinc-500 dark:text-zinc-400">Distance to you</p>
-                    <p class="text-lg font-bold text-zinc-900 dark:text-white" x-text="distanceText || '—'"></p>
+                <div class="bg-neutral-50 dark:bg-neutral-800/50 rounded-xl p-3 border border-neutral-200 dark:border-neutral-800">
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Distance to you</p>
+                    <p class="text-lg font-bold text-neutral-900 dark:text-white mt-0.5" x-text="distanceText || '—'"></p>
                 </div>
-                <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-3">
-                    <p class="text-xs text-zinc-500 dark:text-zinc-400">Estimated arrival</p>
-                    <p class="text-lg font-bold text-zinc-900 dark:text-white" x-text="etaText || '—'"></p>
+                <div class="bg-neutral-50 dark:bg-neutral-800/50 rounded-xl p-3 border border-neutral-200 dark:border-neutral-800">
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Estimated arrival</p>
+                    <p class="text-lg font-bold text-orange-500 mt-0.5" x-text="etaText || '—'"></p>
                 </div>
             </div>
         </div>
@@ -475,16 +503,16 @@
     {{-- ============================================ --}}
     {{-- DELIVERY --}}
     {{-- ============================================ --}}
-    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
-        <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400 mb-2 font-bold">Delivery Address</p>
-        <p class="text-sm text-zinc-700 dark:text-zinc-300">{{ $order->delivery_address }}</p>
+    <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 transition-colors">
+        <p class="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-2 font-bold">Delivery Address</p>
+        <p class="text-sm text-neutral-700 dark:text-neutral-300">{{ $order->delivery_address }}</p>
 
         @if ($order->rider)
-            <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400 mb-1 font-bold">Your Rider</p>
-                <p class="text-sm font-bold text-zinc-900 dark:text-white">{{ $order->rider->user->name }}</p>
+            <div class="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-800">
+                <p class="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-1 font-bold">Your Rider</p>
+                <p class="text-sm font-bold text-neutral-900 dark:text-white">{{ $order->rider->user->name }}</p>
                 @if ($order->rider->vehicle_type)
-                    <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
                         {{ $order->rider->vehicle_type }}
                         @if ($order->rider->vehicle_plate)
                             · {{ $order->rider->vehicle_plate }}
@@ -498,48 +526,53 @@
     {{-- ============================================ --}}
     {{-- ITEMS --}}
     {{-- ============================================ --}}
-    <div class="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5 transition-colors">
-        <p class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400 mb-4 font-bold">Order Summary</p>
-{{-- Payment Info --}}
-<div class="flex justify-between text-sm pt-2 border-t border-zinc-200 dark:border-zinc-800">
-    <span class="text-zinc-500 dark:text-zinc-400">Payment</span>
-    <div class="text-right">
-        <span class="font-bold text-zinc-900 dark:text-white">
-            {{ $order->payment_method_label }}
-        </span>
-        @if ($order->payment_reference)
-            <p class="text-[10px] text-zinc-400 dark:text-zinc-500 font-mono mt-0.5">
-                Ref: {{ $order->payment_reference }}
-            </p>
-        @endif
-        @if ($order->isPrepaid())
-            <span class="inline-block mt-1 text-[10px] bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full font-bold uppercase tracking-wide">
-                ✓ Paid
-            </span>
-        @endif
-    </div>
-</div>
-        <div class="space-y-2">
+    <div class="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-5 transition-colors">
+        <p class="text-xs uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-4 font-bold">Order Summary</p>
+
+        {{-- Payment Info --}}
+        <div class="flex justify-between text-sm pb-4 border-b border-neutral-200 dark:border-neutral-800">
+            <span class="text-neutral-500 dark:text-neutral-400 font-medium">Payment</span>
+            <div class="text-right">
+                <span class="font-bold text-neutral-900 dark:text-white">
+                    {{ $order->payment_method_label }}
+                </span>
+                @if ($order->payment_reference)
+                    <p class="text-[10px] text-neutral-400 dark:text-neutral-500 font-mono mt-0.5">
+                        Ref: {{ $order->payment_reference }}
+                    </p>
+                @endif
+                @if ($order->isPrepaid())
+                    <span class="inline-block mt-1 text-[10px] bg-gradient-to-r from-orange-500 to-orange-600 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wide shadow-sm">
+                        ✓ Paid
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="space-y-2 mt-4">
             @foreach ($order->items as $item)
                 <div class="flex justify-between text-sm">
-                    <span class="text-zinc-700 dark:text-zinc-300">{{ $item->quantity }}× {{ $item->name }}</span>
-                    <span class="font-medium text-zinc-900 dark:text-white">₱{{ number_format($item->price * $item->quantity, 2) }}</span>
+                    <span class="text-neutral-700 dark:text-neutral-300">
+                        <span class="font-bold text-orange-500">{{ $item->quantity }}×</span>
+                        {{ $item->name }}
+                    </span>
+                    <span class="font-semibold text-neutral-900 dark:text-white">₱{{ number_format($item->price * $item->quantity, 2) }}</span>
                 </div>
             @endforeach
         </div>
 
-        <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-1.5 text-sm">
-            <div class="flex justify-between text-zinc-500 dark:text-zinc-400">
+        <div class="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-800 space-y-1.5 text-sm">
+            <div class="flex justify-between text-neutral-500 dark:text-neutral-400">
                 <span>Food cost</span>
                 <span>₱{{ number_format($order->food_cost, 2) }}</span>
             </div>
-            <div class="flex justify-between text-zinc-500 dark:text-zinc-400">
+            <div class="flex justify-between text-neutral-500 dark:text-neutral-400">
                 <span>Delivery fee</span>
                 <span>₱{{ number_format($order->delivery_fee, 2) }}</span>
             </div>
-            <div class="flex justify-between font-bold text-zinc-900 dark:text-white pt-2 border-t border-zinc-200 dark:border-zinc-800">
+            <div class="flex justify-between font-bold text-neutral-900 dark:text-white pt-3 border-t border-neutral-200 dark:border-neutral-800 text-base">
                 <span>Total</span>
-                <span class="text-orange-500">₱{{ number_format($order->total_amount, 2) }}</span>
+                <span class="bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">₱{{ number_format($order->total_amount, 2) }}</span>
             </div>
         </div>
     </div>
@@ -551,6 +584,31 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+// ============================================
+// CANCEL ORDER MODAL
+// ============================================
+function cancelOrderModal() {
+    return {
+        showModal: false,
+        reason: '',
+        submitting: false,
+
+        openModal() {
+            this.showModal = true;
+            this.reason = '';
+            this.submitting = false;
+            document.body.style.overflow = 'hidden';
+        },
+
+        closeModal() {
+            this.showModal = false;
+            this.reason = '';
+            this.submitting = false;
+            document.body.style.overflow = '';
+        }
+    }
+}
+
 // ============================================
 // ORDER TRACKER (with LIVE MAP)
 // ============================================
@@ -623,12 +681,12 @@ function orderTracker(orderId) {
                         <div style="width:52px;height:52px;border-radius:50%;overflow:hidden;border:3px solid #f97316;box-shadow:0 3px 8px rgba(249,115,22,0.5);background:white;">
                             <img src="${trackingRestaurantUrl}" style="width:100%;height:100%;object-fit:cover;" alt="Restaurant">
                         </div>
-                        <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:#f97316;color:white;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:bold;border:2px solid white;white-space:nowrap;">STORE</div>
+                        <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#f97316,#ea580c);color:white;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:bold;border:2px solid white;white-space:nowrap;">STORE</div>
                     </div>
                 ` : `
                     <div style="position:relative;width:52px;height:52px;">
-                        <div style="background:#f97316;color:white;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;border:3px solid white;box-shadow:0 3px 8px rgba(0,0,0,0.4);">${trackingRestaurantInitial}</div>
-                        <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:#f97316;color:white;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:bold;border:2px solid white;white-space:nowrap;">STORE</div>
+                        <div style="background:linear-gradient(135deg,#f97316,#ea580c);color:white;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;border:3px solid white;box-shadow:0 3px 8px rgba(0,0,0,0.4);">${trackingRestaurantInitial}</div>
+                        <div style="position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#f97316,#ea580c);color:white;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:bold;border:2px solid white;white-space:nowrap;">STORE</div>
                     </div>
                 `,
                 className: '',
@@ -812,88 +870,6 @@ function orderTracker(orderId) {
                 'no_rider': 0, 'cancelled': 0, 'rejected': 0,
             };
             return map[this.status] ?? 0;
-        }
-    }
-}
-
-// ============================================
-// REVIEW FORM
-// ============================================
-function reviewForm(orderId) {
-    return {
-        showModal: false,
-        rating: 0,
-        hoverRating: 0,
-        title: '',
-        body: '',
-        photos: [],
-        photoPreviews: [],
-        submitting: false,
-
-        onPhotoChange(e) {
-            const files = Array.from(e.target.files);
-            files.forEach(file => {
-                if (this.photos.length >= 5) return;
-
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('File too large (max 5MB): ' + file.name);
-                    return;
-                }
-
-                this.photos.push(file);
-
-                const reader = new FileReader();
-                reader.onload = (ev) => this.photoPreviews.push(ev.target.result);
-                reader.readAsDataURL(file);
-            });
-            e.target.value = '';
-        },
-
-        removePhoto(i) {
-            this.photos.splice(i, 1);
-            this.photoPreviews.splice(i, 1);
-        },
-
-        async submit() {
-            if (this.rating === 0) {
-                alert('Please select a rating.');
-                return;
-            }
-            if (this.body.length < 10) {
-                alert('Please write at least 10 characters.');
-                return;
-            }
-
-            this.submitting = true;
-
-            const formData = new FormData();
-            formData.append('rating', this.rating);
-            formData.append('title', this.title || '');
-            formData.append('body', this.body);
-            this.photos.forEach(photo => formData.append('images[]', photo));
-
-            try {
-                const res = await fetch(`/orders/${orderId}/review`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    },
-                    body: formData,
-                });
-
-                if (res.ok) {
-                    window.location.reload();
-                } else {
-                    const data = await res.json();
-                    alert(data.message || 'Could not submit review.');
-                    this.submitting = false;
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Network error. Please try again.');
-                this.submitting = false;
-            }
         }
     }
 }
