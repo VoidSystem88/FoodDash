@@ -408,30 +408,30 @@
                         <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">{{ $currentOrder->restaurant->address ?? '' }}</p>
 
                         @if ($currentOrder->isPrepaid())
-    {{-- PREPAID --}}
-    <div class="flex items-center gap-2 mt-2 bg-green-500 rounded-lg px-3 py-2">
-        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span class="text-xs text-white/90 font-bold">PAID via {{ $currentOrder->payment_method_label }}</span>
-        <span class="text-sm font-bold text-white ml-auto">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
-    </div>
-    <p class="text-[10px] text-gray-500 dark:text-neutral-400 mt-1">
-        Huwag nang maningil ng cash. Ref: <span class="font-mono font-bold">{{ $currentOrder->payment_reference }}</span>
-    </p>
-                @else
-                    {{-- COD --}}
-                    <div class="flex items-center gap-2 mt-2 bg-orange-500 rounded-lg px-3 py-2">
-                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                        <span class="text-xs text-white/90">Collect from customer:</span>
-                        <span class="text-sm font-bold text-white">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
-                    </div>
-                    <p class="text-[10px] text-orange-600 dark:text-orange-400 mt-1 font-medium">
-                        💵 Cash on Delivery
-                    </p>
-                @endif
+                            {{-- PREPAID --}}
+                            <div class="flex items-center gap-2 mt-2 bg-green-500 rounded-lg px-3 py-2">
+                                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span class="text-xs text-white/90 font-bold">PAID via {{ $currentOrder->payment_method_label }}</span>
+                                <span class="text-sm font-bold text-white ml-auto">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
+                            </div>
+                            <p class="text-[10px] text-gray-500 dark:text-neutral-400 mt-1">
+                                Huwag nang maningil ng cash. Ref: <span class="font-mono font-bold">{{ $currentOrder->payment_reference }}</span>
+                            </p>
+                        @else
+                            {{-- COD --}}
+                            <div class="flex items-center gap-2 mt-2 bg-orange-500 rounded-lg px-3 py-2">
+                                <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <span class="text-xs text-white/90">Collect from customer:</span>
+                                <span class="text-sm font-bold text-white">₱{{ number_format($currentOrder->total_amount, 2) }}</span>
+                            </div>
+                            <p class="text-[10px] text-orange-600 dark:text-orange-400 mt-1 font-medium">
+                                💵 Cash on Delivery
+                            </p>
+                        @endif
                     </div>
                 </div>
 
@@ -633,10 +633,10 @@
                     </svg>
 
                     <div class="flex items-center gap-2 flex-1 min-w-0 pointer-events-none">
-                        <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                            </svg>
+                        <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 overflow-hidden p-1">
+                            <img src="/images/map.png"
+                                 class="w-full h-full object-contain"
+                                 alt="Map">
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-xs font-bold text-white truncate">Live Navigation</p>
@@ -685,19 +685,19 @@
                 </div>
             </div>
 
+            {{-- ⭐ FAB — Walang orange background, pinalaki ang map.png --}}
             <button x-show="isMinimized"
                     x-transition
                     @mousedown.stop="startFabDrag($event)"
                     @touchstart.stop.passive="startFabDrag($event)"
                     @click="handleFabClick()"
                     type="button"
-                    class="pointer-events-auto w-14 h-14 rounded-full bg-orange-500 shadow-2xl flex items-center justify-center text-white hover:bg-orange-600 transition border-2 border-white dark:border-zinc-900"
+                    class="pointer-events-auto w-12 h-12 flex items-center justify-center transition"
                     :class="fabDragging ? 'cursor-grabbing scale-110' : 'cursor-grab'"
                     style="touch-action: none;">
-                <svg class="w-6 h-6 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                </svg>
-                <span class="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-white animate-pulse pointer-events-none"></span>
+                <img src="/images/map.png"
+                     class="w-full h-full pointer-events-none object-contain drop-shadow-2xl"
+                     alt="Map">
             </button>
         </div>
     @endif
@@ -1071,7 +1071,7 @@ function floatingMap(orderId) {
         setFabDefaultPosition() {
             const winW = window.innerWidth;
             const winH = window.innerHeight;
-            const fabSize = 56;
+            const fabSize = 64;  // ⭐ Pinalaki mula 56 sa 64
             const margin = 16;
             const bottomOffset = winW < 768 ? 80 : 16;
 
@@ -1121,7 +1121,7 @@ function floatingMap(orderId) {
         clampFabPosition() {
             const winW = window.innerWidth;
             const winH = window.innerHeight;
-            const fabSize = 56;
+            const fabSize = 64;  // ⭐ Pinalaki mula 56 sa 64
             const margin = 8;
             const bottomNavOffset = winW < 768 ? 80 : 0;
             const topNavOffset = 64;
@@ -1253,7 +1253,7 @@ function floatingMap(orderId) {
 
             if (this.fabMoved) {
                 const winW = window.innerWidth;
-                const fabSize = 56;
+                const fabSize = 64;  // ⭐ Pinalaki mula 56 sa 64
                 const margin = 16;
 
                 const centerX = this.posX + fabSize / 2;
@@ -1339,6 +1339,7 @@ function floatingMap(orderId) {
                 keyboard: true,
             }).setView([this.riderLat, this.riderLng], 14);
 
+            // ⭐ OSM TILE LAYER (default map)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
             }).addTo(this.map);
