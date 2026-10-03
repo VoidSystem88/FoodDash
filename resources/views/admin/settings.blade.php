@@ -78,64 +78,11 @@
             </div>
         </div>
 
-        {{-- PRESET ICONS --}}
-        <div>
-            <label class="block text-xs font-semibold text-gray-700 dark:text-neutral-300 mb-3 uppercase tracking-wide">
-                Choose a Preset
-            </label>
-
-            <div class="grid grid-cols-5 gap-3">
-                @php
-                    $presets = [
-                        'default' => [
-                            'label' => 'Default',
-                            'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>',
-                        ],
-                        'sparkle' => [
-                            'label' => 'Sparkle',
-                            'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>',
-                        ],
-                        'bot' => [
-                            'label' => 'Bot',
-                            'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>',
-                        ],
-                        'chat' => [
-                            'label' => 'Chat',
-                            'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>',
-                        ],
-                        'magic' => [
-                            'label' => 'Magic',
-                            'svg' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 4V2m0 20v-2M8 9l-2-2m12 12l-2-2M4 15H2m20 0h-2m-3.42-8.42l1.42-1.42M5.42 18.42L4 20M9 21h6M12 8a4 4 0 00-4 4c0 1.5.5 2 1 3h6c.5-1 1-1.5 1-3a4 4 0 00-4-4z"/></svg>',
-                        ],
-                    ];
-                @endphp
-
-                @foreach ($presets as $key => $preset)
-                    <form method="POST" action="{{ route('admin.config.ai-icon.preset') }}">
-                        @csrf
-                        <input type="hidden" name="preset" value="{{ $key }}">
-                        <button type="submit"
-                                title="{{ $preset['label'] }}"
-                                class="w-full aspect-square rounded-xl border-2 transition flex flex-col items-center justify-center gap-1
-                                    {{ $config->ai_icon_type === $key
-                                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-950/30'
-                                        : 'border-gray-200 dark:border-dark-600 hover:border-orange-300 dark:hover:border-orange-800' }}">
-                            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white p-1.5">
-                                {!! $preset['svg'] !!}
-                            </div>
-                            <span class="text-[9px] font-semibold text-gray-600 dark:text-neutral-400 uppercase tracking-wide">
-                                {{ $preset['label'] }}
-                            </span>
-                        </button>
-                    </form>
-                @endforeach
-            </div>
-        </div>
 
         {{-- CUSTOM UPLOAD --}}
         <div>
             <label class="block text-xs font-semibold text-gray-700 dark:text-neutral-300 mb-2 uppercase tracking-wide">
-                Or Upload Custom Icon
+            Upload Custom Icon
             </label>
 
             <form method="POST"

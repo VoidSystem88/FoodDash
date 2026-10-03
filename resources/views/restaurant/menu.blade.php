@@ -339,18 +339,18 @@
                             </button>
 
                             {{-- DELETE --}}
-                            <form method="POST" action="{{ route('menu-items.destroy', $item) }}"
-                                  onsubmit="return confirm('Delete {{ $item->name }}?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                        title="Delete"
-                                        class="w-8 h-8 rounded-full bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur shadow-md flex items-center justify-center text-neutral-700 dark:text-neutral-300 hover:text-orange-600 dark:hover:text-orange-400 hover:scale-110 active:scale-95 transition transform">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
-                            </form>
+                            <button type="button"
+                                    @click="openDelete({
+                                        id: {{ $item->id }},
+                                        name: @js($item->name),
+                                        action: '{{ route('menu-items.destroy', $item) }}',
+                                    })"
+                                    title="Delete"
+                                    class="w-8 h-8 rounded-full bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur shadow-md flex items-center justify-center text-neutral-700 dark:text-neutral-300 hover:text-orange-600 dark:hover:text-orange-400 hover:scale-110 active:scale-95 transition transform">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
 
@@ -469,18 +469,18 @@
                         </button>
 
                         {{-- DELETE --}}
-                        <form method="POST" action="{{ route('menu-items.destroy', $item) }}"
-                              onsubmit="return confirm('Delete {{ $item->name }}?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    title="Delete"
-                                    class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-[#262626] hover:bg-orange-100 dark:hover:bg-orange-950/40 text-neutral-700 dark:text-neutral-300 hover:text-orange-600 dark:hover:text-orange-400 flex items-center justify-center transition">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </button>
-                        </form>
+                        <button type="button"
+                                @click="openDelete({
+                                    id: {{ $item->id }},
+                                    name: @js($item->name),
+                                    action: '{{ route('menu-items.destroy', $item) }}',
+                                })"
+                                title="Delete"
+                                class="w-9 h-9 rounded-lg bg-neutral-100 dark:bg-[#262626] hover:bg-orange-100 dark:hover:bg-orange-950/40 text-neutral-700 dark:text-neutral-300 hover:text-orange-600 dark:hover:text-orange-400 flex items-center justify-center transition">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             @endforeach
@@ -526,7 +526,7 @@
             </div>
 
             {{-- MODAL BODY --}}
-            <form :action="editingItem ? '/menu-items/' + editingItem.id : ''"
+            <form :action="editingItem ? '/restaurant/menu-items/' + editingItem.id : ''"
                   method="POST"
                   enctype="multipart/form-data"
                   class="p-6 space-y-5">
@@ -639,6 +639,85 @@
         </div>
     </div>
 
+    {{-- ============================================ --}}
+    {{-- DELETE CONFIRMATION MODAL --}}
+    {{-- ============================================ --}}
+    <div x-show="deletingItem"
+         x-cloak
+         x-transition.opacity
+         @keydown.escape.window="closeDelete()"
+         @click.self="closeDelete()"
+         class="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+
+        <div x-show="deletingItem"
+             x-transition.scale.origin.center
+             class="bg-white dark:bg-[#141414] rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-neutral-200 dark:border-[#262626]">
+
+            {{-- MODAL BODY --}}
+            <div class="p-6 text-center">
+
+                {{-- DANGER ICON --}}
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-lg shadow-red-500/30 mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </div>
+
+                {{-- TITLE --}}
+                <h3 class="text-xl font-bold text-neutral-900 dark:text-white mb-2">
+                    Delete Menu Item?
+                </h3>
+
+                {{-- ITEM NAME --}}
+                <div class="mb-4">
+                    <p class="text-sm text-neutral-500 dark:text-neutral-400 mb-2">
+                        You are about to delete:
+                    </p>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-neutral-100 dark:bg-[#262626] rounded-xl border border-neutral-200 dark:border-[#262626]">
+                        <svg class="w-4 h-4 text-orange-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span class="font-bold text-neutral-900 dark:text-white text-sm"
+                              x-text="deletingItem?.name"></span>
+                    </div>
+                </div>
+
+                {{-- WARNING --}}
+                <div class="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl mb-5">
+                    <p class="text-xs text-red-700 dark:text-red-300 flex items-start gap-2">
+                        <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>This action cannot be undone. The item will be permanently removed from your menu.</span>
+                    </p>
+                </div>
+            </div>
+
+            {{-- ACTIONS --}}
+            <div class="flex gap-2 p-4 bg-neutral-50 dark:bg-[#0a0a0a] border-t border-neutral-200 dark:border-[#262626]">
+                <button type="button"
+                        @click="closeDelete()"
+                        class="flex-1 border border-neutral-300 dark:border-[#262626] text-neutral-700 dark:text-neutral-300 px-4 py-2.5 rounded-xl font-semibold text-sm hover:bg-neutral-100 dark:hover:bg-[#262626] transition">
+                    Cancel
+                </button>
+
+                <form :action="deletingItem?.action"
+                      method="POST"
+                      class="flex-1">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                            class="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:from-red-600 hover:to-red-700 hover:shadow-lg active:scale-98 transition transform flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Yes, Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
 
@@ -656,7 +735,7 @@ function menuManager() {
         filter: 'all',
         viewKey: 'fooddash_menu_view',
 
-        // ⭐ EDIT STATE
+        // EDIT STATE
         editingItem: null,
         editForm: {
             name: '',
@@ -664,6 +743,9 @@ function menuManager() {
             price: '',
         },
         editImagePreview: '',
+
+        // DELETE STATE
+        deletingItem: null,
 
         init() {
             const saved = localStorage.getItem(this.viewKey);
@@ -705,7 +787,7 @@ function menuManager() {
         },
 
         // ========================================
-        // ⭐ EDIT FORM
+        // EDIT FORM
         // ========================================
         openEdit(item) {
             this.editingItem = item;
@@ -748,7 +830,20 @@ function menuManager() {
                 this.editImagePreview = ev.target.result;
             };
             reader.readAsDataURL(file);
-        }
+        },
+
+        // ========================================
+        // DELETE CONFIRMATION
+        // ========================================
+        openDelete(item) {
+            this.deletingItem = item;
+            document.body.style.overflow = 'hidden';
+        },
+
+        closeDelete() {
+            this.deletingItem = null;
+            document.body.style.overflow = '';
+        },
     }
 }
 </script>

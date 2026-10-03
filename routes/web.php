@@ -21,6 +21,7 @@ use App\Http\Controllers\Restaurant\ReviewReplyController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\PushSubscriptionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AdminProfileController;
 
 // ============================================
 // ROOT REDIRECT
@@ -184,7 +185,15 @@ Route::middleware(['auth', 'role:rider'])->prefix('rider')->group(function () {
 // ADMIN ROUTES
 // ============================================
     Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
-        // ⭐ Light/Dark logo routes
+
+    //  Admin Profile (own profile, hindi customer profile)
+    Route::get('/profile', [AdminProfileController::class, 'index'])->name('admin.profile.index');
+    Route::patch('/profile', [AdminProfileController::class, 'update'])->name('admin.profile.update');
+    Route::patch('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('admin.profile.password');
+    Route::get('/profile/avatar', [AdminProfileController::class, 'avatar'])->name('admin.profile.avatar');
+    Route::post('/profile/avatar', [AdminProfileController::class, 'updateAvatar'])->name('admin.profile.avatar.update');
+    Route::delete('/profile/avatar', [AdminProfileController::class, 'removeAvatar'])->name('admin.profile.avatar.remove');
+        //  Light/Dark logo routes
     Route::post('/config/light-logo', [ConfigController::class, 'uploadLightLogo'])
         ->name('admin.config.light-logo.upload');
     Route::delete('/config/light-logo', [ConfigController::class, 'removeLightLogo'])
