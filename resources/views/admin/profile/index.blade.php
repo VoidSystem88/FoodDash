@@ -346,30 +346,6 @@
                        class="w-full border border-neutral-300 dark:border-[#262626] dark:bg-[#0a0a0a] dark:text-white rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent transition">
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
-                    Gender
-                </label>
-                <div class="grid grid-cols-2 gap-2">
-                    <label class="cursor-pointer">
-                        <input type="radio" name="gender" value="male"
-                               @checked(old('gender', $user->gender) === 'male')
-                               class="peer sr-only">
-                        <div class="flex items-center justify-center gap-2 border-2 border-neutral-200 dark:border-[#262626] rounded-xl py-3 transition peer-checked:border-orange-500 peer-checked:bg-orange-50 dark:peer-checked:bg-orange-950/30 hover:bg-neutral-50 dark:hover:bg-[#0a0a0a]">
-                            <span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Male</span>
-                        </div>
-                    </label>
-                    <label class="cursor-pointer">
-                        <input type="radio" name="gender" value="female"
-                               @checked(old('gender', $user->gender) === 'female')
-                               class="peer sr-only">
-                        <div class="flex items-center justify-center gap-2 border-2 border-neutral-200 dark:border-[#262626] rounded-xl py-3 transition peer-checked:border-orange-500 peer-checked:bg-orange-50 dark:peer-checked:bg-orange-950/30 hover:bg-neutral-50 dark:hover:bg-[#0a0a0a]">
-                            <span class="text-sm font-medium text-neutral-700 dark:text-neutral-300">Female</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
             <div class="pt-2">
                 <button type="submit"
                         class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg active:scale-98 transition transform flex items-center gap-2">

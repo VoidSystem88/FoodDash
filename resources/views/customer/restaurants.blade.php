@@ -117,11 +117,9 @@
                     class="flex gap-3 overflow-x-auto scroll-smooth px-5 py-4 carousel-scroll">
 
                     <template x-for="(item, index) in items" :key="item.id + '-' + index">
-                        <a :href="item.restaurant_url"
-                            @click="quickAdd(item)"
-                           class="flex-shrink-0 w-44 sm:w-48 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-neutral-200 dark:border-[#262626] overflow-hidden hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-800/50 transition-all duration-200 group cursor-pointer">
-
-                            {{-- IMAGE --}}
+                        <a :href="item.restaurant_url + '?quick_add=' + item.id + '&auto_open=1'"
+                        class="flex-shrink-0 w-44 sm:w-48 bg-white dark:bg-[#0a0a0a] rounded-2xl border border-neutral-200 dark:border-[#262626] overflow-hidden hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-800/50 transition-all duration-200 group cursor-pointer">
+                                                {{-- IMAGE --}}
                             <div class="relative aspect-square overflow-hidden bg-neutral-100 dark:bg-[#141414]">
                                 <template x-if="item.image_url">
                                     <img :src="item.image_url"
@@ -644,15 +642,7 @@ function menuCarousel() {
                 if (this.rafId) cancelAnimationFrame(this.rafId);
             });
         },
-            quickAdd(item) {
-                sessionStorage.setItem('fooddash_quick_add', JSON.stringify({
-                    item_id: item.id,
-                    restaurant_id: item.restaurant_id,
-                    quantity: 1,
-                    timestamp: Date.now(),
-                }));
-                window.location.href = item.restaurant_url;
-            },
+        
         async fetchItems() {
             this.loading = true;
 

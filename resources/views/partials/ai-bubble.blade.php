@@ -267,6 +267,10 @@
     -webkit-user-select: none;
     touch-action: none;
     overflow: visible;
+    transition: left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                top 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.15s ease;
+    will-change: left, top, transform;
 }
 
 .ai-bubble-btn:hover {
@@ -276,7 +280,9 @@
 .ai-bubble-btn.dragging {
     cursor: grabbing;
     transform: scale(1.1);
-    transition: none;
+    transition: transform 0.15s ease;
+    cursor: grabbing;
+    transform: scale(1.15);
 }
 
 .ai-bubble-btn:not(.dragging):active {
@@ -1422,177 +1428,265 @@
     // ============================================
     // DRAGGABLE BUBBLE
     // ============================================
-    (function initDraggableBubble() {
-        const btn = document.getElementById('aiBubbleBtn');
-        if (!btn) return;
+    // ============================================
+// DRAGGABLE BUBBLE — WITH AUTO-SNAP TO EDGE
+// ============================================
+(function initDraggableBubble() {
+    const btn = document.getElementById('aiBubbleBtn');
+    if (!btn) return;
 
-        const STORAGE_KEY = 'fooddash_ai_bubble_pos';
-        const DRAG_THRESHOLD = 5;
-        const MARGIN = 8;
-        const MOBILE_BOTTOM_OFFSET = 88;
+    const STORAGE_KEY = 'fooddash_ai_bubble_pos';
+    const DRAG_THRESHOLD = 5;      // pixels bago considered as drag
+    const SNAP_MARGIN = 16;         // space sa gilid pag naka-snap
+    const MOBILE_BOTTOM_OFFSET = 88;
 
-        let isDragging = false;
-        let hasMoved = false;
-        let startX = 0;
-        let startY = 0;
-        let startLeft = 0;
-        let startTop = 0;
+    let isDragging = false;
+    let hasMoved = false;
+    let startX = 0;
+    let startY = 0;
+    let startLeft = 0;
+    let startTop = 0;
+    let currentLeft = 0;
+    let currentTop = 0;
 
-        function restorePosition() {
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    const pos = JSON.parse(saved);
-                    const isMobile = window.innerWidth < 768;
-                    const maxLeft = window.innerWidth - btn.offsetWidth - MARGIN;
-                    const maxTop = window.innerHeight - btn.offsetHeight - MARGIN;
+    // ============================================
+    // RESTORE POSITION (always snapped to edge)
+    // ============================================
+    function restorePosition() {
+        const winW = window.innerWidth;
+        const winH = window.innerHeight;
+        const isMobile = winW < 768;
 
-                    let left = Math.max(MARGIN, Math.min(pos.left, maxLeft));
-                    let top = Math.max(MARGIN, Math.min(pos.top, maxTop));
+        let savedLeft = null;
+        let savedTop = null;
 
-                    if (isMobile && top > window.innerHeight - btn.offsetHeight - MOBILE_BOTTOM_OFFSET) {
-                        top = window.innerHeight - btn.offsetHeight - MOBILE_BOTTOM_OFFSET;
-                    }
-
-                    btn.style.left = left + 'px';
-                    btn.style.top = top + 'px';
-                    btn.style.right = 'auto';
-                    btn.style.bottom = 'auto';
-                    return;
-                }
-            } catch (e) { /* ignore */ }
-
-            const isMobile = window.innerWidth < 768;
-            btn.style.left = (window.innerWidth - btn.offsetWidth - 24) + 'px';
-            btn.style.top = (window.innerHeight - btn.offsetHeight - (isMobile ? MOBILE_BOTTOM_OFFSET : 24)) + 'px';
-            btn.style.right = 'auto';
-            btn.style.bottom = 'auto';
-        }
-
-        function savePosition(left, top) {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify({ left, top }));
-            } catch (e) { /* ignore */ }
-        }
-
-        function getCurrentPos() {
-            const rect = btn.getBoundingClientRect();
-            return { left: rect.left, top: rect.top };
-        }
-
-        function clamp(left, top) {
-            const maxLeft = window.innerWidth - btn.offsetWidth - MARGIN;
-            const maxTop = window.innerHeight - btn.offsetHeight - MARGIN;
-            return {
-                left: Math.max(MARGIN, Math.min(left, maxLeft)),
-                top: Math.max(MARGIN, Math.min(top, maxTop)),
-            };
-        }
-
-        function startDrag(clientX, clientY) {
-            isDragging = true;
-            hasMoved = false;
-            const pos = getCurrentPos();
-            startX = clientX;
-            startY = clientY;
-            startLeft = pos.left;
-            startTop = pos.top;
-            btn.classList.add('dragging');
-        }
-
-        function moveDrag(clientX, clientY) {
-            if (!isDragging) return;
-
-            const dx = clientX - startX;
-            const dy = clientY - startY;
-
-            if (!hasMoved && Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
-                hasMoved = true;
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const pos = JSON.parse(saved);
+                savedLeft = pos.left;
+                savedTop = pos.top;
             }
+        } catch (e) { /* ignore */ }
 
-            const newPos = clamp(startLeft + dx, startTop + dy);
-            btn.style.left = newPos.left + 'px';
-            btn.style.top = newPos.top + 'px';
+        // Default position (bottom-right kung walang saved)
+        if (savedLeft === null || savedTop === null) {
+            savedLeft = winW - btn.offsetWidth - SNAP_MARGIN;
+            savedTop = winH - btn.offsetHeight - (isMobile ? MOBILE_BOTTOM_OFFSET : SNAP_MARGIN);
         }
 
-        function endDrag() {
-            if (!isDragging) return;
-            isDragging = false;
-            btn.classList.remove('dragging');
+        // ⭐ SNAP X to nearest edge
+        const centerX = savedLeft + btn.offsetWidth / 2;
+        const snappedLeft = centerX < winW / 2
+            ? SNAP_MARGIN                              // Snap to LEFT
+            : winW - btn.offsetWidth - SNAP_MARGIN;    // Snap to RIGHT
 
-            if (hasMoved) {
-                const pos = getCurrentPos();
-                savePosition(pos.left, pos.top);
-            } else {
-                window.toggleAIPanel();
-            }
+        // Clamp Y
+        const maxTop = winH - btn.offsetHeight - (isMobile ? MOBILE_BOTTOM_OFFSET : SNAP_MARGIN);
+        const snappedTop = Math.max(SNAP_MARGIN + 64, Math.min(savedTop, maxTop));
+
+        applyPosition(snappedLeft, snappedTop, false); // no animation on initial
+        savePosition(snappedLeft, snappedTop);
+    }
+
+    // ============================================
+    // APPLY POSITION (with optional animation)
+    // ============================================
+    function applyPosition(left, top, animate = true) {
+        if (animate) {
+            btn.style.transition = 'left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        } else {
+            btn.style.transition = 'none';
         }
 
-        btn.addEventListener('mousedown', function (e) {
-            if (e.button !== 0) return;
+        btn.style.left = left + 'px';
+        btn.style.top = top + 'px';
+        btn.style.right = 'auto';
+        btn.style.bottom = 'auto';
+
+        currentLeft = left;
+        currentTop = top;
+
+        // Clear transition after animation
+        if (animate) {
+            setTimeout(() => {
+                btn.style.transition = '';
+            }, 400);
+        }
+    }
+
+    // ============================================
+    // GET CURRENT POSITION
+    // ============================================
+    function getCurrentPos() {
+        const rect = btn.getBoundingClientRect();
+        return { left: rect.left, top: rect.top };
+    }
+
+    // ============================================
+    // SAVE POSITION
+    // ============================================
+    function savePosition(left, top) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ left, top }));
+        } catch (e) { /* ignore */ }
+    }
+
+    // ============================================
+    // START DRAG
+    // ============================================
+    function startDrag(clientX, clientY) {
+        isDragging = true;
+        hasMoved = false;
+
+        const pos = getCurrentPos();
+        startX = clientX;
+        startY = clientY;
+        startLeft = pos.left;
+        startTop = pos.top;
+
+        btn.classList.add('dragging');
+        btn.style.transition = 'none'; // remove animation habang nag-drag
+    }
+
+    // ============================================
+    // MOVE DRAG — free movement during drag
+    // ============================================
+    function moveDrag(clientX, clientY) {
+        if (!isDragging) return;
+
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+
+        // Detect if actually moved (para ma-distinguish click vs drag)
+        if (!hasMoved && Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
+            hasMoved = true;
+        }
+
+        const winW = window.innerWidth;
+        const winH = window.innerHeight;
+        const isMobile = winW < 768;
+        const margin = 8;
+
+        // Free movement (walang snap habang nag-drag)
+        let newLeft = startLeft + dx;
+        let newTop = startTop + dy;
+
+        // Clamp sa viewport
+        newLeft = Math.max(margin, Math.min(newLeft, winW - btn.offsetWidth - margin));
+        newTop = Math.max(64 + margin, Math.min(newTop, winH - btn.offsetHeight - (isMobile ? MOBILE_BOTTOM_OFFSET : margin)));
+
+        btn.style.left = newLeft + 'px';
+        btn.style.top = newTop + 'px';
+    }
+
+    // ============================================
+    // END DRAG — SNAP TO NEAREST EDGE ⭐
+    // ============================================
+    function endDrag() {
+        if (!isDragging) return;
+        isDragging = false;
+        btn.classList.remove('dragging');
+
+        if (!hasMoved) {
+            // Walang movement → treat as click
+            window.toggleAIPanel();
+            return;
+        }
+
+        const winW = window.innerWidth;
+        const winH = window.innerHeight;
+        const isMobile = winW < 768;
+
+        // Get current pos (yung iniwan mo)
+        const pos = getCurrentPos();
+
+        // ⭐ SNAP X to nearest edge
+        const centerX = pos.left + btn.offsetWidth / 2;
+        const snappedLeft = centerX < winW / 2
+            ? SNAP_MARGIN                              // Snap to LEFT
+            : winW - btn.offsetWidth - SNAP_MARGIN;    // Snap to RIGHT
+
+        // Clamp Y (keep vertical position)
+        const maxTop = winH - btn.offsetHeight - (isMobile ? MOBILE_BOTTOM_OFFSET : SNAP_MARGIN);
+        const snappedTop = Math.max(64 + SNAP_MARGIN, Math.min(pos.top, maxTop));
+
+        // Animate to snapped position
+        applyPosition(snappedLeft, snappedTop, true);
+        savePosition(snappedLeft, snappedTop);
+    }
+
+    // ============================================
+    // MOUSE EVENTS
+    // ============================================
+    btn.addEventListener('mousedown', function (e) {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        startDrag(e.clientX, e.clientY);
+
+        const onMove = (ev) => moveDrag(ev.clientX, ev.clientY);
+        const onUp = () => {
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            endDrag();
+        };
+
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+    });
+
+    // ============================================
+    // TOUCH EVENTS
+    // ============================================
+    btn.addEventListener('touchstart', function (e) {
+        const touch = e.touches[0];
+        if (!touch) return;
+        startDrag(touch.clientX, touch.clientY);
+
+        const onMove = (ev) => {
+            const t = ev.touches[0];
+            if (!t) return;
+            ev.preventDefault();
+            moveDrag(t.clientX, t.clientY);
+        };
+        const onUp = () => {
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend', onUp);
+            document.removeEventListener('touchcancel', onUp);
+            endDrag();
+        };
+
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend', onUp);
+        document.addEventListener('touchcancel', onUp);
+    }, { passive: false });
+
+    // ============================================
+    // KEYBOARD ACCESSIBILITY
+    // ============================================
+    btn.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            startDrag(e.clientX, e.clientY);
+            window.toggleAIPanel();
+        }
+    });
 
-            const onMove = (ev) => moveDrag(ev.clientX, ev.clientY);
-            const onUp = () => {
-                document.removeEventListener('mousemove', onMove);
-                document.removeEventListener('mouseup', onUp);
-                endDrag();
-            };
+    // ============================================
+    // RESIZE HANDLER — re-snap
+    // ============================================
+    let resizeTimer;
+    window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            restorePosition(); // re-snap sa tamang edge
+        }, 150);
+    });
 
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
-        });
-
-        btn.addEventListener('touchstart', function (e) {
-            const touch = e.touches[0];
-            if (!touch) return;
-            startDrag(touch.clientX, touch.clientY);
-
-            const onMove = (ev) => {
-                const t = ev.touches[0];
-                if (!t) return;
-                ev.preventDefault();
-                moveDrag(t.clientX, t.clientY);
-            };
-            const onUp = () => {
-                document.removeEventListener('touchmove', onMove);
-                document.removeEventListener('touchend', onUp);
-                document.removeEventListener('touchcancel', onUp);
-                endDrag();
-            };
-
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('touchend', onUp);
-            document.addEventListener('touchcancel', onUp);
-        }, { passive: false });
-
-        btn.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                window.toggleAIPanel();
-            }
-        });
-
-        let resizeTimer;
-        window.addEventListener('resize', function () {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                const pos = getCurrentPos();
-                const clamped = clamp(pos.left, pos.top);
-                btn.style.left = clamped.left + 'px';
-                btn.style.top = clamped.top + 'px';
-                savePosition(clamped.left, clamped.top);
-
-                const panel = document.getElementById('aiPanel');
-                if (panel && panel.style.display === 'flex') {
-                    positionPanelNearBubble();
-                }
-            }, 150);
-        });
-
-        restorePosition();
-    })();
+    // ============================================
+    // INITIAL RESTORE
+    // ============================================
+    restorePosition();
+})();
 
     // ============================================
     // DRAGGABLE PANEL

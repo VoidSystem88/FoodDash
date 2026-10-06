@@ -29,16 +29,20 @@
 
     <div class="w-full max-w-md">
 
-        {{-- ============================================ --}}
-        {{-- LOGO / BRAND --}}
-        {{-- ============================================ --}}
         <div class="text-center mb-8">
             <a href="{{ route('customer.restaurants') }}" class="inline-flex items-center justify-center gap-3">
-                @if ($config->hasLogo())
-                    <img src="{{ $config->logo_url }}"
-                         alt="{{ config('app.name', 'FoodDash') }}"
-                         class="w-auto"
-                         style="height: {{ max(48, $config->logo_height_px) }}px;">
+                @if ($config->hasLightLogo() || $config->hasDarkLogo() || $config->hasLogo())
+                    {{-- Light mode logo --}}
+                    <img src="{{ $config->light_logo_url ?: $config->logo_url }}"
+                        alt="{{ config('app.name', 'FoodDash') }}"
+                        class="w-auto dark:hidden"
+                        style="height: {{ max(48, $config->logo_height_px) }}px;">
+
+                    {{-- Dark mode logo (fallback sa light kung wala) --}}
+                    <img src="{{ $config->dark_logo_url ?: ($config->light_logo_url ?: $config->logo_url) }}"
+                        alt="{{ config('app.name', 'FoodDash') }}"
+                        class="w-auto hidden dark:block"
+                        style="height: {{ max(48, $config->logo_height_px) }}px;">
                 @else
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg">
                         <span class="text-3xl">🍕</span>

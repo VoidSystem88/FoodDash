@@ -883,7 +883,20 @@ function orderForm(restaurantId, menuItems) {
             this.$watch('address', () => this.saveAddress());
             this.$nextTick(() => this.setupNavigationInterceptor());
         },
-
+        checkQuickAdd() {
+            // Example: read quick-add params from URL
+            const params = new URLSearchParams(window.location.search);
+            const quickAdd = params.get('quick_add');
+            
+            if (quickAdd) {
+                const itemIds = quickAdd.split(',').map(id => parseInt(id));
+                itemIds.forEach(id => {
+                    if (this.menu.find(m => m.id === id)) {
+                        this.inc(id);
+                    }
+                });
+            }
+        },
         setupNavigationInterceptor() {
             if (this.listenersSetup) return;
             this.listenersSetup = true;
